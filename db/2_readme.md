@@ -2711,22 +2711,6 @@ This Element is relatively new and may have some parameter additions or deletion
 <!-- <+Graph+> -->
 
 
-<!-- 
-```python
-  Graph(canvas_size,
-		graph_bottom_left,
-		graph_top_right,
-		background_color=None,
-		pad=None,
-		change_submits=False,
-		drag_submits=False
-		enable_events=False,
-		key=None,
-		tooltip=None,
-		right_click_menu=None,
-		visible=True)
-``` -->
-
 ### Graph Methods
 ```python
 DrawLine(self, point_from, point_to, color='black', width=1)

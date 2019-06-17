@@ -188,11 +188,11 @@ for class_name in mark_points:
 # ■■■■■■■■■■■■■■■■■
 
 # ▼▼▼ FULL ▼▼▼
-# Joinde_MARKDOWN = '\n\n'.join([HEADER_top_part, readme, FOOTER, Release_notes])
+Joined_MARKDOWN = '\n\n'.join([HEADER_top_part, readme, FOOTER, Release_notes])
 # ▼▼▼ debug mode ▼▼▼
-Joinde_MARKDOWN = readme
+# Joined_MARKDOWN = readme
 
 with open('<<FINAL readme.md', 'w', encoding='utf-8') as ff:
 	curr_dt = datetime.today().strftime(' <!-- CREATED: %Y-%m-%d %H.%M -->\n\n') 
-	content = curr_dt + Joinde_MARKDOWN
+	content = curr_dt + Joined_MARKDOWN
 	ff.write(content)
