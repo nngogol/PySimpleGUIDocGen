@@ -14,11 +14,16 @@ Brief: this project is created for generating and maintaining `readme.md` for Py
 
 # Usage
 
-
-run (in the `shell`):
+### CLI:
 
 ```bash
 python3 make_real_readme.py
 ```
 
 You will get `readme.md`.
+
+### GUI:
+
+```bash
+python3 make_real_readme.py
+```
