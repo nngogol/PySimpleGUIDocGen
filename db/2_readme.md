@@ -263,7 +263,7 @@ This is a typpical call
 
 The animated Popup enables you to easily display a "loading" style animation specified through a GIF file that is either stored in a file or a base64 variable.
 
-<!-- <+func.PopupAnimated+> -->
+<!-- no <+func.PopupAnimated+> -->
 
 ```python
 def PopupAnimated(image_source,
