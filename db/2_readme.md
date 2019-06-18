@@ -1526,25 +1526,7 @@ layout = [[sg.Listbox(values=['Listbox 1', 'Listbox 2', 'Listbox 3'], size=(30, 
 
 ![listbox 2](https://user-images.githubusercontent.com/13696193/44959859-b4cd2880-aec3-11e8-881c-1e369d5c6337.jpg)
 
-
 <!-- <+Listbox.__init__+> -->
-
-Listbox(self,
-	values,
-	default_values=None,
-	select_mode=None,
-	change_submits=False,
-	enable_events=False,
-	bind_return_key=False,
-	size=(None,
-	None),
-	disabled=False,
-	auto_size_text=None,
-	font=None,
-	background_color=None,
-	text_color=None, key=None, pad=None, tooltip=None, right_click_menu=None,
-	visible=True):
-
 
 
 The `select_mode` option can be a string or a constant value defined as a variable.  Generally speaking strings are used for these kinds of options.

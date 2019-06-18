@@ -229,7 +229,7 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 	#  ■ ■   magic start here   ■ ■
 	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 	# memes - is classes, funcions, varialbe
-	psg_classes_funcs_variables = inspect.getmembers(PySimpleGUIlib)
+	psg_classes_funcs_variables = getmembers(PySimpleGUIlib)
 	psg_funcs 		= [o for o in psg_classes_funcs_variables if isfunction(o[1])]
 	psg_classes 	= [o for o in psg_classes_funcs_variables if isclass(o[1])]
 	# filter repeated classes
