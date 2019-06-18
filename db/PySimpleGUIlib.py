@@ -914,16 +914,17 @@ InputOptionMenu = OptionMenu
 #                           Listbox                                      #
 # ---------------------------------------------------------------------- #
 class Listbox(Element):
-    """A List Box.  Provide a list of values for the user to choose one or more of.   Returns a list of selected rows
+    """
+    A List Box.  Provide a list of values for the user to choose one or more of.   Returns a list of selected rows
     when a window.Read() is executed.
-
+    
 
     """
     def __init__(self, values, default_values=None, select_mode=None, change_submits=False, enable_events=False,
                  bind_return_key=False, size=(None, None), disabled=False, auto_size_text=None, font=None,
                  background_color=None, text_color=None, key=None, pad=None, tooltip=None, right_click_menu=None,
                  visible=True):
-        """Listbox Element
+        """
 
         :param values: 
         :param default_values:  (Default value = None)
@@ -977,6 +978,7 @@ class Listbox(Element):
         :param visible:  change visibility of element (Default value = None)
 
         """
+
         
         if disabled == True:
             self.TKListbox.configure(state='disabled')
@@ -1018,7 +1020,9 @@ class Listbox(Element):
         self.DefaultValues = values
 
     def GetListValues(self):
-        """ """
+        """
+        :returns :
+        """
         return self.Values
 
     def SetFocus(self):
@@ -1043,8 +1047,6 @@ class Listbox(Element):
 class Radio(Element):
     """Radio Button Element - Used in a group of other Radio Elements to provide user with ability to select only
     1 choice in a list of choices.
-
-
     """
     def __init__(self, text, group_id, default=False, disabled=False, size=(None, None), auto_size_text=None,
                  background_color=None, text_color=None, font=None, key=None, pad=None, tooltip=None,
@@ -1066,7 +1068,6 @@ class Radio(Element):
         :param change_submits: If True, pressing Enter key submits window (Default value = False)
         :param enable_events: Turns on the element specific events.(Default value = False)
         :param visible: set visibility state of the element (Default value = True)
-
         """
         
         self.InitialState = default
@@ -1357,9 +1358,9 @@ class Multiline(Element):
                visible=None, autoscroll=None):
         """
 
-        :param value:  (Default value = None)
+        :param value: string to set the text field to (Default value = None)
         :param disabled: disable or enable state of the element (Default value = None)
-        :param append:  (Default value = False)
+        :param append: add the new text (Default value = False)
         :param font: (common_key) specifies the font family, size, etc (Default value = None)
         :param text_color: color of the text (Default value = None)
         :param background_color: color of background (Default value = None)
@@ -1425,13 +1426,12 @@ class Text(Element):
                  relief=None, font=None, text_color=None, background_color=None, justification=None, pad=None, key=None,
                  right_click_menu=None, tooltip=None, visible=True):
         """
-
         :param text: 
         :param size: (common_key) (w,h) w=characters-wide, h=rows-high (Default value = (None, None))
         :param auto_size_text: True if size should fit the text length (Default value = None)
-        :param click_submits:  (Default value = False)
+        :param click_submits: if clicked will trigger `Call()` (Default value = False)
         :param enable_events: Turns on the element specific events.(Default value = False)
-        :param relief:  (Default value = None)
+        :param relief: relief to use around the text (Default value = None)
         :param font: (common_key) specifies the font family, size, etc (Default value = None)
         :param text_color: color of the text (Default value = None)
         :param background_color: color of background (Default value = None)
@@ -1441,7 +1441,6 @@ class Text(Element):
         :param right_click_menu: see "Right Click Menus" (Default value = None)
         :param tooltip: text, that will appear the you hover on (Default value = None)
         :param visible: set visibility state of the element (Default value = True)
-
         """
         
         self.DisplayText = str(text)
@@ -1510,7 +1509,7 @@ class StatusBar(Element):
         :param text: 
         :param size: (common_key) (w,h) w=characters-wide, h=rows-high (Default value = (None, None))
         :param auto_size_text: True if size should fit the text length (Default value = None)
-        :param click_submits:  (Default value = None)
+        :param click_submits: if clicked will trigger `Call()` (Default value = None)
         :param enable_events: Turns on the element specific events.(Default value = False)
         :param relief:  (Default value = RELIEF_SUNKEN)
         :param font: (common_key) specifies the font family, size, etc (Default value = None)
@@ -2360,8 +2359,8 @@ class Image(Element):
     def UpdateAnimation(self, source, time_between_frames=0):
         """
 
-        :param source: 
-        :param time_between_frames:  (Default value = 0)
+        :param source: a filename ***or*** a base64 bytes variable (unlike other calls that split out the filename parameter and base64 parameter into 2 parameters.
+        :param time_between_frames: optional parameter.  It will keep track of the amount of time between frame changes for you to give you a smooth animation.  With this parameter you can call the function as often as you want and it will advance to the next frame only after the correct amount of time has lapsed. (Default value = 0)
 
         """
         
@@ -2900,16 +2899,16 @@ class Frame(Element):
                  tooltip=None, right_click_menu=None, visible=True):
         """
 
-        :param title: 
-        :param layout: 
-        :param title_color:  (Default value = None)
+        :param title: the label / title to put on frame
+        :param layout: list of rows of elements the frame contains
+        :param title_color: color of the title text (Default value = None)
         :param background_color: color of background (Default value = None)
-        :param title_location:  (Default value = None)
+        :param title_location: locations to put the title (Default value = None)
         :param relief:  (Default value = DEFAULT_FRAME_RELIEF)
         :param size: (common_key) (w,h) w=characters-wide, h=rows-high (Default value = (None, None))
         :param font: (common_key) specifies the font family, size, etc (Default value = None)
         :param pad: (common_key) Amount of padding to put around element (Default value = None)
-        :param border_width:  (Default value = None)
+        :param border_width: how thick the line going around frame should be (Default value = None)
         :param key: (common_key) Used with window.FindElement and with return values (Default value = None)
         :param tooltip: text, that will appear the you hover on (Default value = None)
         :param right_click_menu: see "Right Click Menus" (Default value = None)
