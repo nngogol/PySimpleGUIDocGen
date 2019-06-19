@@ -253,6 +253,7 @@ was the second.
 While simple to use, PySimpleGUI has significant depth to be explored by more advanced programmers.  The feature set goes way beyond the requirements of a beginner programmer, and into the  required features needed for complex GUIs.
 
 Features of PySimpleGUI include:
+
 - Support for Python versions 2.7 and 3
 - Text
 - Single Line Input
