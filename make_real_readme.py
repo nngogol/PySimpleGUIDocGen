@@ -107,11 +107,11 @@ def method_to_md(class_obj, method_name):
 	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 	# ▒   ▒- 		Making params_TABLE			 ▒   ▒-#
 	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-	md_table =  '\n'.join([ 	f'| {name} | {desc} |'
+	md_table =  '\n'.join([ 	f'|{name}|{desc}|'
 								for name, desc in
 								get_params_part(method_doc_string).items()])
-	params_TABLE = f'''\n Parameters explained:
-						| Name | Meaning |
+	params_TABLE = f'''\n Parameters explained:\n
+						|Name|Meaning|
 						|-|-|
 						{md_table}
 						|||
@@ -338,4 +338,4 @@ if __name__ == '__main__':
 	logger.addHandler(my_file)
 	
 	logger.debug('STARTING \n\n')
-	main(logger=logger, output_name="TEST.readme.md")
+	main(logger=logger, files_to_include=[0,1,2,3,4], output_name="TEST.readme.md")
