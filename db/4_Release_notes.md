@@ -636,6 +636,25 @@ A combination of user requests, and needs of new `imwatchingyou` debugger
     * Was crashing
     * Enables application to fill these in later
 
+# 4.0.0 PySimpleGUI & 2.0.0 PySimpleGUI27   19-June-2019
+
+* DOC STRINGS DOCS STRINGS DOC STRINGS!
+	* Your IDE is about to become very happy
+	* All Elements have actual documentation in the call signature
+	* The Readme and ReadTheDocs will be generated going forward using the CODE
+	* HUGE Thanks for @nngogol for both copying & adding all those strings, but also for making an entire document creation system.
+* New __version__ string for PySimpleGUI.py
+* New parameter to ALL `SetFocus` calls. 	
+	* def SetFocus(self, force=False)
+	* If force is True, then a call to `focus_force` is made instead of `focus_set`
+* Get - New Radio Button Method.  Returns True is the Radio Button is set
+* Rename of Debugger class to _Debugger so IDEs don't get confused
+* User read access to last Button Color set now available via property `Button.ButtonColor`
+* Rename of a number of callback handlers to start with _
+* Fix for memory leak in Read call. Every call to read lost a little memory due to root.protocol calls
+* Listbox.Update - New parameter - scroll_to_index - scroll view so that index is shown at the top
+* First PyPI release to use new documentation!
+
 
 
 ### Upcoming

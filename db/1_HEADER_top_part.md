@@ -61,9 +61,9 @@ HOW DO I INSERT IMAGES ???
 ## The *only* way to write both desktop and web based GUIs at the same time
 
 
-![Python Version](https://img.shields.io/badge/PySimpleGUI_For_Python_3.x_Version-3.39.0-red.svg?longCache=true&style=for-the-badge)
+![Python Version](https://img.shields.io/badge/PySimpleGUI_For_Python_3.x_Version-4.0.0-red.svg?longCache=true&style=for-the-badge)
 
-![Python Version](https://img.shields.io/badge/PySimpleGUI_For_Python_2.7_Version-1.39.0-blue.svg?longCache=true&style=for-the-badge)
+![Python Version](https://img.shields.io/badge/PySimpleGUI_For_Python_2.7_Version-2.0.0-blue.svg?longCache=true&style=for-the-badge)
 
 ![Python Version](https://img.shields.io/badge/PySimpleGUIQt_Version-0.31.0-orange.svg?longCache=true&style=for-the-badge)
 
@@ -253,6 +253,7 @@ was the second.
 While simple to use, PySimpleGUI has significant depth to be explored by more advanced programmers.  The feature set goes way beyond the requirements of a beginner programmer, and into the  required features needed for complex GUIs.
 
 Features of PySimpleGUI include:
+
 - Support for Python versions 2.7 and 3
 - Text
 - Single Line Input
