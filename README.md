@@ -87,7 +87,7 @@ class Person(object):
 
 # There is 2 tags:
 
-| Meaning | his looks |
+|Meaning|his looks|
 | :-: | - |
 | for classes  | `<!-- <+Classname.method+> -->`   |
 | for function | `<!-- <+func.function_name+> -->` |
@@ -95,7 +95,7 @@ class Person(object):
 
 Here is defenitions for `method` in `Classname` tag:
 
-| TagName | Meaning |
+|TagName|Meaning|
 | :-:       |  :-: |
 | `.testmethod`      | signature + table of params |
 | `.1testmethod`     | signature |

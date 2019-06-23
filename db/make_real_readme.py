@@ -85,11 +85,11 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 	# ▒   ▒- 		Making params_TABLE			 ▒   ▒-#
 	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-	md_table =  '\n'.join([ 	f'| {name} | {desc} |'
+	md_table =  '\n'.join([ 	f'|{name}|{desc}|'
 								for name, desc in
 								get_params_part(doc_string).items()])
-	params_TABLE = f'''\n\nParameters explained:\n\n
-						| Name | Meaning |
+	params_TABLE = f'''\nParameters explained:\n
+						|Name|Meaning|
 						|-|-|
 						{md_table}
 						|||
