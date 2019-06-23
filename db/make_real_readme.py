@@ -409,6 +409,7 @@ if __name__ == '__main__':
 	delete_html_comments = True
 	output_name = "FINAL_README.md"
 	log_file = 'LOGS.txt'
+
 	# ---------------
 
 	logger = logging.getLogger(__name__)
@@ -448,4 +449,7 @@ if __name__ == '__main__':
 		# delete log file
 		log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), log_file)
 		if os.path.exists(log_file):
-			os.remove(log_file)
+			try:
+				os.remove(log_file)
+			except Exception as e:
+				print(str(e))
