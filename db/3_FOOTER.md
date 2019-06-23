@@ -1,8 +1,36 @@
-# Sample Applications
+# "Demo Programs" Applications
 
 There are too many to list!!
 
 There are over 130 sample programs to give you a jump start.
+
+
+You will find Demo Programs located in a subfolder named "Demo Programs" under each of the PySimpleGUI ports on GitHub.
+
+Demo programs for plain PySimpleGUI (tkinter)
+https://github.com/PySimpleGUI/PySimpleGUI/tree/master/DemoPrograms
+
+Demo programs for PySimpleGUIQt:
+https://github.com/PySimpleGUI/PySimpleGUI/tree/master/PySimpleGUIQt/Demo%20Programs
+
+Demo programs for PySimpleGUIWx:
+https://github.com/PySimpleGUI/PySimpleGUI/tree/master/PySimpleGUIWx/Demo%20Programs
+
+Demo programs for PySimpleGUIWeb:
+https://github.com/PySimpleGUI/PySimpleGUI/tree/master/PySimpleGUIWeb/Demo%20Programs
+
+
+There are not many programs under each of the port's folders because the main Demo Programs should run on all of the other platforms with minimal changes (often only the import statement changes).
+
+## Start Here
+
+When you are just beginning to build your application, or to design it, look through the Demo Programs first to see if there is a program written that does what you're looking for.  If so, then this program could be a good starting point.  Copy it and modify it to your liking.
+
+Even if no program perfectly matches your situation, there are still a good number of example uses of Elements or techniques that are demonstrated.  
+
+Maybe you're going to write a program that uses the Graph Element.  In addition to reading the documentaion about the Graph Element, check to see if there's a Demo Program that uses it.   At the moment there are 7 Demo programs that match "Demo_Graph_*.py"
+
+
 
 ## Packages Used In Demos
 

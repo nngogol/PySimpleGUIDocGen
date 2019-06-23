@@ -1,4 +1,6 @@
 #!/usr/bin/python3
+version = __version__ = "4.1.0 Unreleased"
+
 import sys
 
 if sys.version_info[0] >= 3:
@@ -702,10 +704,13 @@ class InputText(Element):
             text = ''
         return text
 
-    def SetFocus(self):
+    def SetFocus(self, force=False):
         """ """
         try:
-            self.TKEntry.focus_set()
+            if force:
+                self.TKEntry.focus_force()
+            else:
+                self.TKEntry.focus_set()
         except:
             pass
 
@@ -750,7 +755,7 @@ class Combo(Element):
         self.Values = values
         self.DefaultValue = default_value
         self.ChangeSubmits = change_submits or enable_events
-        self.TKCombo = None
+        self.Widget = self.TKCombo = None               # type: ttk.Combobox
         # self.InitializeAsDisabled = disabled
         self.Disabled = disabled
         self.Readonly = readonly
@@ -807,6 +812,16 @@ class Combo(Element):
             self.TKCombo.pack_forget()
         elif visible is True:
             self.TKCombo.pack()
+
+    def GetSelectedItemsIndexes(self):
+        """
+        Get the list of chosen items and return them as a list of indexes (offsets within the list)
+        :return: [int,] List of indexes of currently selected items
+        """
+        if not self.TKStringVar:
+            return []
+        return [self.TKCombo.current(),]            # for tkinter this will always be just 1 item
+
 
     def __del__(self):
         """ """
@@ -914,17 +929,16 @@ InputOptionMenu = OptionMenu
 #                           Listbox                                      #
 # ---------------------------------------------------------------------- #
 class Listbox(Element):
-    """
-    A List Box.  Provide a list of values for the user to choose one or more of.   Returns a list of selected rows
+    """A List Box.  Provide a list of values for the user to choose one or more of.   Returns a list of selected rows
     when a window.Read() is executed.
-    
+
 
     """
     def __init__(self, values, default_values=None, select_mode=None, change_submits=False, enable_events=False,
                  bind_return_key=False, size=(None, None), disabled=False, auto_size_text=None, font=None,
                  background_color=None, text_color=None, key=None, pad=None, tooltip=None, right_click_menu=None,
                  visible=True):
-        """
+        """Listbox Element
 
         :param values: 
         :param default_values:  (Default value = None)
@@ -969,16 +983,17 @@ class Listbox(Element):
         super().__init__(ELEM_TYPE_INPUT_LISTBOX, size=size, auto_size_text=auto_size_text, font=font,
                          background_color=bg, text_color=fg, key=key, pad=pad, tooltip=tooltip, visible=visible)
 
-    def Update(self, values=None, disabled=None, set_to_index=None, visible=None):
+
+    def Update(self, values=None, disabled=None, set_to_index=None, scroll_to_index=None, visible=None):
         """
 
         :param values:  (Default value = None)
         :param disabled: disable or enable state of the element (Default value = None)
-        :param set_to_index:  (Default value = None)
+        :param set_to_index:  highlights the item at this index as if user clicked (Default value = None)
+        :param scroll_to_index: scroll the listbox so that this index is the first shown (Default value = None)
         :param visible:  change visibility of element (Default value = None)
 
         """
-
         
         if disabled == True:
             self.TKListbox.configure(state='disabled')
@@ -1002,6 +1017,9 @@ class Listbox(Element):
         elif visible is True:
             self.TKListbox.pack()
             self.vsb.pack()
+        if scroll_to_index is not None and len(self.Values):
+            self.TKListbox.yview_moveto(scroll_to_index/len(self.Values))
+
 
     def SetValue(self, values):
         """
@@ -1019,18 +1037,22 @@ class Listbox(Element):
                 pass
         self.DefaultValues = values
 
+
     def GetListValues(self):
-        """
-        :returns :
-        """
+        """ """
         return self.Values
 
-    def SetFocus(self):
+
+    def SetFocus(self, force=False):
         """ """
         try:
-            self.TKListbox.focus_set()
+            if force:
+                self.TKListbox.focus_force()
+            else:
+                self.TKListbox.focus_set()
         except:
             pass
+
 
     def __del__(self):
         """ """
@@ -1047,6 +1069,8 @@ class Listbox(Element):
 class Radio(Element):
     """Radio Button Element - Used in a group of other Radio Elements to provide user with ability to select only
     1 choice in a list of choices.
+
+
     """
     def __init__(self, text, group_id, default=False, disabled=False, size=(None, None), auto_size_text=None,
                  background_color=None, text_color=None, font=None, key=None, pad=None, tooltip=None,
@@ -1068,6 +1092,7 @@ class Radio(Element):
         :param change_submits: If True, pressing Enter key submits window (Default value = False)
         :param enable_events: Turns on the element specific events.(Default value = False)
         :param visible: set visibility state of the element (Default value = True)
+
         """
         
         self.InitialState = default
@@ -1110,6 +1135,14 @@ class Radio(Element):
     def ResetGroup(self):
         """ """
         self.TKIntVar.set(0)
+
+    def Get(self):
+        """
+        A snapshot of the value of Radio Button (True/False)
+        :return: Bool - True is radio button is chosen
+        """
+        return self.TKIntVar.get() == self.EncodedRadioValue
+
 
     def __del__(self):
         """ """
@@ -1358,9 +1391,9 @@ class Multiline(Element):
                visible=None, autoscroll=None):
         """
 
-        :param value: string to set the text field to (Default value = None)
+        :param value:  (Default value = None)
         :param disabled: disable or enable state of the element (Default value = None)
-        :param append: add the new text (Default value = False)
+        :param append:  (Default value = False)
         :param font: (common_key) specifies the font family, size, etc (Default value = None)
         :param text_color: color of the text (Default value = None)
         :param background_color: color of background (Default value = None)
@@ -1404,12 +1437,16 @@ class Multiline(Element):
         """ """
         return self.TKText.get(1.0, tk.END)
 
-    def SetFocus(self):
+    def SetFocus(self, force=False):
         """ """
         try:
-            self.TKText.focus_set()
+            if force:
+                self.TKText.focus_force()
+            else:
+                self.TKText.focus_set()
         except:
             pass
+
 
     def __del__(self):
         """ """
@@ -1420,18 +1457,21 @@ class Multiline(Element):
 #                                       Text                             #
 # ---------------------------------------------------------------------- #
 class Text(Element):
-    """ """
+    """
+    Text - Display some text in the window.  Can be single or multiple lines but no scrolling if multiple lines.
+    """
     
     def __init__(self, text, size=(None, None), auto_size_text=None, click_submits=False, enable_events=False,
                  relief=None, font=None, text_color=None, background_color=None, justification=None, pad=None, key=None,
                  right_click_menu=None, tooltip=None, visible=True):
         """
-        :param text: 
+
+        :param text: The text to display (required)
         :param size: (common_key) (w,h) w=characters-wide, h=rows-high (Default value = (None, None))
         :param auto_size_text: True if size should fit the text length (Default value = None)
-        :param click_submits: if clicked will trigger `Call()` (Default value = False)
+        :param click_submits:  (Default value = False)
         :param enable_events: Turns on the element specific events.(Default value = False)
-        :param relief: relief to use around the text (Default value = None)
+        :param relief:  (Default value = None)
         :param font: (common_key) specifies the font family, size, etc (Default value = None)
         :param text_color: color of the text (Default value = None)
         :param background_color: color of background (Default value = None)
@@ -1441,6 +1481,7 @@ class Text(Element):
         :param right_click_menu: see "Right Click Menus" (Default value = None)
         :param tooltip: text, that will appear the you hover on (Default value = None)
         :param visible: set visibility state of the element (Default value = True)
+
         """
         
         self.DisplayText = str(text)
@@ -1457,7 +1498,7 @@ class Text(Element):
 
         super().__init__(ELEM_TYPE_TEXT, size, auto_size_text, background_color=bg, font=font if font else DEFAULT_FONT,
                          text_color=self.TextColor, pad=pad, key=key, tooltip=tooltip, visible=visible)
-        return
+
 
     def Update(self, value=None, background_color=None, text_color=None, font=None, visible=None):
         """
@@ -1469,7 +1510,7 @@ class Text(Element):
         :param visible:  change visibility of element (Default value = None)
 
         """
-        
+
         if value is not None:
             self.DisplayText = value
             stringvar = self.TKStringVar
@@ -1506,10 +1547,10 @@ class StatusBar(Element):
                  key=None, tooltip=None, visible=True):
         """
 
-        :param text: 
+        :param text: (required) text that is to be displayed in the widget
         :param size: (common_key) (w,h) w=characters-wide, h=rows-high (Default value = (None, None))
         :param auto_size_text: True if size should fit the text length (Default value = None)
-        :param click_submits: if clicked will trigger `Call()` (Default value = None)
+        :param click_submits:  (Default value = None)
         :param enable_events: Turns on the element specific events.(Default value = False)
         :param relief:  (Default value = RELIEF_SUNKEN)
         :param font: (common_key) specifies the font family, size, etc (Default value = None)
@@ -1537,6 +1578,7 @@ class StatusBar(Element):
                          visible=visible)
         return
 
+
     def Update(self, value=None, background_color=None, text_color=None, font=None, visible=None):
         """
 
@@ -1562,6 +1604,7 @@ class StatusBar(Element):
             self.TKText.pack_forget()
         elif visible is True:
             self.TKText.pack()
+
 
     def __del__(self):
         """ """
@@ -2008,7 +2051,7 @@ class Button(Element):
                 pass
         elif self.BType == BUTTON_TYPE_SHOW_DEBUGGER:
             if self.ParentForm.DebuggerEnabled:
-                Debugger.debugger._build_floating_window()
+                _Debugger.debugger._build_floating_window()
                 # show_debugger_window()
 
         if should_submit_window:
@@ -2079,12 +2122,16 @@ class Button(Element):
         """ """
         return self.ButtonText
 
-    def SetFocus(self):
+    def SetFocus(self, force=False):
         """ """
         try:
-            self.TKButton.focus_set()
+            if force:
+                self.TKButton.focus_force()
+            else:
+                self.TKButton.focus_set()
         except:
             pass
+
 
     def Click(self):
         """Generates a click of the button as if the user clicked the button
@@ -2359,8 +2406,8 @@ class Image(Element):
     def UpdateAnimation(self, source, time_between_frames=0):
         """
 
-        :param source: a filename ***or*** a base64 bytes variable (unlike other calls that split out the filename parameter and base64 parameter into 2 parameters.
-        :param time_between_frames: optional parameter.  It will keep track of the amount of time between frame changes for you to give you a smooth animation.  With this parameter you can call the function as often as you want and it will advance to the next frame only after the correct amount of time has lapsed. (Default value = 0)
+        :param source: 
+        :param time_between_frames:  (Default value = 0)
 
         """
         
@@ -2458,7 +2505,7 @@ class Graph(Element):
     
     def __init__(self, canvas_size, graph_bottom_left, graph_top_right, background_color=None, pad=None,
                  change_submits=False, drag_submits=False, enable_events=False, key=None, tooltip=None,
-                 right_click_menu=None, visible=True):
+                 right_click_menu=None, visible=True, float_values=False):
         """
 
         :param canvas_size: 
@@ -2473,6 +2520,7 @@ class Graph(Element):
         :param tooltip: text, that will appear the you hover on (Default value = None)
         :param right_click_menu: see "Right Click Menus" (Default value = None)
         :param visible: set visibility state of the element (Default value = True)
+        :param float_values: bool: If True x,y coordinates are returned as floats, not ints
 
         """
         
@@ -2487,6 +2535,7 @@ class Graph(Element):
         self.MouseButtonDown = False
         self.Images = {}
         self.RightClickMenu = right_click_menu
+        self.FloatValues = float_values
 
         super().__init__(ELEM_TYPE_GRAPH, background_color=background_color, size=canvas_size, pad=pad, key=key,
                          tooltip=tooltip, visible=visible)
@@ -2521,7 +2570,10 @@ class Graph(Element):
 
         new_x = x_in / scale_x + self.BottomLeft[0]
         new_y = (y_in - self.CanvasSize[1]) / scale_y + self.BottomLeft[1]
-        return int(new_x), int(new_y)
+        if self.FloatValues:
+            return new_x, new_y
+        else:
+            return int(new_x), int(new_y)
 
     def DrawLine(self, point_from, point_to, color='black', width=1):
         """
@@ -2878,10 +2930,16 @@ class Graph(Element):
         if self.ParentForm.CurrentlyRunningMainloop:
             self.ParentForm.TKroot.quit()  # kick out of loop if read was called
 
-    def SetFocus(self):
+    def SetFocus(self, force=False):
         """ """
-        self._TKCanvas2.focus_set()
-        # self._TKCanvas2.focus_force()
+        try:
+            if force:
+                self._TKCanvas2.focus_force()
+            else:
+                self._TKCanvas2.focus_set()
+        except:
+            pass
+
 
     def __del__(self):
         """ """
@@ -2899,16 +2957,16 @@ class Frame(Element):
                  tooltip=None, right_click_menu=None, visible=True):
         """
 
-        :param title: the label / title to put on frame
-        :param layout: list of rows of elements the frame contains
-        :param title_color: color of the title text (Default value = None)
+        :param title: 
+        :param layout: 
+        :param title_color:  (Default value = None)
         :param background_color: color of background (Default value = None)
-        :param title_location: locations to put the title (Default value = None)
+        :param title_location:  (Default value = None)
         :param relief:  (Default value = DEFAULT_FRAME_RELIEF)
         :param size: (common_key) (w,h) w=characters-wide, h=rows-high (Default value = (None, None))
         :param font: (common_key) specifies the font family, size, etc (Default value = None)
         :param pad: (common_key) Amount of padding to put around element (Default value = None)
-        :param border_width: how thick the line going around frame should be (Default value = None)
+        :param border_width:  (Default value = None)
         :param key: (common_key) Used with window.FindElement and with return values (Default value = None)
         :param tooltip: text, that will appear the you hover on (Default value = None)
         :param right_click_menu: see "Right Click Menus" (Default value = None)
@@ -4735,6 +4793,7 @@ class Window:
 
         self.WindowIcon = wicon
         try:
+            # print(f'icon bitmap = {wicon}')
             self.TKroot.iconbitmap(wicon)
         except:
             pass
@@ -4849,8 +4908,8 @@ class Window:
                 self.TKAfterID = self.TKroot.after(timeout, self._TimeoutAlarmCallback)
             self.CurrentlyRunningMainloop = True
             # print(f'In main {self.Title} {self.TKroot}')
-            self.TKroot.protocol("WM_DESTROY_WINDOW", self.OnClosingCallback)
-            self.TKroot.protocol("WM_DELETE_WINDOW", self.OnClosingCallback)
+            # self.TKroot.protocol("WM_DESTROY_WINDOW", self.OnClosingCallback)
+            # self.TKroot.protocol("WM_DELETE_WINDOW", self.OnClosingCallback)
             self.TKroot.mainloop()
             # print('Out main')
             self.CurrentlyRunningMainloop = False
@@ -4955,19 +5014,17 @@ class Window:
 
     def FindElement(self, key, silent_on_error=False):
         """
+        Find element object associated with the provided key
+        :returns Found element object, an Error Element, or None
 
         :param key: (common_key) Used with window.FindElement and with return values
         :param silent_on_error:  (Default value = False)
 
         """
-        # print(f'In find elem key={key}', self.AllKeysDict)
-
         try:
             element = self.AllKeysDict[key]
         except KeyError:
             element = None
-        # element = _FindElementFromKeyInSubForm(self, key)
-        if element is None:
             if not silent_on_error:
                 print(
                     '*** WARNING = FindElement did not find the key. Please check your key\'s spelling key = %s ***' % key)
@@ -4975,7 +5032,7 @@ class Window:
                            'Bad key = {}'.format(key),
                            'Your bad line of code may resemble this:',
                            'window.FindElement("{}")'.format(key))
-            return ErrorElement(key=key)
+                element = ErrorElement(key=key)
         return element
 
     Element = FindElement  # Shortcut function
@@ -5346,7 +5403,7 @@ class Window:
         :param event: 
 
         """
-        Debugger.debugger._build_main_debugger_window()
+        _Debugger.debugger._build_main_debugger_window()
 
     def _callback_popout_window_create_keystroke(self, event):
         """
@@ -5354,7 +5411,7 @@ class Window:
         :param event: 
 
         """
-        Debugger.debugger._build_floating_window()
+        _Debugger.debugger._build_floating_window()
 
     def EnableDebugger(self):
         """ """
@@ -6266,7 +6323,15 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                         except:
                             value = None
                 elif element.Type == ELEM_TYPE_INPUT_COMBO:
-                    value = element.TKStringVar.get()
+                    element = element           # type: Combo
+                    # value = element.TKStringVar.get()
+                    try:
+                        if element.TKCombo.current() == -1:     # if the current value was not in the original list
+                            value = element.TKCombo.get()
+                        else:
+                            value = element.Values[element.TKCombo.current()]   # get value from original list given index
+                    except:
+                        value = '*Exception occurred*'
                 elif element.Type == ELEM_TYPE_INPUT_OPTION_MENU:
                     value = element.TKStringVar.get()
                 elif element.Type == ELEM_TYPE_INPUT_LISTBOX:
@@ -6278,6 +6343,10 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                 elif element.Type == ELEM_TYPE_INPUT_SPIN:
                     try:
                         value = element.TKStringVar.get()
+                        for v in element.Values:
+                            if str(v) == value:
+                                value = v
+                                break
                     except:
                         value = 0
                 elif element.Type == ELEM_TYPE_INPUT_SLIDER:
@@ -9810,7 +9879,7 @@ MAX_LINES_PER_RESULT_MAIN      = 3
 
 POPOUT_WINDOW_FONT = 'Sans 8'
 
-class Debugger():
+class _Debugger():
     """ """
 
     debugger = None
@@ -9834,15 +9903,6 @@ class Debugger():
         self.globals = {}
         self.popout_choices = {}
 
-
-
-    def _build_main_debugger_window_callback(self, events):
-        """
-
-        :param events: 
-
-        """
-        self._build_main_debugger_window()
 
     # Includes the DUAL PANE (now 2 tabs)!  Don't forget REPL is there too!
     def _build_main_debugger_window(self, location=(None, None)):
@@ -9962,7 +10022,11 @@ class Debugger():
             try:
                 result = ObjToStringSingleObj(mylocals[var])
             except Exception as e:
-                result = '{}\nError showing object {}'.format(e, var)
+                try:
+                    result = eval('{}'.format(var), myglobals, mylocals)
+                    result = ObjToStringSingleObj(result)
+                except Exception as e:
+                    result = '{}\nError showing object {}'.format(e, var)
             PopupScrolled(str(var) + '\n' + str(result), title=var, non_blocking=True)
         # ------------------------------- Process Watch Tab -------------------------------
         # BUTTON - Choose Locals to see
@@ -10291,9 +10355,9 @@ def show_debugger_window(location=(None, None), *args):
     :param *args: 
 
     """
-    if Debugger.debugger is None:
-        Debugger.debugger = Debugger()
-    debugger = Debugger.debugger
+    if _Debugger.debugger is None:
+        _Debugger.debugger = _Debugger()
+    debugger = _Debugger.debugger
     frame = inspect.currentframe()
     prev_frame = inspect.currentframe().f_back
     # frame, *others = inspect.stack()[1]
@@ -10315,9 +10379,9 @@ def show_debugger_popout_window(location=(None, None), *args):
     :param *args: 
 
     """
-    if Debugger.debugger is None:
-        Debugger.debugger = Debugger()
-    debugger = Debugger.debugger
+    if _Debugger.debugger is None:
+        _Debugger.debugger = _Debugger()
+    debugger = _Debugger.debugger
     frame = inspect.currentframe()
     prev_frame = inspect.currentframe().f_back
     # frame = inspect.getframeinfo(prev_frame)
@@ -10335,9 +10399,9 @@ def show_debugger_popout_window(location=(None, None), *args):
 
 def refresh_debugger():
     """ """
-    if Debugger.debugger is None:
-        Debugger.debugger = Debugger()
-    debugger = Debugger.debugger
+    if _Debugger.debugger is None:
+        _Debugger.debugger = _Debugger()
+    debugger = _Debugger.debugger
     Window.read_call_from_debugger = True
     frame = inspect.currentframe()
     frame = inspect.currentframe().f_back
@@ -10403,10 +10467,10 @@ def main():
     ]
 
     frame2 = [
-        [Listbox(['Listbox 1', 'Listbox 2', 'Listbox 3'], size=(20, 5))],
-        [Combo(['Combo item 1', ], size=(20, 3), text_color='red', background_color='red')],
-        [Combo(['Combo item 1', ], size=(20, 3), text_color='red', background_color='red')],
-        [Spin([1, 2, 3], size=(4, 3))],
+        [Listbox(['Listbox 1', 'Listbox 2', 'Listbox 3'], select_mode=SELECT_MODE_EXTENDED, size=(20, 5))],
+        [Combo(['Combo item 1',2,3,4 ], size=(20, 3),readonly=True, text_color='red', background_color='red', key='_COMBO1_')],
+        [Combo(['Combo item 1', 2,3,4], size=(20, 3), readonly=False, text_color='red', background_color='red', key='_COMBO2_')],
+        [Spin([1, 2, 3, 'a','b','c'], size=(4, 3))],
     ]
 
     frame3 = [
@@ -10445,7 +10509,9 @@ def main():
         [Text('You are running the py file itself', font='ANY 15', tooltip='My tooltip', key='_TEXT1_')],
         [Text('You should be importing it rather than running it', font='ANY 15')],
         [Frame('Input Text Group', frame1, title_color='red'),
-         Image(data=DEFAULT_BASE64_LOADING_GIF, key='_IMAGE_')],
+         Text('VERSION\n{}'.format(__version__), size=(18, 2), text_color='red', font='ANY 24'),
+         Image(data=DEFAULT_BASE64_LOADING_GIF, key='_IMAGE_'),
+         ],
         [Frame('Multiple Choice Group', frame2, title_color='green'),
          Frame('Binary Choice Group', frame3, title_color='purple', tooltip='Binary Choice'),
          Frame('Variable Choice Group', frame4, title_color='blue')],
@@ -10464,12 +10530,12 @@ def main():
                     right_click_menu=['&Right', ['Right', '!&Click', '&Menu', 'E&xit', 'Properties']],
                     # transparent_color= '#9FB8AD',
                     resizable=True,
+                    # icon=r'X:\VMWare Virtual Machines\SHARED FOLDER\kingb.ico'
                     ).Finalize()
     graph_elem.DrawCircle((200, 200), 50, 'blue')
     i = 0
     while True:  # Event Loop
-        # TimerStart()
-        event, values = window.Read(timeout=0)
+        event, values = window.Read(timeout=1)
         if event != TIMEOUT_KEY:
             print(event, values)
         if event is None or event == 'Exit':
@@ -10495,18 +10561,6 @@ def main():
             show_debugger_window()
         # TimerStop()
     window.Close()
-
-    # layout = [[Text('You are running the PySimpleGUI.py file itself')],
-    #           [Text('You should be importing it rather than running it', size=(50, 2))],
-    #           [Text('Here is your sample input window....')],
-    #           [Text('Source Folder', size=(15, 1), justification='right'), InputText('Source', focus=True),
-    #            FolderBrowse(tooltip='Browse for a folder')],
-    #           [Text('Destination Folder', size=(15, 1), justification='right'), InputText('Dest'), FolderBrowse()],
-    #           [Ok(bind_return_key=True), Cancel()]]
-    #
-    # window = Window('Demo window..').Layout(layout)
-    # event, values = window.Read()
-    # window.Close()
 
 
 if __name__ == '__main__':

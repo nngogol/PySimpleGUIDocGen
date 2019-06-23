@@ -1,7 +1,7 @@
 from inspect import getmembers, isfunction, isclass, getsource, signature, _empty
 from datetime import datetime
 import PySimpleGUIlib
-import json, re
+import json, re, os
 
 def get_params_part(code:str) -> dict:
 	"""
@@ -28,6 +28,10 @@ def get_params_part(code:str) -> dict:
 		
 		param_name, els = param_name.strip(), els.strip()
 		args_kwargs_pairs[param_name] = els
+
+	# returns = code[code.index(':return:'):]
+	# return args_kwargs_pairs, returns
+
 	return args_kwargs_pairs
 
 def get_sig_table_parts(function_obj, function_name, doc_string):
@@ -181,6 +185,9 @@ def render(injection):
 	if injection['number'] == '1': return pad_n(sig)
 	if injection['number'] == '2': return pad_n(table)
 
+def readfile(fname):
+	with open(fname, 'r', encoding='utf-8') as ff:
+		return ff.read()
 def main(do_full_readme=False, files_to_include:list=[], logger=None, output_name=None):
 	"""
 	Goal is:
@@ -197,9 +204,6 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 	# ■■■■■■■■■■■■■■
 	#  ■ ■   1   ■ ■ loading files
 	# ■■■■■■■■■■■■■■
-	def readfile(fname):
-		with open(fname, 'r', encoding='utf-8') as ff:
-			return ff.read()
 	HEADER_top_part 		= readfile('1_HEADER_top_part.md') 	# 1
 	readme 					= readfile('2_readme.md') 			# 2
 	FOOTER 					= readfile('3_FOOTER.md') 			# 3
@@ -390,10 +394,19 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 if __name__ == '__main__':
 	import logging
 
+	# ---------------
+	# config
+	# ---------------
+	delete_log = True
+	delete_html_comments = False
+	output_name = "FINAL_README.md"
+	log_file = 'LOGS.txt'
+	# ---------------
+
 	logger = logging.getLogger(__name__)
 	logger.setLevel(logging.DEBUG)
 	
-	my_file = logging.FileHandler('LOGS.txt');
+	my_file = logging.FileHandler(log_file);
 	my_file.setLevel(logging.DEBUG)
 	# formatter = logging.Formatter('%(levelname)s: \t%(message)s')
 	
@@ -405,4 +418,18 @@ if __name__ == '__main__':
 	logger.debug('STARTING \n\n')
 	main(logger=logger,
 		files_to_include=[0,1,2,3],
-		output_name="FINAL_README.md")
+		output_name=output_name)
+
+	readme_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), output_name)
+	readme_file = readfile(readme_file_path)
+
+	with open(readme_file_path, 'w', encoding='utf-8') as ff:
+		# remove html comments
+		filtered_readme_file = re.sub(r'<!--.*-->', '\n', readme_file, flags=re.MULTILINE)
+		ff.write(filtered_readme_file)
+
+	if delete_log:
+		# delete log file
+		log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), log_file)
+		if os.path.exists(log_file):
+			os.remove(log_file)
