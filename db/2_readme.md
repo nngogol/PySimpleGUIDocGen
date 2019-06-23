@@ -2,20 +2,6 @@
 ▓▓  WHAT, HOW, WHEN?  ▓▓
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-WTF is %!%?
-	It's a mark, where "some element" documentation begins
-
-WTF is <!-- <+SOMETHING.doc+> --> in html comments?
-WTF is <!-- <+SOMETHING.__init__+> --> in html comments?
-	For example, if you see <!-- <+TEXT.doc+> -->, then it means:
-	For example, if you see <!-- <+TEXT.__init__+> -->, then it means:
-	replace '<!-- <+TEXT.__init__+> -->' with '__init__ and parameters for __init__' IN doc LINE
-	replace '<!-- <+TEXT.__init__+> -->' with '__init__ and parameters for __init__' IN THIS LINE
-
-WTF is <+SOMETHING methods+>?
-	it's for future.
-	Like, for docs for Update() method.
-
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 ============= Format =============
 
@@ -272,9 +258,9 @@ This is a typpical call
 
 The animated Popup enables you to easily display a "loading" style animation specified through a GIF file that is either stored in a file or a base64 variable.
 
-<!-- no <+func.PopupAnimated+> -->
+<!-- <+func.PopupAnimated+> -->
 
-```python
+<!-- ```python
 def PopupAnimated(image_source,
 		message=None,
 		background_color=None,
@@ -287,8 +273,9 @@ def PopupAnimated(image_source,
 		alpha_channel=.8,
 		time_between_frames=0)
 ```
-| name | meaning |
-|-|-|
+
+|Name|Meaning|
+|-----|-----|
 |image_source           | The GIF file specified as a string filename or a base64 variable |
 |message                | optional text message to be displayed under the animation |
 |background_color       | the background color to use for the window and all of the other parts of the window |
@@ -298,13 +285,14 @@ def PopupAnimated(image_source,
 |location               | location to show the window |
 |alpha_channel          | alpha channel to use for the window |
 |time_between_frames    | amount of time in milliseconds to use between frames |
-|||
+||| -->
 
 ***To close animated popups***, call PopupAnimated with `image_source=None`.  This will close all of the currently open PopupAnimated windows.
 
 
 # Progress Meters!
 We all have loops in our code.  'Isn't it joyful waiting, watching a counter scrolling past in a text window?  How about one line of code to get a progress meter, that contains statistics about your code?
+
 
 ```
 OneLineProgressMeter(title,
@@ -569,6 +557,7 @@ While one goal was making it simple to create a GUI another just as important go
 The key to custom windows in PySimpleGUI is to view windows as ROWS of GUI  Elements.  Each row is specified as a list of these Elements.  Put the rows together and you've got a window.  This means the GUI is defined as a series of Lists, a Pythonic way of looking at things.
 
 Let's dissect this little program
+
 ```python
 import PySimpleGUI as sg
 
@@ -607,6 +596,7 @@ And what about those return values?  Most people simply want to show a window, g
 For return values the window is scanned from top to bottom, left to right.  Each field that's an input field will occupy a spot in the return values.
 
 In our example window, there are 2 fields, so the return values from this window will be a list with 2 values in it.
+
 ```python
 event, values = window.Read()
 folder_path, file_path = values
@@ -624,6 +614,7 @@ As of version 2.8 there are 2 forms of return values, list and dictionary.
 ### Two Return Values
 
 All Window Read calls return 2 values.  By convention a read statement is written:
+
 ```python
 event, values = window.Read()
 ```
@@ -666,6 +657,7 @@ if event is None:
 ```
 
 Putting it all together we end up with an "event loop" that looks something like this:
+
 ```python
 while True:
 	event, values = window.Read()
@@ -701,8 +693,8 @@ while True:
 Some elements are capable of generating events when something happens to them.  For example, when a slider is moved, or list item clicked on or table row clicked on.  These events are not enabled by default.  To enable events for an Element, set the parameter `enable_events=True`.  This is the same as the older `click_submits` parameter.  You will find the `click_submits` parameter still in the function definition.  You can continue to use it. They are the same setting.  An 'or' of the two values is used.  In the future, click_submits will be removed so please migrate your code to using `enable_events`.
 
 
-| name | events |
-| -  | - |
+|Name|events|
+| ---  | --- |
 | InputText | any change |
 | Combo | item chosen |
 | Option menu | item chosen |
@@ -979,8 +971,8 @@ Window( title,
 
 Parameter Descriptions.  You will find these same parameters specified for each `Element` and some of them in `Row` specifications.  The `Element` specified value will take precedence over the `Row` and `window` values.
 
-| Name | Meaning |
-| - | - |
+|Name|Meaning|
+| ----- | ---- |
 | default_element_size | Size of elements in window in characters (width, height)      |
 | default_button_element_size | Size of buttons on this window      |
 | auto_size_text | Bool. True if elements should size themselves according to contents. Defaults to True      |
@@ -1008,7 +1000,6 @@ Parameter Descriptions.  You will find these same parameters specified for each 
 | disable_close | if True user will not be able to close using the X. |
 | disable_minimize | if True user will not be able to minimize the window|
 | right_click_menu | menu definition that will be used on wall elements that support right click. If a  definition is specified on an element then it will be used instead.|
-| | |
 
 
 ### Window Location
@@ -1129,8 +1120,8 @@ Read the Window's input values and button clicks but without blocking.  It will 
 
 Will consume 100% of your CPU if you do not have other blocking calls in your event loop.
 
-|name|meaning|
-|-|-|
+|Name|Meaning|
+|-----|-----|
 | `Refresh() ` | Cause changes to the window to be displayed on the screen.  Normally not needed unless the changes are immediately required or if it's going to be a while before another call to Read.    |
 | `SetIcon(icon, pngbase64) ` | Sets the window's icon that will be shown on the titlebar.    Can either be a filename or a base64 string.|
 | `Fill(values_dict) ` | Populates the windows fields with the values shown in the dictionary.|
@@ -1274,10 +1265,6 @@ Many of the main method calls and Element names have shortcuts.  This enables yo
 
 
 
-
-
-
-
 <!-- %!% -->
 ## Text Element | `T == Txt == Text`
 Basic Element. It displays text. That's it.
@@ -1323,14 +1310,6 @@ The shorthand functions for `Text` are `Txt` and `T`
 If you set the parameter `enable_events` or `click_submits` then you will get an event if the user clicks on the Text.
 
 
-
-
-
-
-
-
-
-
 <!-- %!% -->
 ## Multiline Element
 This Element doubles as both an input and output Element.
@@ -1349,13 +1328,6 @@ layout = [[sg.Multiline('This is what a Multi-line Text Element looks like', siz
 ### Methods
 
 <!-- <+Multiline.Update+> -->
-
-
-
-
-
-
-
 
 <!-- %!% -->
 ## Text Input Element  | `Input == In`
@@ -1390,9 +1362,10 @@ def InputText(default_text ='',
 	vitible=True):
 ```
 
-.
-|name|meaning|
-|-|-|
+
+
+|Name|Meaning|
+|-----|-----|
 | default_text | str. Text initially shown in the input box      |
 | size | (width, height) of element in characters      |
 | auto_size_text | Bool.  True is element should be sized to fit text      |
@@ -1435,18 +1408,16 @@ Shorthand functions that are equivalent to `InputText` are `Input` and `In`
 ```python
 Update(value=None, disabled=None):
 Get()
-```
-|name|meaning|
-|-|-|
+``
+
+|Name|Meaning|
+|-----|-----|
 | Update | Change the Element |
 | value | new value to display in field |
 | disabled | if True will disable the element |
 | Get | Returns the current value for the element (you can get also from a call to Read) |
 |||
  -->
-
-
-
 
 
 
@@ -1485,8 +1456,8 @@ InputCombo(values,
 	visible=True)
 ```
 
-|name|meaning|
-|-|-|
+|Name|Meaning|
+|-----|-----|
 | values | Choices to be displayed. List of strings      |
 | default_value | which value should be initially chosen      |
 | size | (width, height) of element in characters      |
@@ -1549,8 +1520,8 @@ SetValue(values)
 GetListValues()
 ```
 
-|name|meaning|
-|-|-|
+|Name|Meaning|
+|-----|-----|
 | Update | Change element |
 | values | new list of choices |
 | disabled | if True disables the element |
@@ -1563,15 +1534,6 @@ GetListValues()
 
 ListBoxes can cause a window to return from a Read call.  If the flag change_submits is set, then when a user makes a selection, the Read immediately returns.
 Another way ListBoxes can cause Reads to return is if the flag bind_return_key is set.  If True, then if the user presses the return key while an entry is selected, then the Read returns.  Also, if this flag is set, if the user double-clicks an entry it will return from the Read.
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1655,18 +1617,6 @@ disabled - if True disables element
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- %!% -->
 ## Radio Element
 Creates one radio button that is assigned to a group of radio buttons.  Only 1 of the buttons in the group can be selected at any one time.
@@ -1698,8 +1648,8 @@ layout =  [
 		tooltip = None,
 		visible=True)
 
-|name|meaning|
-|-|-|
+|Name|Meaning|
+|-----|-----|
 | text| Text to display next to button|
 | group_id| Groups together multiple Radio Buttons. Can be any value|
 | default| Bool.  Initial state|
@@ -1722,8 +1672,8 @@ layout =  [
 Update(value=None, disabled=None, visible=None)
 ```
 
-|name|meaning|
-|-|-|
+|Name|Meaning|
+|-----|-----|
 | value | Bool. if True change to selected |
 | disabled | if True disables the element |
 |||
@@ -1778,9 +1728,8 @@ layout =  [[sg.Checkbox('My first Checkbox!', default=True), sg.Checkbox('My sec
 Update(value=None, disabled=None, visible=None)
 Get()
 ```
-
-|name|meaning|
-|-|-|
+|Name|Meaning|
+|-----|-----|
 | Update| changes the element|
 | value| Bool if True checks the checkbox|
 | disabled| if True disables the element|
@@ -1858,24 +1807,6 @@ disabled - if True disables the element
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- %!% -->
 ## Image Element
 
@@ -1939,22 +1870,6 @@ You can call the method without setting the `time_between_frames` value and it w
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- %!% -->
 ## Button Element
 
@@ -1995,10 +1910,10 @@ Sometimes there are multiple names for the same function.  This is simply to mak
 
 The 4 primary windows of PySimpleGUI buttons and their names are:
 
- 1. `Button`= `ReadButton` = `RButton` = `ReadFormButton` (old style... use Button instead)
- 2. `CloseButton` = `CButton`
- 3. `RealtimeButton`
- 4. `DummyButton`
+1. `Button`= `ReadButton` = `RButton` = `ReadFormButton` (old style... use Button instead)
+2. `CloseButton` = `CButton`
+3. `RealtimeButton`
+4. `DummyButton`
 
 You will find the long-form names in the older programs. ReadButton for example.
 
@@ -2292,18 +2207,6 @@ GetText - Returns the current text shown on a button
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- %!% -->
 ## ButtonMenu Element
 
@@ -2352,25 +2255,6 @@ Return values for ButtonMenus are sent via the return values dictionary.  If a s
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- %!% -->
 ## VerticalSeparator Element
 This element has limited usefulness and is being included more for completeness than anything else.  It will draw a line between elements.
@@ -2386,11 +2270,6 @@ VerticalSeparator(pad=None)
 ![snag-0129](https://user-images.githubusercontent.com/13696193/47376041-a92a0100-d6bf-11e8-8f5b-0c0df56cf0f3.jpg)
 
 <!-- <+VerticalSeparator.__init__+> -->
-
-
-
-
-
 
 
 
@@ -2434,36 +2313,13 @@ for i in range(10000):
   # update bar with loop value +1 so that bar eventually reaches the maximum
   progress_bar.UpdateBar(i + 1)
 # done with loop... need to destroy the window as it's still open
-window.Close())
+window.Close()
 ```
 
 ![progress custom](https://user-images.githubusercontent.com/13696193/45243969-c3508100-b2c3-11e8-82bc-927d0307e093.jpg)
 
 
 <!-- <+ProgressBar.__init__+> -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2690,7 +2546,7 @@ One such integration is with Matploplib and Pyplot.  There is a Demo program wri
              size - size in pixels
              pad - element padding for packing
              key - key used to lookup element
-             tooltip - tooltip text
+             tooltip - tooltip text)
 
 The order of operations to obtain a tkinter Canvas Widget is:
 
@@ -2948,6 +2804,7 @@ View of second tab:
 First we have the Tab layout definitions. They mirror what you see in the screen shots.  Tab 1 has 1 Text Element in it.  Tab 2 has a Text and an Input Element.
 
 <!-- <+Tab.doc+> -->
+
 <!-- <+TabGroup.doc+> -->
 
 ```python
@@ -3257,7 +3114,7 @@ The preset `messageicon` values are:
 
 ```python
 ShowMessage(title, message, filename=None, data=None, data_base64=None, messageicon=None, time=10000):
-    '''
+'''
  Shows a balloon above icon in system tray
  :param title:  Title shown in balloon
  :param message: Message to be displayed
@@ -3345,8 +3202,8 @@ Let's have some fun customizing!  Make PySimpleGUI look the way you want it to l
 
 Explanation of parameters
 
-| Name | Meaning |
-| - | - |
+|Name|Meaning|
+|----- | ---- |
 | icon     | filename of icon used for taskbar and title bar |
 | button_color     | button color (foreground, background) |
 | element_size     | element size (width, height) in characters |
