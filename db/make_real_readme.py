@@ -29,9 +29,6 @@ def get_params_part(code:str) -> dict:
 		param_name, els = param_name.strip(), els.strip()
 		args_kwargs_pairs[param_name] = els
 
-	# returns = code[code.index(':return:'):]
-	# return args_kwargs_pairs, returns
-
 	return args_kwargs_pairs
 
 def get_sig_table_parts(function_obj, function_name, doc_string):
@@ -59,7 +56,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 			raise Exception(f'IDK this type -> {key, val}')
 	# where the magic stops
 	sig_content = ',\n\t'.join(rows)
-	sign = f"```python\n{function_name}({sig_content})\n```"
+	sign = f"\n```python\n{function_name}({sig_content})\n```"
 	# where the magic stops, for real.
 
 
@@ -75,16 +72,16 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 		->
 		Get() - method
 		"""
-		return f'\n\n<br>\n\n{function_name}() - method <br>\n\n', ''
+		return f'\n\n{function_name}() - method\n\n', ''
 	if 'self' in params_names and params_names[0] == params_names[-1] and doc_string and ':param' not in doc_string:
 		"""
 		def Get(self):
 			''' bla bla'''
 		
 		->
-		Get() - bla bla <br>
+		Get() - bla bla 
 		"""
-		return f'\n\n<br>\n\n{function_name}() - {doc_string}\n<br>\n\n' , ''
+		return f'\n\n{function_name}() - {doc_string}\n\n' , ''
 
 	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 	# ▒   ▒- 		Making params_TABLE			 ▒   ▒-#
@@ -94,15 +91,25 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 								get_params_part(doc_string).items()])
 	params_TABLE = f'''\nParameters explained:\n
 						|Name|Meaning|
-						|-|-|
+						|---|---|
 						{md_table}
-						|||
-						'''.replace('\t', '')
+						|||\n'''.replace('\t', '')
 	
 	if not md_table.strip():
 		params_TABLE = ''
 
-	return sign, params_TABLE
+
+	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	# ▒   ▒- 		return value parsing 		 ▒   ▒-#
+	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	return_guy      = [i.strip() for i in doc_string.split('\n') if ':return:' in i]
+	if not return_guy:
+		return_guy = ''
+	else:
+		return_guy = return_guy[0].strip()[8:]
+		return_guy = f'\n\nreturn value: {return_guy}\n'
+
+	return sign, params_TABLE + return_guy
 
 ##############################################################################################################################################################
 #                                                                                                                                                            #
@@ -168,7 +175,7 @@ CLASS
 #                                                                                                                  #
 ####################################################################################################################
 
-def pad_n(text): return f'\n{text}\n'
+def pad_n(text): return f'{text}'
 
 def render(injection):
 	if injection['part1'] == 'func': # function
@@ -188,6 +195,7 @@ def render(injection):
 def readfile(fname):
 	with open(fname, 'r', encoding='utf-8') as ff:
 		return ff.read()
+
 def main(do_full_readme=False, files_to_include:list=[], logger=None, output_name=None):
 	"""
 	Goal is:
@@ -398,7 +406,7 @@ if __name__ == '__main__':
 	# config
 	# ---------------
 	delete_log = True
-	delete_html_comments = False
+	delete_html_comments = True
 	output_name = "FINAL_README.md"
 	log_file = 'LOGS.txt'
 	# ---------------
@@ -409,9 +417,9 @@ if __name__ == '__main__':
 	my_file = logging.FileHandler(log_file);
 	my_file.setLevel(logging.DEBUG)
 	# formatter = logging.Formatter('%(levelname)s: \t%(message)s')
-	
+
 	formatter = logging.Formatter('%(asctime)s>%(levelname)s: %(message)s')
-	
+
 	my_file.setFormatter(formatter)
 	logger.addHandler(my_file)
 	
@@ -420,13 +428,21 @@ if __name__ == '__main__':
 		files_to_include=[0,1,2,3],
 		output_name=output_name)
 
-	readme_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), output_name)
-	readme_file = readfile(readme_file_path)
+	if delete_html_comments:
+		readme_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), output_name)
+		readme_file = readfile(readme_file_path)
 
-	with open(readme_file_path, 'w', encoding='utf-8') as ff:
-		# remove html comments
-		filtered_readme_file = re.sub(r'<!--.*-->', '\n', readme_file, flags=re.MULTILINE)
-		ff.write(filtered_readme_file)
+		with open(readme_file_path, 'w', encoding='utf-8') as ff:
+			# remove html comments
+			stackedit_data = readme_file[readme_file.index('<!--stackedit_data:'):]
+			filtered_readme_file = re.sub(r'<!--([\s\S]*?)-->', '\n', readme_file, flags=re.MULTILINE)
+			filtered_readme_file += stackedit_data
+			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+			ff.write(filtered_readme_file)
 
 	if delete_log:
 		# delete log file
