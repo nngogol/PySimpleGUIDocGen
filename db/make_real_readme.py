@@ -404,5 +404,5 @@ if __name__ == '__main__':
 	
 	logger.debug('STARTING \n\n')
 	main(logger=logger,
-		files_to_include=[0,1,2,3,4],
-		output_name="<<FINAL_README>>.md")
+		files_to_include=[0,1,2,3],
+		output_name="FINAL_README.md")
