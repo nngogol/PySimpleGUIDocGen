@@ -142,6 +142,12 @@ You can add `1` or `2` before function or method.
 | `.1testmethod`   | signature                   |  `<!-- <+func.1Popup+> -->`      |
 | `.2testmethod`   | table of params             |  `<!-- <+Listbox.2Update+> -->`  |
 
+
+Here is mapping between tags and doc_strings:
+
+![mdfile](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/tags.png)
+
+
 ---
 ---
 
