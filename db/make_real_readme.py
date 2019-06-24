@@ -1,6 +1,5 @@
 from inspect import getmembers, isfunction, isclass, getsource, signature, _empty
 from datetime import datetime
-import PySimpleGUI as sg
 import PySimpleGUIlib
 import click, logging, json, re, os
 
@@ -381,7 +380,6 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 
 		return content
 
-	sg.Popup('DOCS ARE BAKED')
 
 @click.command()
 @click.option('-nol', '--no_log',  					is_flag=True, help='Disable log')
