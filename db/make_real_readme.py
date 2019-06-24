@@ -1,7 +1,7 @@
 from inspect import getmembers, isfunction, isclass, getsource, signature, _empty
 from datetime import datetime
 import PySimpleGUIlib
-import json, re, os
+import click, logging, json, re, os
 
 def get_params_part(code:str) -> dict:
 	"""
@@ -93,7 +93,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 						|Name|Meaning|
 						|---|---|
 						{md_table}
-						|||\n'''.replace('\t', '')
+						\n'''.replace('\t', '')
 	
 	if not md_table.strip():
 		params_TABLE = ''
@@ -175,7 +175,7 @@ CLASS
 #                                                                                                                  #
 ####################################################################################################################
 
-def pad_n(text): return f'{text}'
+def pad_n(text): return f'\n{text}\n'
 
 def render(injection):
 	if injection['part1'] == 'func': # function
@@ -286,7 +286,7 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 			# ░▒▓ collect ▓▒░
 			injection_points.append({
 				"tag" : tag,
-				"function_object" : founded_method,
+				"function_object" : founded_function[0],
 				"parent_class" : None,
 				"part1" : 'func',
 				"part2" : part2,
@@ -399,37 +399,47 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 	return content
 
 
-if __name__ == '__main__':
-	import logging
+@click.command()
+@click.option('-nol', '--no_log',  					is_flag=True, help='Disable log')
+@click.option('-rml', '--delete_log', 				is_flag=True, help='Delete log file after generating')
+@click.option('-rmh', '--delete_html_comments', 	is_flag=True, help='Delete html comment in the generated .md file')
+@click.option('-o', '--output_name', 				default='FINALreadme.md',	type=click.Path(), help='Name for generated .md file')
+@click.option('-lo', '--log_file', 					default='LOGS.log',			type=click.Path(), help='Name for log file')
+def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
 
-	# ---------------
-	# config
-	# ---------------
-	delete_log = True
-	delete_html_comments = True
-	output_name = "FINAL_README.md"
-	log_file = 'LOGS.txt'
-
-	# ---------------
+	# --------------------
+	# ----- logging setup- 
+	# --------------------
 
 	logger = logging.getLogger(__name__)
-	logger.setLevel(logging.DEBUG)
+	if no_log:
+		logger.setLevel(logging.CRITICAL)
+		# delete_log = True
+	else:
+		logger.setLevel(logging.DEBUG)
 	
-	my_file = logging.FileHandler(log_file);
+	my_file = logging.FileHandler(log_file, mode='w')
 	my_file.setLevel(logging.DEBUG)
 	# formatter = logging.Formatter('%(levelname)s: \t%(message)s')
-
 	formatter = logging.Formatter('%(asctime)s>%(levelname)s: %(message)s')
 
 	my_file.setFormatter(formatter)
 	logger.addHandler(my_file)
-	
-	logger.debug('STARTING \n\n')
+	logger.info('STARTING')
+
 	main(logger=logger,
 		files_to_include=[0,1,2,3],
 		output_name=output_name)
 
+	logger.info('FINISHED')
+
+
+	# --------------------
+	# ----- POST process-- 
+	# --------------------
+
 	if delete_html_comments:
+		logger.info('Deleting html comments')
 		readme_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), output_name)
 		readme_file = readfile(readme_file_path)
 
@@ -453,3 +463,6 @@ if __name__ == '__main__':
 				os.remove(log_file)
 			except Exception as e:
 				print(str(e))
+
+if __name__ == '__main__':
+	cli()
