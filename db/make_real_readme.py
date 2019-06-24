@@ -1,5 +1,6 @@
 from inspect import getmembers, isfunction, isclass, getsource, signature, _empty
 from datetime import datetime
+import PySimpleGUI as sg
 import PySimpleGUIlib
 import click, logging, json, re, os
 
@@ -15,7 +16,7 @@ def get_params_part(code:str) -> dict:
 	"""
 	only_params = code[code.index(':param'):] # get_only_params_string(code)
 
-	# ■■■■ making dict
+	# ▓▓▓▓ making dict
 	param_lines = only_params.split(':param ')
 	param_lines = [i.strip() for i in param_lines if i.strip()] # filter empty lines
 
@@ -38,9 +39,9 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 
 	doc_string = doc_string.strip()
 
-	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	# ▒   ▒ 		   Making INIT_CALL   		 ▒   ▒ #
-	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	# where the magic begins
 	sig, rows = signature(function_obj).parameters, []
 	for index, key in enumerate(sig):
@@ -83,9 +84,9 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 		"""
 		return f'\n\n{function_name}() - {doc_string}\n\n' , ''
 
-	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	# ▒   ▒- 		Making params_TABLE			 ▒   ▒-#
-	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	md_table =  '\n'.join([ 	f'|{name}|{desc}|'
 								for name, desc in
 								get_params_part(doc_string).items()])
@@ -99,9 +100,9 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 		params_TABLE = ''
 
 
-	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	# ▒   ▒- 		return value parsing 		 ▒   ▒-#
-	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	return_guy      = [i.strip() for i in doc_string.split('\n') if ':return:' in i]
 	if not return_guy:
 		return_guy = ''
@@ -111,16 +112,13 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 
 	return sign, params_TABLE + return_guy
 
-##############################################################################################################################################################
-#                                                                                                                                                            #
-#     ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______     #
-#    |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|    #
-#     ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______     #
-#    |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|    #
-#                                                                                                                                                            #
-#                                                                                                                                                            #
-#                                                                                                                                                            #
-##############################################################################################################################################################
+####################################################################################################################
+#     ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______     #
+#    |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|    #
+#     ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______     #
+#    |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|    #
+#                                                                                                                  #
+####################################################################################################################
 # injection_points
 """
 injection_point structure cal look like this:
@@ -165,13 +163,10 @@ CLASS
 
 """
 ####################################################################################################################
-#                                                                                                                  #
 #     ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______     #
 #    |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|    #
 #     ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______     #
 #    |______|______|______|______|______|______|______|______|______|______|______|______|______|______|______|    #
-#                                                                                                                  #
-#                                                                                                                  #
 #                                                                                                                  #
 ####################################################################################################################
 
@@ -196,7 +191,7 @@ def readfile(fname):
 	with open(fname, 'r', encoding='utf-8') as ff:
 		return ff.read()
 
-def main(do_full_readme=False, files_to_include:list=[], logger=None, output_name=None):
+def main(do_full_readme=False, files_to_include:list=[], logger=None, output_name=None, delete_html_comments=True):
 	"""
 	Goal is:
 	1) load 1_ 2_ 3_ 4_
@@ -207,18 +202,19 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 	6) join 1 big readme file
 	"""
 
-	if logger == None: raise Exception('give me a logger')
+	# if logger == None: raise Exception('give me a logger')
 
-	# ■■■■■■■■■■■■■■
-	#  ■ ■   1   ■ ■ loading files
-	# ■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▓▓▓▓▓▓▓▓▓▓▓▓ 1 loading files
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	HEADER_top_part 		= readfile('1_HEADER_top_part.md') 	# 1
 	readme 					= readfile('2_readme.md') 			# 2
 	FOOTER 					= readfile('3_FOOTER.md') 			# 3
 	Release_notes 			= readfile('4_Release_notes.md') 	# 4
-	# ■■■■■■■■■■■■■■
-	#  ■ ■   2   ■ ■ GET classes, funcions, varialbe a.k.a. memes
-	# ■■■■■■■■■■■■■■
+	
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▓▓▓▓▓▓▓▓▓▓▓▓ 2 GET classes, funcions, varialbe a.k.a. memes
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	psg_members = getmembers(PySimpleGUIlib)
 
 	psg_funcs 		= [o for o in psg_members if isfunction(o[1])]
@@ -226,16 +222,16 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 	psg_classes_	 = list(set([i[1] for i in psg_classes])) # filtering
 	psg_classes		= list(zip([i.__name__ for i in psg_classes_], psg_classes_))
 
-	# ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-	# ■■■■                       | |	■■■■■
-	# ■■■■   _ __ ___   ___  __ _| |_	■■■■■
-	# ■■■■  | '_ ` _ \ / _ \/ _` | __|	■■■■■
-	# ■■■■  | | | | | |  __/ (_| | |_  	■■■■■
-	# ■■■■  |_| |_| |_|\___|\__,_|\__|	■■■■■
-	# ■■■■■■■■■■■■■■
-	#  ■ ■   3   ■ ■ find all tags in 2_readme
-	# ■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▓▓▓▓                       | |	▓▓▓▓▓
+	# ▓▓▓▓   _ __ ___   ___  __ _| |_	▓▓▓▓▓
+	# ▓▓▓▓  | '_ ` _ \ / _ \/ _` | __|	▓▓▓▓▓
+	# ▓▓▓▓  | | | | | |  __/ (_| | |_  	▓▓▓▓▓
+	# ▓▓▓▓  |_| |_| |_|\___|\__,_|\__|	▓▓▓▓▓
 
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▓▓▓▓▓▓▓▓▓▓▓▓ 3 find all tags in 2_readme
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 	# strip top of the file head
 	started_mark = '<!-- Start from here -->'; readme = readme[readme.index(started_mark)+len(started_mark):]
 
@@ -244,24 +240,19 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 
 	# if there are REPEATED tags -> show them.
 	if len(list(set(mark_points))) != len(mark_points):
-		[mark_points.remove(x) for x in set(mark_points)]; logger.error("You have repeated tags! \n {0}".format(','.join(mark_points)))
+		[mark_points.remove(x) for x in set(mark_points)];
+		if logger: logger.error("You have repeated tags! \n {0}".format(','.join(mark_points)))
 		return ''
 
-
-
-	# ■■■■■■■■■■■■■■
-	#  ■ ■   4   ■ ■ structure tags and REAL objects
-	# ■■■■■■■■■■■■■■
-
-	# 		■■■■■■■■■■■■■■
-	# 		 ■ ■  4.1  ■ ■ making injections
-	# 		■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▓▓▓▓▓▓▓▓▓▓▓▓ 4 structure tags and REAL objects
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
 	injection_points = []
-
 	classes_method_tags = [ j for j in mark_points if 'func.' not in j]
 	func_tags = [ j for j in mark_points if 'func.' in j]
 	
+	# ░▒▓◘◘◘▓ functions ▓◘◘◘▓▒░
 	for tag in func_tags:
 
 		try:
@@ -277,10 +268,10 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 			# ░▒▓ find function ▓▒░
 			founded_function = [func for func_name, func in psg_funcs if func_name == function_name]
 			if not founded_function:
-				logger.error(f'function "{function_name}" not found in PySimpleGUI')
+				if logger: logger.error(f'function "{function_name}" not found in PySimpleGUI')
 				continue
 			if len(founded_function) > 1 :
-				logger.error(f'more than 1 function named "{function_name}" found in PySimpleGUI')
+				if logger: logger.error(f'more than 1 function named "{function_name}" found in PySimpleGUI')
 				continue
 
 			# ░▒▓ collect ▓▒░
@@ -293,10 +284,10 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 				"number" : number,
 			})
 		except Exception as e:
-			logger.error(f'                               {str(e)}')
+			if logger: logger.error(f'               {str(e)}')
 			continue
 
-	# --------------------------------
+	# ░▒▓◘◘◘▓ classes ▓◘◘◘▓▒░
 	for tag in classes_method_tags:
 		try:
 			class_name, method_name = tag.split('.')
@@ -312,10 +303,10 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 			# ░▒▓ find class ▓▒░
 			founded_class = [a_class_obj for a_class_name, a_class_obj in psg_classes if a_class_name == class_name]
 			if not founded_class:
-				logger.error(f'class "{tag}" not found in PySimpleGUI')
+				if logger: logger.error(f'class "{tag}" not found in PySimpleGUI')
 				continue
 			if len(founded_class) > 1 :
-				logger.error(f'more than 1 class named "{tag}" found in PySimpleGUI')
+				if logger: logger.error(f'more than 1 class named "{tag}" found in PySimpleGUI')
 				continue
 
 			# ░▒▓ find method ▓▒░
@@ -325,10 +316,10 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 				else:
 					founded_method = None
 			except AttributeError as e:
-				logger.error(f'METHOD not found!: {str(e)}')
+				if logger: logger.error(f'METHOD not found!: {str(e)}')
 				continue
 			except Exception as e:
-				logger.error(str(e))
+				if logger: logger.error(str(e))
 				continue
 
 			# ░▒▓ collect ▓▒░
@@ -341,12 +332,13 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 				"number" : number,
 			})
 		except Exception as e:
-			logger.error(f'```````````````````````{str(e)}')
+			if logger: logger.error(f'```````````````````````{str(e)}')
 			continue
 
-	# 		■■■■■■■■■■■■■■
-	# 		 ■ ■  4.2  ■ ■ injecting!
-	# 		■■■■■■■■■■■■■■
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▓▓▓▓▓▓▓▓▓▓▓▓ 5 injecting
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
 	for injection in injection_points:
 
 		if injection['part2'] == 'doc': # our special snowflake "doc"
@@ -354,35 +346,11 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 		else:
 			readme = readme.replace(injection['tag'], render(injection))
 
-	# # classes
-	# mark_points_classes = [i for i in mark_points if 'func' not in i]
-	# done_classes = []
-	# for class_name_tag in mark_points_classes:
-	# 	try:
-	# 		class_name = class_name_tag.split('.')[0].split('+')[1]
-	# 		if class_name in done_classes:
-	# 			continue
-	# 		done_classes.append(class_name)
-	# 		md_parts = make_md_parts(psg_classes, class_name=class_name, READMEFILE=readme, logger=logger)
-	# 		for from_, to_ in md_parts.items():
-	# 			if from_ == 'doc':
-	# 				continue
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▓▓▓▓▓▓▓▓▓▓▓▓ 6 join
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 
-	# 			if from_ in readme:
-	# 				readme = readme.replace(from_, to_)
-	# 			else:
-	# 				logger.warning(f"CAN'T replace '{from_}'")
-
-	# 			# readme = readme.replace(f'<!-- {from_} -->', to_)
-	# 		# readme = readme.replace(f'<!-- <+{class_name}+> -->', md_class)
-	# 	except Exception as e:
-	# 		logger.error(str(e))
-
-	# ■■■■■■■■■■■■■■■■■
-	#  ■ ■ ■ join ■ ■ ■
-	# ■■■■■■■■■■■■■■■■■
 	files = []
-
 	if 0 in files_to_include: files.append(HEADER_top_part)
 	if 1 in files_to_include: files.append(readme)
 	if 2 in files_to_include: files.append(FOOTER)
@@ -394,10 +362,26 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 		with open(output_name, 'w', encoding='utf-8') as ff:
 			curr_dt = datetime.today().strftime('<!-- CREATED: %Y-%m-%d %H.%M.%S -->\n') 
 			content = curr_dt + Joined_MARKDOWN
+
+			# ░▒▓ html removing ▓▒░
+			if delete_html_comments:
+				if logger: logger.info('Deleting html comments')
+				
+				# remove html comments
+				stackedit_data = content[content.index('<!--stackedit_data:'):]
+				filtered_readme_file = re.sub(r'<!--([\s\S]*?)-->', '\n', content, flags=re.MULTILINE)
+				filtered_readme_file += stackedit_data
+				filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+				filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+				filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+				filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+				content = filtered_readme_file.replace('\n\n\n', '\n\n')
+
 			ff.write(content)
 
-	return content
+		return content
 
+	sg.Popup('DOCS ARE BAKED')
 
 @click.command()
 @click.option('-nol', '--no_log',  					is_flag=True, help='Disable log')
@@ -420,7 +404,6 @@ def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
 	
 	my_file = logging.FileHandler(log_file, mode='w')
 	my_file.setLevel(logging.DEBUG)
-	# formatter = logging.Formatter('%(levelname)s: \t%(message)s')
 	formatter = logging.Formatter('%(asctime)s>%(levelname)s: %(message)s')
 
 	my_file.setFormatter(formatter)
@@ -429,7 +412,8 @@ def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
 
 	main(logger=logger,
 		files_to_include=[0,1,2,3],
-		output_name=output_name)
+		output_name=output_name,
+		delete_html_comments=delete_html_comments)
 
 	logger.info('FINISHED')
 
@@ -437,23 +421,6 @@ def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
 	# --------------------
 	# ----- POST process-- 
 	# --------------------
-
-	if delete_html_comments:
-		logger.info('Deleting html comments')
-		readme_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), output_name)
-		readme_file = readfile(readme_file_path)
-
-		with open(readme_file_path, 'w', encoding='utf-8') as ff:
-			# remove html comments
-			stackedit_data = readme_file[readme_file.index('<!--stackedit_data:'):]
-			filtered_readme_file = re.sub(r'<!--([\s\S]*?)-->', '\n', readme_file, flags=re.MULTILINE)
-			filtered_readme_file += stackedit_data
-			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
-			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
-			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
-			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
-			filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
-			ff.write(filtered_readme_file)
 
 	if delete_log:
 		# delete log file
