@@ -97,8 +97,10 @@ You can add `1` or `2` before function or method.
 | `.1testmethod`   | signature                   |  `<!-- <+func.1Popup+> -->`      |
 | `.2testmethod`   | table of params             |  `<!-- <+Listbox.2Update+> -->`  |
 
+---
+---
 
-#### Example:
+#### Comprehensive Example
 
 Let's take this `Person` class:
 
@@ -182,11 +184,11 @@ class Animal(object):
 
 Let's make simple block:
 
-![mdfile](mdfile1.jpg)
+![mdfile](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/mdfile1.png)
 
 Now, look on this diagram:
 
-![fulldiag](full-diag.jpg)
+![fulldiag](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/full-diag.png)
 
 ----
 
