@@ -18,18 +18,63 @@ Simple and easy.
 
 ### CLI:
 
+Basic usage:
+
 ```bash
 python3 make_real_readme.py
 ```
 
-You will get `readme.md`.
+You will get your markdown file `FINALreadme.md`.
+
+For help:
+
+```bash
+>>> python3 make_real_readme.py --help
+
+Usage: make_real_readme.py [OPTIONS]
+
+Options:
+  -nol, --no_log                Disable log
+  -rml, --delete_log            Delete log file after generating
+  -rmh, --delete_html_comments  Delete html comment in the generated .md file
+  -o, --output_name PATH        Name for generated .md file
+  -lo, --log_file PATH          Name for log file
+  --help                        Show this message and exit.
+```
+
+---
+
+Make output file `test.md` and log file 'mylog.log'
+
+```bash
+python3 make_real_readme.py -o test.md -lo mylog.log
+```
+
+
+Make log, but don't output anything in it
+
+```bash
+python3 make_real_readme.py -o test.md -lo mylog.log --no_log
+```
+
+
+Remove log after generating
+
+```bash
+python3 make_real_readme.py -o test.md -rml
+```
+
+
+Remove log after generating + remove html triple '\n' in output file (**I use this a lot**)
+
+```bash
+python3 make_real_readme.py -o test.md -rml -rmh -nol
+```
+
 
 ### GUI:
 
-```bash
-python3 make_real_readme.py
-```
-
+I removed it. *LEARN SHELL.*
 
 # Everything is a `function` (maybe even you are)
 
