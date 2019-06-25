@@ -367,13 +367,17 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 				if logger: logger.info('Deleting html comments')
 				
 				# remove html comments
-				stackedit_data = content[content.index('<!--stackedit_data:'):]
 				filtered_readme_file = re.sub(r'<!--([\s\S]*?)-->', '\n', content, flags=re.MULTILINE)
-				filtered_readme_file += stackedit_data
 				filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
 				filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
 				filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
 				filtered_readme_file = filtered_readme_file.replace('\n\n\n', '\n\n')
+
+				# add staked_edit
+				if '<!--stackedit_data:' in content:
+					stackedit_data = content[content.index('<!--stackedit_data:'):]
+					filtered_readme_file += stackedit_data
+				
 				content = filtered_readme_file.replace('\n\n\n', '\n\n')
 
 			ff.write(content)
