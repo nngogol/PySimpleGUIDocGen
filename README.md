@@ -145,7 +145,7 @@ You can add `1` or `2` before function or method.
 
 Here is mapping between tags and doc_strings:
 
-![mdfile](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/tags.png)
+![mdfile](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/img/tags.png)
 
 
 ---
@@ -235,11 +235,11 @@ class Animal(object):
 
 Let's make simple block:
 
-![mdfile](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/mdfile1.png)
+![mdfile](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/img/mdfile1.png)
 
 Now, look on this diagram:
 
-![fulldiag](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/full-diag.png)
+![fulldiag](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/img/full-diag.png)
 
 ----
 
