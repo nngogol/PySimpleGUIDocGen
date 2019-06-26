@@ -246,9 +246,9 @@ Now, look on this diagram:
 
 "`testmethod`" can be any method, that really exists in class: "`__init__, hello, blabla`" etc.
 
-**Big exception is "`.class_obj_doc`"** - it will render doc string **for your class**.
+**Big exception is "`.doc`"** - it will render doc string **for your class**.
 
-If you have method `class_obj_doc` in your class - it's bad for your.
+If you have method `doc` in your class - it's bad for your (it wouldn't show in generated docs - it will insted show doc string of class).
 
 ----
 
