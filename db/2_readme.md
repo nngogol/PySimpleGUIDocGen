@@ -1330,7 +1330,7 @@ layout = [[sg.Multiline('This is what a Multi-line Text Element looks like', siz
 <!-- <+Multiline.Update+> -->
 
 <!-- %!% -->
-## Text Input Element  | `Input == In`
+## Text Input Element  | `InputText == Input == In`
 
 <!-- <+InputText.doc+> -->
 ```python
@@ -1341,151 +1341,36 @@ layout = [[sg.InputText('Default text')]]
 
 <!-- <+InputText.__init__+> -->
 
-<!-- 
-```python
-def InputText(default_text ='',
-	size=(None, None),
-	disabled=False,
-	auto_size_text=None,
-	password_char='',
-	justification=None,
-	background_color=None,
-	text_color=None,
-	font=None,
-	tooltip=None,
-	change_submits=False
-	do_not_clear=False,
-	key=None,
-	focus=False,
-	right_click_menu=None,
-	pad=None,
-	vitible=True):
-```
-
-
-
-|Name|Meaning|
-|-----|-----|
-| default_text | str. Text initially shown in the input box      |
-| size | (width, height) of element in characters      |
-| auto_size_text | Bool.  True is element should be sized to fit text      |
-| disabled | Bool. If True the input is disabled    |
-| password_char | Character that will be used to replace each entered character. Setting to a value indicates this field is a password entry field      |
-| background_color | color to use for the input field background      |
-| text_color | color to use for the typed text      |
-| font | font used for the element|
-| tooltip | what is shown when hovered over element (doesn't appear to work)|
-| change_submits | if True, will cause a Window.Read to return if a button fills in the value|
-| do_not_clear | Bool. Normally windows clear when read, turn off clearing with this flag.      |
-| key | Dictionary key to use for return values      |
-| focus | Bool. True if this field should capture the focus (moves cursor to this field)      |
-| pad | amount of room in pixels to leave around the element|
-|||
--->
-
-
-There are two methods that can be called:
-
-```
-Input.Update(new_Value) - sets the input to new_value
-Input.Get() - returns the current value of the field.
-```
-
-Shorthand functions that are equivalent to `InputText` are `Input` and `In`
-
-#### do_not_clear Parameter
-
-**Important** - This trips a lot of people up.  If you do not set the `do_not_clear` parameter then the input field will clear when an event takes place.   The behavior is a "forms" style window development.  The assumption is that you want the field to clear.  If you are writing a chat program then you're thankful.  The rest of you, I'm sorry.
-
 ### Methods
 
 <!-- <+InputText.Update+> -->
 
 <!-- <+InputText.Get+> -->
 
+---
 
-<!-- 
-```python
-Update(value=None, disabled=None):
-Get()
-``
+#### do_not_clear Parameter
 
-|Name|Meaning|
-|-----|-----|
-| Update | Change the Element |
-| value | new value to display in field |
-| disabled | if True will disable the element |
-| Get | Returns the current value for the element (you can get also from a call to Read) |
-|||
- -->
-
-
-
-
+**Important** - This trips a lot of people up.  If you do not set the `do_not_clear` parameter then the input field will clear when an event takes place.   The behavior is a "forms" style window development.  The assumption is that you want the field to clear.  If you are writing a chat program then you're thankful.  The rest of you, I'm sorry.
 
 
 <!-- %!% -->
-## Combo Element | `Combo == DropDown == Drop`
+## Combo Element | `Combo == InputCombo == DropDown == Drop`
 Also known as a drop-down list.  Only required parameter is the list of choices.  The return value is a string matching what's visible on the GUI.
 
 <!-- <+Combo.doc+> -->
 
 ```python
-layout = [[sg.InputCombo(['choice 1', 'choice 2'])]]
+layout = [[sg.Combo(['choice 1', 'choice 2'])]]
 ```
 
 ![combobox](https://user-images.githubusercontent.com/13696193/44959860-b565bf00-aec3-11e8-82fe-dbe41252458b.jpg)
 
 <!-- <+Combo.__init__+> -->
 
-<!-- 
-```
-InputCombo(values,
-	default_value=None
-	size=(None, None)
-	auto_size_text=None
-	background_color=None
-	text_color=None
-	change_submits=False
-	enable_events=False
-	readonly=True
-	disabled=False
-	key=None
-	pad=None
-	tooltip=None
-	visible=True)
-```
-
-|Name|Meaning|
-|-----|-----|
-| values | Choices to be displayed. List of strings      |
-| default_value | which value should be initially chosen      |
-| size | (width, height) of element in characters      |
-| auto_size_text | Bool. True if size should fit the text length      |
-| background_color | color to use for the input field background      |
-| text_color | color to use for the typed text      |
-| change_submits | Bool. If set causes Read to immediately return if the selected value changes      |
-| disabled | Bool. If set will disable changes   |
-| readonly | Bool. If set user cannot change the values to choose from   |
-| key | Dictionary key to use for return values      |
-| pad | (x,y) Amount of padding to put around element in pixels      |
-| tooltip |  Text string. If set, hovering over field will popup the text      |
- -->
-
-
 ### Methods
 
 <!-- <+Combo.Update+> -->
-
-<!-- ```python
-Update(value=None, values=None, set_to_index=None, disabled=None, readonly=None)
-```
-value - change which value is current selected
-values - change list of choices
-set_to_index - change selection to a particular choice
-disable - if True will disable element
-readonly - if True will make element readonly
- -->
 
 <!-- %!% -->
 ## Listbox Element
@@ -1501,10 +1386,6 @@ layout = [[sg.Listbox(values=['Listbox 1', 'Listbox 2', 'Listbox 3'], size=(30, 
 
 <!-- <+Listbox.__init__+> -->
 
-
-The `select_mode` option can be a string or a constant value defined as a variable.  Generally speaking strings are used for these kinds of options.
-
-
 ### Methods
 
 <!-- <+Listbox.Update+> -->
@@ -1513,88 +1394,30 @@ The `select_mode` option can be a string or a constant value defined as a variab
 
 <!-- <+Listbox.GetListValues+> -->
 
-<!-- 
-```python
-Update(values=None, disabled=None)
-SetValue(values)
-GetListValues()
-```
-
-|Name|Meaning|
-|-----|-----|
-| Update | Change element |
-| values | new list of choices |
-| disabled | if True disables the element |
-| SetValue | Sets selection to one or more values |
-| GetListValues | Return the list of values to choose from |
-|||
- -->
-
 ---
 
 ListBoxes can cause a window to return from a Read call.  If the flag change_submits is set, then when a user makes a selection, the Read immediately returns.
+
 Another way ListBoxes can cause Reads to return is if the flag bind_return_key is set.  If True, then if the user presses the return key while an entry is selected, then the Read returns.  Also, if this flag is set, if the user double-clicks an entry it will return from the Read.
-
-
 
 <!-- %!% -->
 ## Slider Element
 
-Sliders have a couple of slider-specific settings as well as appearance settings.  Examples include the `orientation` and `range` settings.
+Sliders have a couple of slider-specific settings as well as appearance settings. Examples include the `orientation` and `range` settings.
 
 <!-- <+Slider.doc+> -->
+
 ```python
-layout = [[sg.Slider(range=(1,500), default_value=222, size=(20,15), orientation='horizontal', font=('Helvetica', 12))]]
+layout = [[sg.Slider(range=(1,500),
+         default_value=222,
+         size=(20,15),
+         orientation='horizontal',
+         font=('Helvetica', 12))]]
 ```
 
 ![slider](https://user-images.githubusercontent.com/13696193/44959858-b4349200-aec3-11e8-9e25-c0fcf025d19e.jpg)
 
-
 <!-- <+Slider.__init__+> -->
-
-<!-- 
-	Slider(range=(None,None),
-		default_value=None,
-		resolution=None,
-		orientation=None,
-		border_width=None,
-		relief=None,
-		change_submits=False,
-		disabled=False,
-		size=(None, None),
-		font=None,
-		background_color=None,
-		text_color=None,
-		key=None,
-		pad=None,
-		tooltip=None,
-		visible=True)
-
-range - (min, max) slider's range
-default_value - default setting (within range)
-resolution - how much each 'tick' should represent. Default = 1
-orientation - 'horizontal' or 'vertical' ('h' or 'v' work)
-border_width - how deep the widget looks
-relief - relief style. Values are same as progress meter relief values.  Can be a constant or a string:
-
-- RELIEF_RAISED= 'raised'
-- RELIEF_SUNKEN= 'sunken'
-- RELIEF_FLAT= 'flat'
-- RELIEF_RIDGE= 'ridge'
-- RELIEF_GROOVE= 'groove'
-- RELIEF_SOLID = 'solid'
-
-size - (width, height) of element in characters
-disabled - Bool If True slider is disabled
-auto_size_text - Bool. True if size should fit the text
-background_color - color to use for the input field background
-text_color - color to use for the typed text
-change_submits - causes window read to immediately return if the checkbox value changes
-key- Dictionary key to use for return values
-tooltip - Tooltip to display when hovered over wlement
--->
-
-
 
 ### Qt Sliders
 
@@ -1604,18 +1427,6 @@ There is an important difference between Qt and tkinter sliders.  On Qt, the sli
 ### Slider Methods
 
 <!-- <+Slider.Update+> -->
-
-
-<!-- ```python
-	Update(self, value=None, range=(None, None), disabled=None, visible=None):
-```
-
-value - set current selection to value
-range - change range of valid values
-disabled - if True disables element
- -->
-
-
 
 <!-- %!% -->
 ## Radio Element
@@ -1633,111 +1444,28 @@ layout =  [
 
 <!-- <+Radio.__init__+> -->
 
-<!-- 
-	Radio(text,
-		group_id,
-		default=False,
-		size=(None, None),
-		disabled = False,
-		auto_size_text=None,
-		font=None,
-		background_color = None,
-		text_color = None,
-		key = None,
-		pad = None,
-		tooltip = None,
-		visible=True)
-
-|Name|Meaning|
-|-----|-----|
-| text| Text to display next to button|
-| group_id| Groups together multiple Radio Buttons. Can be any value|
-| default| Bool.  Initial state|
-| size| (width, height) size of element in characters|
-| auto_size_text| Bool.  True if should size width to fit text|
-| font| Font type and size for text display|
-| background_color| color to use for the background|
-| text_color| color to use for the text|
-| key| Dictionary key to use for return values|
-| pad| padding around element|
-| tooltip| tooltip to show when mouse hovered over element|
-|||
- -->
-
 ###  Methods
 
 <!-- <+Radio.Update+> -->
 
-<!-- ```python
-Update(value=None, disabled=None, visible=None)
-```
-
-|Name|Meaning|
-|-----|-----|
-| value | Bool. if True change to selected |
-| disabled | if True disables the element |
-|||
- -->
-
-
 <!-- %!% -->
 ## Checkbox Element | `CBox == CB == Check`
 Checkbox elements are like Radio Button elements.  They return a bool indicating whether or not they are checked.
+
+<!-- <+Checkbox.doc+> -->
 
 ```python
 layout =  [[sg.Checkbox('My first Checkbox!', default=True), sg.Checkbox('My second Checkbox!')]]
 ```
 ![checkbox](https://user-images.githubusercontent.com/13696193/44959906-6f5d2b00-aec4-11e8-9c8a-962c787f0286.jpg)
 
-
-<!-- <+Checkbox.doc+> -->
 <!-- <+Checkbox.__init__+> -->
 
-<!--    Checkbox(text,
-        default=False,
-        size=(None, None),
-        auto_size_text=None,
-        font=None,
-        background_color = None,
-        text_color = None,
-        change_submits = False
-        disabled = False,
-        key = None,
-        pad = None,
-        tooltip = None,
-        visible=True):
-
-
-| text | Text to display next to checkbox      |
-| default | Bool + None.  Initial state. True = Checked, False = unchecked, None = Not available (grayed out)      |
-| size | (width, height) size of element in characters      |
-| auto_size_text | Bool.  True if should size width to fit text      |
-| disabled | Bool. If True element is disabled    |
-| font | Font type and size for text display      |
-| background_color | color to use for the background      |
-| text_color | color to use for the typed text      |
-| change_submits | causes window read to immediately return if the checkbox value changes      |
-| key | Dictionary key to use for return values      |
-| pad | Padding around element in window    |
-| tooltip | text to show when mouse is hovered over element    |
- -->
-
-
 ### Methods
-```python
-Update(value=None, disabled=None, visible=None)
-Get()
-```
-|Name|Meaning|
-|-----|-----|
-| Update| changes the element|
-| value| Bool if True checks the checkbox|
-| disabled| if True disables the element|
-| Get| returns current state|
-|||
 
+<!-- <+Checkbox.Update+> -->
 
-
+<!-- <+Checkbox.Get+> -->
 
 <!-- %!% -->
 ## Spin Element
@@ -1753,59 +1481,17 @@ layout =  [[sg.Spin([i for i in range(1,11)], initial_value=1), sg.Text('Volume 
 
 <!-- <+Spin.__init__+> -->
 
-<!-- 
-    Spin(values,
-         intiial_value=None,
-         disabled = False,
-         size=(None, None),
-         change_submits = False,
-         auto_size_text=None,
-         font=None,
-         background_color = None,
-         text_color = None,
-         key = None.
-         pad = None,
-         tooltip = None,
-         visible=True):
-
-
-
-Parameter definitions
-
-     values - List of valid values
-     initial_value - String with initial value
-     size - (width, height) size of element in characters
-     auto_size_text - Bool.  True if should size width to fit text
-     font - Font type and size for text display
-     disabled - Bool. If True element is disabled
-     background_color - color to use for the background
-     text_color - color to use for the typed text
-     change_submits - causes window read to immediately return if the spinner value changes
-     key = Dictionary key to use for return values
-     pad - padding around element in the window
-     tooltip - text to show when mouse hovered over element -->
-
-
 ### Qt Differences - `values` is a range!
 
 Note that Qt does not allow arbitrary spinner values.  With PySimpleGUI-tkinter you can have any values in your list.  In Qt they must be integers.  Yea, it kinda sucks.  I'm working on it.
 
 On Qt values is a tuple representing a range.  On plain PySimpleGUI this value is a list of items.  Make sure on the plain version you specify items as a list using [] and not a generator using ().
 
-
 ### Methods
 
 <!-- <+Spin.Update+> -->
 
-<!-- ```python
-Update(value=None, values=None, disabled=None, visible=None)
-```
-value - set the current value
-values - set available choices
-disabled - if True disables the element
- -->
-
-
+<!-- <+Spin.Get+> -->
 
 <!-- %!% -->
 ## Image Element
@@ -1818,44 +1504,11 @@ Images can be placed in your window provide they are in PNG, GIF, PPM/PGM format
 
 <!-- <+Image.__init__+> -->
 
-<!-- 
-```python
-  Image(filename=None,
-        data=None,
-        data_base64=None,
-        background_color=None,
-        size=(None,None),
-        pad=None,
-        key=None,
-        tooltip=None,
-        click_submits=False,
-        enable_events=False,
-        visible=True,
-        right_click_menu=None,
-        size_px=(None,None)
-        visible=True)
-```
-Parameter definitions
-
-    filename - file name if the image is in a file
-    data - if image is in RAM (PIL format?)
-    data_base64 - image in base64 format
-    background_color - Color of background
-    size - Size (Width, Height) of image in pixels
-    pad - Padding around Element in the window
-    key - Key used to find the element
-    tooltip - text to show when mouse if hovered over image
-    click_submits, enable_events - if True returns event when image is clicked
-    visible - if False will create image as hidden
-    size_px - size of image in pixels
--->
-
 ### Methods
 
 <!-- <+Image.Update+> -->
 
 Choose **either** a filename or in-ram data image to use to replace current image
-
 
 ##### `UpdateAnimation` Method for Animated GIFs
 
@@ -1866,9 +1519,6 @@ You can specify an animated GIF as an image and can animate the GIF by calling `
 <!-- <+Image.UpdateAnimation+> -->
 
 You can call the method without setting the `time_between_frames` value and it will show a frame and immediately move on to the next frame.  This enables you to do the inter-frame timing.
-
-
-
 
 <!-- %!% -->
 ## Button Element
@@ -1931,55 +1581,6 @@ layout =  [[sg.OK(), sg.Cancel()]]
 
 <!-- <+Button.__init__+> -->
 
-
-
-<!--    Button(button_text=''
-           button_type=BUTTON_TYPE_CLOSES_WIN
-           target=(None, None)
-           tooltip=None
-           file_types=(("ALL Files", "*.*"),)
-           initial_folder=None
-           disabled = False
-           image_filename=None
-           image_data=None
-           image_size=(None, None)
-           image_subsample=None
-           border_width=None
-           size=(None, None)
-           auto_size_button=None
-           button_color=None
-           default_value = None
-           font=None
-           bind_return_key=False
-           focus=False
-           pad=None
-           key=None,
-           visible=True):
-
-Parameters
-
-    button_text - Text to be displayed on the button
-    button_type - You  should NOT be setting this directly
-    target - key or (row,col) target for the button
-    tooltip - tooltip text for the button
-    file_types - the filetypes that will be used to match files
-    initial_folder - starting path for folders and files
-    disabled = Bool If True button is disabled
-    image_filename - image filename if there is a button image
-    image_data - in-RAM image to be displayed on button
-    image_size - size of button image in pixels
-    image_subsample - amount to reduce the size of the image
-    border_width - width of border around button in pixels
-    size - size in characters
-    auto_size_button - True if button size is determined by button text
-    button_color - (text color, backound color)
-    default_value - initial value for buttons that hold information
-    font - font to use for button text
-    bind_return_key - If True the return key will cause this button to fire
-    focus - if focus should be set to this button
-    pad - (x,y) padding in pixels for packing the button
-    key - key used for finding the element
- -->
 ### Shortcut, Pre-defined Buttons
 These Pre-made buttons are some of the most important elements of all because they are used so much.  They all basically do the same thing, set the button text to match the function name and set the parameters to commonly used values. If you find yourself needing to create a custom button often because it's not on this list, please post a request on GitHub. . They include:
 
@@ -2057,15 +1658,11 @@ See how much easier the key method is?
 
 There are 4 different types of File/Folder open dialog box available.  If you are looking for a file to open, the `FileBrowse` is what you want. If you want to save a file, `SaveAs` is the button. If you want to get a folder name, then `FolderBrowse` is the button to use. To open several files at once, use the `FilesBrowse` button.  It will create a list of files that are separated by ';'
 
-
 ![open](https://user-images.githubusercontent.com/13696193/45243804-2b529780-b2c3-11e8-90dc-6c9061db2a1e.jpg)
-
 
 ![folder](https://user-images.githubusercontent.com/13696193/45243805-2b529780-b2c3-11e8-95ee-fec3c0b11319.jpg)
 
-
 ![saveas](https://user-images.githubusercontent.com/13696193/45243807-2beb2e00-b2c3-11e8-8549-ba71cdc05951.jpg)
-
 
 
 **Calendar Buttons**
@@ -2097,15 +1694,17 @@ Your button images need to be in PNG or GIF format.  When you make a button with
 
 This example comes from the `Demo Media Player.py` example program.  Because it's a non-blocking button, it's defined as `RButton`.  You also put images on blocking buttons by using `Button`.
 
-
-    sg.RButton('Restart Song', button_color=sg.TRANSPARENT_BUTTON,
-                       image_filename=image_restart, image_size=(50, 50), image_subsample=2, border_width=0)
-
+```python
+sg.RButton('Restart Song', button_color=sg.TRANSPARENT_BUTTON,
+               image_filename=image_restart, image_size=(50, 50), image_subsample=2, border_width=0)
+```
 Three parameters are used for button images.
 
-    image_filename - Filename. Can be a relative path
-    image_size - Size of image file in pixels
-    image_subsample - Amount to divide the size by.  2 means your image will be 1/2 the size.  3 means 1/3
+```
+image_filename - Filename. Can be a relative path
+image_size - Size of image file in pixels
+image_subsample - Amount to divide the size by.  2 means your image will be 1/2 the size.  3 means 1/3
+```
 
 Here's an example window made with button images.
 
@@ -2121,9 +1720,9 @@ sg.RButton('Pause', button_color=sg.TRANSPARENT_BUTTON,
 ```
 This is one you'll have to experiment with at this point.  Not up for an exhaustive explanation.
 
-  **Realtime Buttons**
+**Realtime Buttons**
 
-  Normally buttons are considered "clicked" when the mouse button is let UP after a downward click on the button.  What about times when you need to read the raw up/down button values.  A classic example for this is a robotic remote control.  Building a remote control using a GUI is easy enough.  One button for each of the directions is a start.  Perhaps something like this:
+Normally buttons are considered "clicked" when the mouse button is let UP after a downward click on the button.  What about times when you need to read the raw up/down button values.  A classic example for this is a robotic remote control.  Building a remote control using a GUI is easy enough.  One button for each of the directions is a start.  Perhaps something like this:
 
 ![robot remote](https://user-images.githubusercontent.com/13696193/44959958-ff9b7000-aec4-11e8-99ea-7450926409be.jpg)
 
@@ -2186,25 +1785,7 @@ If there are more than 1 button on a window, the FIRST button that is of type Cl
 
 <!-- <+Button.Update+> -->
 
-<!-- ```python
-Update(text=None, button_color=(None, None), disabled=None, image_data=None, image_filename=None, visible=None)
-
-GetText()
-```
-Update - Change the button element
-
-        text - sets button text
-        button color - (text, background)
-        disabled - if True disables the button
-        image_data - sets button image to in-ram image
-        image_filename - sets button image using a file
-
- -->
-
-GetText - Returns the current text shown on a button
-
 <!-- <+Button.GetText+> -->
-
 
 
 <!-- %!% -->
@@ -2212,42 +1793,17 @@ GetText - Returns the current text shown on a button
 
 The ButtonMenu element produces a unique kind of effect.  It's a button, that when clicked, shows you a menu.   It's like clicking one of the top-level menu items on a MenuBar.  As a result, the menu definition take the format of a single  menu entry from  a normal menu definition.  A normal menu definition is  a list of lists.  This definition is one of those lists.
 
-Here is a sample definition:
+<!-- <+ButtonMenu.doc+> -->
+
 ```python
  ['Menu', ['&Pause Graph', 'Menu item::optional_key']]
 ```
+
 The very first string normally specifies what is shown on the menu bar.  In this case, the value is **not used**.  You set the text for the button using a different parameter, the `button_text` parm.
-
-<!-- <+ButtonMenu.doc+> -->
-
 
 <!-- <+ButtonMenu.__init__+> -->
 
-<!-- 
-```python
-ButtonMenu( button_text,
-            menu_def,
-            tooltip=None,
-            disabled=False,
-            image_filename=None,
-            image_data=None,
-            image_size=(None, None),
-            image_subsample=None,
-            border_width=None,
-            size=(None, None),
-            auto_size_button=None,
-            button_color=None,
-            font=None,
-            pad=None,
-            key=None,
-            visible=True,
-            size_px=(None,None)):
-```
- -->
-
 One use of this element is to make a "fake menu bar" that has a colored background.  Normal menu bars cannot have their background color changed.  Not so with ButtonMenus.
-
-This is the effect:
 
 ![buttonmenu](https://user-images.githubusercontent.com/13696193/50387000-bc0d8180-06c0-11e9-8d17-3b22ed665e78.gif)
 
@@ -2270,6 +1826,7 @@ VerticalSeparator(pad=None)
 ![snag-0129](https://user-images.githubusercontent.com/13696193/47376041-a92a0100-d6bf-11e8-8f5b-0c0df56cf0f3.jpg)
 
 <!-- <+VerticalSeparator.__init__+> -->
+
 
 
 
@@ -2318,10 +1875,13 @@ window.Close()
 
 ![progress custom](https://user-images.githubusercontent.com/13696193/45243969-c3508100-b2c3-11e8-82bc-927d0307e093.jpg)
 
-
 <!-- <+ProgressBar.__init__+> -->
 
+### Methods
 
+<!-- <+Output.Update+> -->
+
+<!-- <+Output.UpdateBar+> -->
 
 <!-- %!% -->
 ## Output Elements
@@ -2330,8 +1890,6 @@ The Output Element is a re-direction of Stdout.  Anything "printed" will be disp
 Note that you will NOT see what you `print` until you call either window.Read or window.Refresh.  If you want to immediately see what was printed, call window.Refresh() immediately after your print statement.
 
 <!-- <+Output.doc+> -->
-
-
 
 ```python
 Output(size=(None, None))
@@ -2345,23 +1903,10 @@ Output(size=(None, None))
 
 <!-- <+Output.Update+> -->
 
-<!-- size - Size of Output Element (width, height) in characters
-You should be quite familiar with these parameters by now.  If not, read able another element or read about common parameters.
- -->
-
+<!-- <+Output.UpdateBar+> -->
 
 ----
 
-UpdateBar - ?
-
-<!-- ```python
-UpdateBar(current_count, max=None)
-```
-current_count - sets the current value
-max - changes the max value
- -->
-
-----
 
 Here's a complete solution for a chat-window using an Async window with an Output Element
 
@@ -2393,40 +1938,6 @@ ChatBot()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- %!% -->
 ## Column Element
 Starting in version 2.9 you'll be able to do more complex layouts by using the Column Element.  Think of a Column as a window within a window.  And, yes, you can have a Column within a Column if you want.
@@ -2442,7 +1953,6 @@ Columns are needed when you have an element that has a height > 1 line on the le
 The Column Element has 1 required parameter and 1 optional (the layout and the background color).  Setting the background color has the same effect as setting the window's background color, except it only affects the column rectangle.
 
 <!-- <+Column.__init__+> -->
-
 
 ---
 
@@ -2478,7 +1988,6 @@ event, values = sg.Window('Compact 1-line window with column').Layout(layout).Re
 sg.Popup(event, values, line_width=200)
 ```
 
-
 ----
 
 ## Frame Element (Labelled Frames, Frames with a title)
@@ -2486,7 +1995,6 @@ sg.Popup(event, values, line_width=200)
 Frames work exactly the same way as Columns.  You create layout that is then used to initialize the Frame.
 
 <!-- <+Frame.doc+> -->
-
 
 ![frame element](https://user-images.githubusercontent.com/13696193/45889173-c2245700-bd8d-11e8-8f73-1e5f1be3ddb1.jpg)
 
@@ -2513,17 +2021,6 @@ layout = [
 
 window = sg.Window('Frame with buttons', font=("Helvetica", 12)).Layout(layout)
 ```
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2833,46 +2330,13 @@ Check out what's possible with the NEW Tabs!
 
 ![tabs tabs tabs](https://user-images.githubusercontent.com/13696193/45993438-fd0fde80-c05c-11e8-9ed0-742f14d3070f.jpg)
 
-
 Check out Tabs 7 and 8.  We've got a Window with a Column containing Tabs 5 and 6.  On Tab 6 are... Tabs 7 and 8.
 
 As of Release 3.8.0, not all of *options* shown in the API definitions of the Tab and TabGroup Elements are working. They are there as placeholders.
 
-
 <!-- <+TabGroup.__init__+> -->
 
-
-<!-- The definition of a TabGroup is -->
-<!--      TabGroup(layout,
-               title_color=None
-               background_color=None
-               font=None
-               pad=None
-               border_width=None
-               change_submits = False
-               key=None
-               tooltip=None)
- -->
-
-<!-- The definition of a Tab Element is -->
-
-
-
-
 <!-- <+Tab.__init__+> -->
-
-<!-- 
-    Tab(title,
-        layout,
-        title_color=None,
-        background_color=None,
-        font=None,
-        pad=None
-        disabled=False
-        border_width=None
-        key=None
-        tooltip=None)
- -->
 
 ### Reading Tab Groups
 
@@ -2882,23 +2346,6 @@ Tab Groups now return a value when a Read returns.  They return which tab is cur
 ### Methods
 
 <!-- <+Tree.Update+> -->
-
-<!-- ```python
-Update(disabled = None, visible=None)
-```
-WARNING - This Update method may not be working correctly -->
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <!-- %!% -->
@@ -2911,12 +2358,6 @@ New in version 3.20 is the Pane Element, a super-cool tkinter feature.  You won'
 ![pane3](https://user-images.githubusercontent.com/13696193/50035040-fcd50e80-ffcd-11e8-939c-df8ab8d64712.gif)
 
 <!-- <+Pane.__init__+> -->
-
-<!-- 
-```python
-
-Pane(pane_list, background_color=None, size=(None, None), pad=None, orientation='vertical', show_handle=True, relief=RELIEF_RAISED, handle_size=None, border_width=None, key=None, visible=True):
-``` -->
 
 ***Each "Pane" of a Pane Element must be a Column Element***.  The parameter `pane_list` is a list of Column Elements.
 
@@ -2936,12 +2377,9 @@ Your windows can go from this:
 
 ![snap0155](https://user-images.githubusercontent.com/13696193/43273879-a9fdc10a-90cb-11e8-8c20-4f6a244ebe2f.jpg)
 
-
 to this... with one function call...
 
-
 ![snap0156](https://user-images.githubusercontent.com/13696193/43273880-aa1955e6-90cb-11e8-94b6-673ecdb2698c.jpg)
-
 
 
 While you can do it on an element by element or window level basis, the easiest way, by far, is a call to `SetOptions`.
@@ -3154,17 +2592,8 @@ Update(menu=None, tooltip=None,filename=None, data=None, data_base64=None,)
  -->
 
 
-
-
-
-
-
-
-
-
-
-
 # Global Settings
+
 **Global Settings**
 Let's have some fun customizing!  Make PySimpleGUI look the way you want it to look. You can set the global settings using the function `PySimpleGUI.SetOptions`.  Each option has an optional parameter that's used to set it.
 
@@ -3204,14 +2633,9 @@ Explanation of parameters
 
 |Name|Meaning|
 |----- | ---- |
-| icon     | filename of icon used for taskbar and title bar |
-| button_color     | button color (foreground, background) |
-| element_size     | element size (width, height) in characters |
-| margins      | tkinter margins around outsize |
 | element_padding      | tkinter padding around each element |
 | auto_size_text   | autosize the elements to fit their text |
 | auto_size_buttons    | autosize the buttons to fit their text |
-| font     | font used for elements |
 | border_width     | amount of bezel or border around sunken or raised elements |
 | slider_border_width      | changes the way sliders look |
 | slider_relief    | changes the way sliders look |
@@ -3234,7 +2658,6 @@ Explanation of parameters
 | text_justification   | justification to use on Text Elements. Values are strings - 'left', 'right', 'center' |
 | debug_win_size   | size of the Print output window |
 | window_location      | location on the screen (x,y) of window's top left cornder |
-| tooltip_time     | time in milliseconds to wait before showing a tooltip. Default is 400ms |
 | | |
 
 
