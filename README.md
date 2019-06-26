@@ -9,6 +9,7 @@ Simple and easy.
 
 |Folder or File|Meaning|
 |-|-|
+|`doc_string__to__doc_string/` | making `class` doc string from one version of PSG to another|
 |`db/` | building parts|
 |`make_real_readme.py` | the builder|
 |`PySimpleGUIlib.py` | some version of PySimpleGUI|
