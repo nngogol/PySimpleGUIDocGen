@@ -1333,6 +1333,7 @@ layout = [[sg.Multiline('This is what a Multi-line Text Element looks like', siz
 ## Text Input Element  | `InputText == Input == In`
 
 <!-- <+InputText.doc+> -->
+
 ```python
 layout = [[sg.InputText('Default text')]]
 ```
@@ -1343,22 +1344,16 @@ layout = [[sg.InputText('Default text')]]
 
 ### Methods
 
-#### Update
-
 <!-- <+InputText.Update+> -->
-
-#### Get
 
 <!-- <+InputText.Get+> -->
 
-#### SetFocus
-
 <!-- <+InputText.SetFocus+> -->
-
 
 ---
 
 #### do_not_clear Parameter
+
 
 **Important** - This trips a lot of people up.  If you do not set the `do_not_clear` parameter then the input field will clear when an event takes place.   The behavior is a "forms" style window development.  The assumption is that you want the field to clear.  If you are writing a chat program then you're thankful.  The rest of you, I'm sorry.
 
@@ -1886,11 +1881,6 @@ window.Close()
 
 <!-- <+ProgressBar.__init__+> -->
 
-### Methods
-
-<!-- <+ProgressBar.Update+> -->
-
-<!-- <+ProgressBar.UpdateBar+> -->
 
 <!-- %!% -->
 ## Output Elements
@@ -1912,6 +1902,7 @@ Output(size=(None, None))
 
 <!-- <+Output.Update+> -->
 
+<!-- <+Output.UpdateBar+> -->
 
 ----
 
