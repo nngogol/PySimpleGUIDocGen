@@ -697,7 +697,7 @@ class InputText(Element):
             self.TKEntry.pack()
 
     def Get(self):
-        """ """
+        """ :return: (str) value of InputText """
         try:
             text = self.TKStringVar.get()
         except:

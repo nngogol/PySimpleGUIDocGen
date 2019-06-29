@@ -3,113 +3,6 @@ from datetime import datetime
 import PySimpleGUIlib
 import click, logging, json, re, os
 
-def get_params_part(code:str) -> dict:
-	"""
-	Find ":param " part in given "doc string"
-
-	from __doc__ to {
-		'parameter' :  'desctiption',
-		'parameter2' : 'desctiption2',
-		'parameter3' : 'desctiption3',
-	}
-	"""
-	only_params = code[code.index(':param'):] # get_only_params_string(code)
-
-	# ▓▓▓▓ making dict
-	param_lines = only_params.split(':param ')
-	param_lines = [i.strip() for i in param_lines if i.strip()] # filter empty lines
-
-	args_kwargs_pairs = {}
-	for index, i in enumerate(param_lines):
-		
-		cols = i.split(':')
-		param_name, els = cols[0], '\n'.join([j.strip() for j in ':'.join(cols[1:]).split('\n')])
-		# param_name, els = cols[0],  ' '.join([j.strip() for j in ':'.join(cols).split('\n')]) # can be this:
-		
-		param_name, els = param_name.strip(), els.strip()
-		args_kwargs_pairs[param_name] = els
-
-	return args_kwargs_pairs
-
-def get_sig_table_parts(function_obj, function_name, doc_string):
-	"""
-	Convert "function + __doc__" tp "method call + params table" in MARKDOWN
-	"""
-
-	doc_string = doc_string.strip()
-
-	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-	# ▒   ▒ 		   Making INIT_CALL   		 ▒   ▒ #
-	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-	# where the magic begins
-	sig, rows = signature(function_obj).parameters, []
-	for index, key in enumerate(sig):
-		val = sig[key].default
-		if 'self' == str(key): 		continue
-		if val == _empty: 			rows.append(key)
-		elif val == None: 			rows.append(f'{key}=None')
-		elif type(val) is int: 		rows.append(f'{key}={val}')
-		elif type(val) is str: 		rows.append(f'{key}="{val}"')
-		elif type(val) is tuple: 	rows.append(f'{key}={val}')
-		elif type(val) is bool: 	rows.append(f'{key}={val}')
-		else:
-			raise Exception(f'IDK this type -> {key, val}')
-	# where the magic stops
-	sig_content = ',\n\t'.join(rows)
-	sign = f"\n```python\n{function_name}({sig_content})\n```"
-	# where the magic stops, for real.
-
-
-	# --------------
-	# SPECIAL CASES
-	# --------------
-	params_names = list(dict(sig).keys())
-	if 'self' in params_names and params_names[0] == params_names[-1] and not doc_string:
-		"""
-		def Get(self):
-			''' '''
-		
-		->
-		Get() - method
-		"""
-		return f'\n\n{function_name}() - method\n\n', ''
-	if 'self' in params_names and params_names[0] == params_names[-1] and doc_string and ':param' not in doc_string:
-		"""
-		def Get(self):
-			''' bla bla'''
-		
-		->
-		Get() - bla bla 
-		"""
-		return f'\n\n{function_name}() - {doc_string}\n\n' , ''
-
-	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-	# ▒   ▒- 		Making params_TABLE			 ▒   ▒-#
-	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-	md_table =  '\n'.join([ 	f'|{name}|{desc}|'
-								for name, desc in
-								get_params_part(doc_string).items()])
-	params_TABLE = f'''\nParameters explained:\n
-						|Name|Meaning|
-						|---|---|
-						{md_table}
-						\n'''.replace('\t', '')
-	
-	if not md_table.strip():
-		params_TABLE = ''
-
-
-	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-	# ▒   ▒- 		return value parsing 		 ▒   ▒-#
-	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-	return_guy      = [i.strip() for i in doc_string.split('\n') if ':return:' in i]
-	if not return_guy:
-		return_guy = ''
-	else:
-		return_guy = return_guy[0].strip()[8:]
-		return_guy = f'\n\nreturn value: {return_guy}\n'
-
-	return sign, params_TABLE + return_guy
 
 ####################################################################################################################
 #     ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______ ______     #
@@ -169,6 +62,167 @@ CLASS
 #                                                                                                                  #
 ####################################################################################################################
 
+
+def get_params_part(code:str) -> dict:
+	"""
+	Find ":param " part in given "doc string".
+
+	from __doc__ to {
+		'parameter' :  'desctiption',
+		'parameter2' : 'desctiption2',
+		'parameter3' : 'desctiption3',
+	}
+	"""
+
+	# if doc_string is empty
+	if '' == code.strip(): return {}
+
+	only_params = code[code.index(':param'):] # get_only_params_string(code)
+
+	# ▓▓▓▓ making dict
+	param_lines = only_params.split(':param ')
+	param_lines = [i.strip() for i in param_lines if i.strip()] # filter empty lines
+
+	args_kwargs_pairs = {}
+	for index, i in enumerate(param_lines):
+		
+		cols = i.split(':')
+		param_name, els = cols[0], '\n'.join([j.strip() for j in ':'.join(cols[1:]).split('\n')])
+		# param_name, els = cols[0],  ' '.join([j.strip() for j in ':'.join(cols).split('\n')]) # can be this:
+		
+		param_name, els = param_name.strip(), els.strip()
+		args_kwargs_pairs[param_name] = els
+
+	return args_kwargs_pairs
+
+def get_return_part(code:str) -> str:
+	""" Find ":return:" part in given "doc string"."""
+	if ':return:' not in code:
+		return ''
+	return code[code.index(':return:')+len(':return:'):].strip()
+
+def special_cases(function_name, sig, doc_string):
+
+	doca = doc_string.strip()
+	params_names = list(dict(sig).keys())
+	if 'self' in params_names and params_names[0] == params_names[-1] and not doca:
+		"""
+		def Get(self):
+			''' '''
+		
+		->
+		```python
+		Get()
+		```
+		"""
+		return True, f'\n\n```python\n{function_name}()\n```\n\n'
+
+	if 'self' in params_names and params_names[0] == params_names[-1] and doca and ':param' not in doca and ':return' not in doca:
+		"""
+		def Get(self):
+			''' 
+			blah blah blah
+			'''
+		
+		->
+		
+		```python
+		Get() # blah blah blah
+		```
+		
+		"""
+		return True, f'\n\n```python\n{function_name}() # {doca}\n```\n\n' 
+
+	if 'self' in params_names and params_names[0] == params_names[-1] and doca and ':param' not in doca and ':return' in doca:
+		"""
+		def Get(self):
+			''' 
+			blah blah blah
+			:return: blah-blah
+			'''
+		
+		->
+		
+		```python
+		Get() -> blah-blah # blah blah blah
+		```
+		
+		"""
+		return_part = get_return_part(doca)
+		return True, f'\n\n```python\n{function_name}() -> {return_part} # {doca}\n```\n\n' 
+
+	return False, ''
+
+
+def get_sig_table_parts(function_obj, function_name, doc_string):
+	"""
+	Convert "function + __doc__" tp "method call + params table" in MARKDOWN
+	"""
+
+	doc_string = doc_string.strip()
+
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▒   ▒ 		   Making INIT_CALL   		 ▒   ▒ #
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+	sig, rows = signature(function_obj).parameters, []
+	for index, key in enumerate(sig):
+		val = sig[key].default
+		if 'self' == str(key): 		continue
+		if val == _empty: 			rows.append(key)
+		elif val == None: 			rows.append(f'{key}=None')
+		elif type(val) is int: 		rows.append(f'{key}={val}')
+		elif type(val) is str: 		rows.append(f'{key}="{val}"')
+		elif type(val) is tuple: 	rows.append(f'{key}={val}')
+		elif type(val) is bool: 	rows.append(f'{key}={val}')
+		else:
+			raise Exception(f'IDK this type -> {key, val}')
+	
+	sig_content = ',\n\t'.join(rows)
+	sign = "\n```python\n{0}({1})\n```".format(function_name, sig_content)
+
+
+	# --------------
+	# SPECIAL CASES
+	# --------------
+	result = special_cases(function_name, sig, doc_string)
+	if result: return result[1], ''
+
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+	# ▒   ▒- 		Making params_TABLE			 ▒   ▒-#
+	# ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+	# 1
+	return_guy      = get_return_part(doc_string)
+	if not return_guy:
+		return_guy = ''
+		md_return = ''
+	else:
+		return_guy = return_guy[0].strip()[8:]
+		md_return = f'|||\n| return | {return_guy} |'
+		# return_guy = f'\n\nreturn value: {return_guy}\n'
+		# return_guy_val_str = return_guy
+	
+	# 2
+	md_table =  '\n'.join([ 	f'|{name}|{desc}|'
+								for name, desc in
+								get_params_part(doc_string).items()])
+
+	# 3
+	params_TABLE = f'''\nParameters explained:\n
+						|Name|Meaning|
+						|---|---|
+						{md_table}
+						{md_return}
+						\n'''.replace('\t', '')
+	
+	if not md_table.strip():
+		params_TABLE = ''
+		if return_guy:
+			sign += sign[:-3] + f'\nRETURN: {return_guy}```'
+
+	return sign, params_TABLE
+
 def pad_n(text): return f'\n{text}\n'
 
 def render(injection):
@@ -190,7 +244,7 @@ def readfile(fname):
 	with open(fname, 'r', encoding='utf-8') as ff:
 		return ff.read()
 
-def main(do_full_readme=False, files_to_include:list=[], logger=None, output_name=None, delete_html_comments=True):
+def main(do_full_readme=False, files_to_include:list=[], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True):
 	"""
 	Goal is:
 	1) load 1_ 2_ 3_ 4_
@@ -378,10 +432,19 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 					stackedit_data = content[content.index('<!--stackedit_data:'):]
 					filtered_readme_file += stackedit_data
 				
-				content = filtered_readme_file.replace('\n\n\n', '\n\n')
+				content = filtered_readme_file
 
+			# ░▒▓ filter multiple multilines EVERUWHERE ▓▒░
+			if delete_x3_newlines:
+
+				# removing spaces
+				content = re.sub(r'^[ ]+$', '', content, flags=re.MULTILINE)
+				# removing \n
+				content = re.sub(r'\n{3,}', '\n\n', content, flags=re.MULTILINE)
+
+			# FINISH
+			content = content.strip()
 			ff.write(content)
-
 		return content
 
 
@@ -434,4 +497,12 @@ def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
 				print(str(e))
 
 if __name__ == '__main__':
-	cli()
+	my_mode = 'debug-mode'
+	# my_mode = 'cli-mode'
+
+	if my_mode == 'cli-mode':
+		cli()
+	if my_mode == 'debug-mode':
+		main(files_to_include=[0,1,2,3],
+			output_name='johnson_n_johnson.txt',
+			delete_html_comments=True)

@@ -1347,6 +1347,8 @@ layout = [[sg.InputText('Default text')]]
 
 <!-- <+InputText.Get+> -->
 
+<!-- <+InputText.SetFocus+> -->
+
 ---
 
 #### do_not_clear Parameter
@@ -1877,11 +1879,6 @@ window.Close()
 
 <!-- <+ProgressBar.__init__+> -->
 
-### Methods
-
-<!-- <+Output.Update+> -->
-
-<!-- <+Output.UpdateBar+> -->
 
 <!-- %!% -->
 ## Output Elements
