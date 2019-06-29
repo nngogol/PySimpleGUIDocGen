@@ -153,6 +153,17 @@ def special_cases(function_name, sig, doc_string):
 
 	return False, ''
 
+def get_doc_discription(doc_string):
+
+	desc = doc_string.strip()
+	if ':param' in desc:
+		desc = desc[:desc.index(':param')]
+	if ':return' in desc:
+		desc = desc[:desc.index(':return')]
+
+	desc = desc.strip()
+
+	return f'\n{desc}' if desc else ''
 
 def get_sig_table_parts(function_obj, function_name, doc_string):
 	"""
@@ -179,8 +190,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
 			raise Exception(f'IDK this type -> {key, val}')
 	
 	sig_content = ',\n\t'.join(rows)
-	sign = "\n```python\n{0}({1})\n```".format(function_name, sig_content)
-
+	sign = "\n```python{0}\n{1}({2})\n```".format(get_doc_discription(doc_string), function_name, sig_content)
 
 	# --------------
 	# SPECIAL CASES
