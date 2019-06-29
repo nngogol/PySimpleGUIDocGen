@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-version = __version__ = "4.1.0.1 Unreleased"
+version = __version__ = "4.1.0.3 Unreleased"
 
 import sys
 
@@ -12,20 +12,13 @@ if sys.version_info[0] >= 3:
     import tkinter.font
 else:
     import Tkinter as tk
-    import tkFileDialog
     import ttk
-    import tkColorChooser
-    import tkFont
-    import ScrolledText
 
-import types
 import datetime
 import time
 import pickle
 import calendar
-from random import randint
 import textwrap
-import operator
 import inspect
 
 #  888888ba           .d88888b  oo                     dP           .88888.  dP     dP dP
@@ -42,16 +35,17 @@ g_time_start = 0
 g_time_end = 0
 g_time_delta = 0
 
-
+# These timer routines are to help you quickly time portions of code.  Please this TimerStart call at the point
+# you want to start timing and the TimerStop at the end point. As you can see, TimerStop prints the time delta in ms.
 def TimerStart():
-    """ """
+    """ Time your code easily.... start the timer. """
     global g_time_start
 
     g_time_start = time.time()
 
 
 def TimerStop():
-    """ """
+    """ Time your code easily.... stop the timer and print the number of ms since the timer start """
     global g_time_delta, g_time_end
 
     g_time_end = time.time()
@@ -225,7 +219,15 @@ MENU_KEY_SEPARATOR = '::'
 # ====================================================================== #
 # One-liner functions that are handy as f_ck                             #
 # ====================================================================== #
-def RGB(red, green, blue): return '#%02x%02x%02x' % (red, green, blue)
+def RGB(red, green, blue):
+    """
+    Given integer values of Red, Green, Blue, return a color string "#RRGGBB"
+    :param (int) red: int: Red portion from 0 to 255
+    :param (int) green: int: Green portion from 0 to 255
+    :param (int) blue: int: Blue portion from 0 to 255
+    :return: (str) A single RGB String in the format "#RRGGBB" where each pair is a hex number.
+    """
+    return '#%02x%02x%02x' % (red, green, blue)
 
 
 # ====================================================================== #
@@ -294,15 +296,17 @@ POPUP_BUTTONS_NO_BUTTONS = 5
 # ------------------------------------------------------------------------- #
 
 class ToolTip:
-    """Create a tooltip for a given widget
+    """
+    Create a tooltip for a given widget
     (inspired by https://stackoverflow.com/a/36221216)
+    This is an INTERNALLY USED only class.  Users should not refer to this class at all.
     """
     def __init__(self, widget, text, timeout=DEFAULT_TOOLTIP_TIME):
         """
 
-        :param widget: ?????????????????????????
-        :param text: text in the tooltip
-        :param timeout:  (Default value = DEFAULT_TOOLTIP_TIME)
+        :param widget: (widget type varies) The tkinter widget
+        :param text: text for the tooltip. It can inslude \n
+        :param timeout: (int) Time in milliseconds that mouse must remain still before tip is shown
 
         """
         self.widget = widget
@@ -318,8 +322,8 @@ class ToolTip:
 
     def enter(self, event=None):
         """
-
-        :param event:  
+        Called by tkinter when mouse enters a widget
+        :param event:  from tkinter.  Has x,y coordinates of mouse
 
         """
         self.x = event.x
@@ -328,26 +332,32 @@ class ToolTip:
 
     def leave(self, event=None):
         """
-
-        :param event:  
+        Called by tktiner when mouse exits a widget
+        :param event:  from tkinter.  Event info that's not used by function.
 
         """
         self.unschedule()
         self.hidetip()
 
     def schedule(self):
-        """ """
+        """
+        Schedule a timer to time how long mouse is hovering
+        """
         self.unschedule()
         self.id = self.widget.after(self.timeout, self.showtip)
 
     def unschedule(self):
-        """ """
+        """
+        Cancel timer used to time mouse hover
+        """
         if self.id:
             self.widget.after_cancel(self.id)
         self.id = None
 
     def showtip(self):
-        """ """
+        """
+        Creates a topoltip window with the tooltip text inside of it
+        """
         if self.tipwindow:
             return
         x = self.widget.winfo_rootx() + self.x + DEFAULT_TOOLTIP_OFFSET[0]
@@ -362,7 +372,9 @@ class ToolTip:
         label.pack()
 
     def hidetip(self):
-        """ """
+        """
+        Destroy the tooltip window
+        """
         if self.tipwindow:
             self.tipwindow.destroy()
         self.tipwindow = None
@@ -379,24 +391,23 @@ class ToolTip:
 #                       Element CLASS                                       #
 # ------------------------------------------------------------------------- #
 class Element():
-    """The base class for all Elements.
+    """
+    The base class for all Elements.
     Holds the basic description of an Element like size and colors
-
-
     """
     def __init__(self, type, size=(None, None), auto_size_text=None, font=None, background_color=None, text_color=None, key=None, pad=None, tooltip=None, visible=True):
         """
-
-        :param type: ??????????????????????????
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
-        :param auto_size_text: True if size should fit the text length 
-        :param font: ▲ specifies the font family, size, etc 
-        :param background_color: color of background 
-        :param text_color: element's text color 
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
-        :param tooltip: text, that will appear the you hover on 
-        :param visible: set visibility state of the element (Default = True)
+        Element base class. Only used internally.  User will not create an Element object by itself
+        :param type: (int - could be enum) The type of element. These constants all start with "ELEM_TYPE_"
+        :param size: (int,int)  (width ,height ) w=characters-wide, h=rows-high
+        :param auto_size_text: (bool) True if the Widget should be shrunk to exactly fit the number of chars to show
+        :param font: (str or tuple)  specifies the font family, size, bold, ....  See docs on format of this field
+        :param background_color: (str) color of background. Can be in #RRGGBB format or a color name "black"
+        :param text_color: (str) element's text color. Can be in #RRGGBB format or a color name "black"
+        :param key: (any type)  Identifies an Element. Should be UNIQUE to this window.
+        :param pad: (int, int) or ((int,int),(int,int))  Amount of padding to put around element in pixels (left/right, top/bottom)
+        :param tooltip: (str) text, that will appear when mouse hovers over the element
+        :param visible: (bool) set visibility state of the element (Default = True)
 
         """
         self.Size = size
@@ -426,8 +437,9 @@ class Element():
 
     def _RightClickMenuCallback(self, event):
         """
+        Callback function that's called when a right click happens. Shows right click menu as result
 
-        :param event: 
+        :param event: information provided by tkinter about the event including x,y location of click
 
         """
         self.TKRightClickMenu.tk_popup(event.x_root, event.y_root, 0)
@@ -435,8 +447,9 @@ class Element():
 
     def _MenuItemChosenCallback(self, item_chosen):  # TEXT Menu item callback
         """
+        Callback function called when user chooses a menu item from menubar, Button Menu or right click menu
 
-        :param item_chosen: 
+        :param item_chosen: str. String holding the value chosen.
 
         """
         # print('IN MENU ITEM CALLBACK', item_chosen)
@@ -448,9 +461,11 @@ class Element():
 
     def _FindReturnKeyBoundButton(self, form):
         """
+        Searches for which Button has the flag Button.BindReturnKey set.  It is called recursively when a
+        "Container Element" is encountered. Func has to walk entire window including these "sub-forms"
 
-        :param form: 
-
+        :param form: the Window object to search
+        :return Button Object if a button is found, else None if no button found
         """
         for row in form.Rows:
             for element in row:
@@ -481,6 +496,8 @@ class Element():
 
     def _TextClickedHandler(self, event):
         """
+        Callback that's called when a text element is clicked on with events enabled on the Text Element.
+        Result is that control is returned back to user (quits mainloop).
 
         :param event: 
 
@@ -495,7 +512,7 @@ class Element():
 
     def _ReturnKeyHandler(self, event):
         """
-
+        Internal callback for the ENTER / RETURN key. Results in calling the ButtonCallBack for element that has the return key bound to it, just as if button was clicked.
         :param event: 
 
         """
@@ -506,8 +523,9 @@ class Element():
 
     def _ListboxSelectHandler(self, event):
         """
+        Internal callback function for when a listbox item is selected
 
-        :param event: 
+        :param event: Information from tkinter about the callback
 
         """
         # first, get the results table built
@@ -522,8 +540,8 @@ class Element():
 
     def _ComboboxSelectHandler(self, event):
         """
-
-        :param event: 
+        Internal callback function for when an entry is selected in a Combobox.
+        :param event: Event data from tkinter (not used)
 
         """
         # first, get the results table built
@@ -537,7 +555,9 @@ class Element():
             self.ParentForm.TKroot.quit()  # kick the users out of the mainloop
 
     def _RadioHandler(self):
-        """ """
+        """
+        Internal callback for when a radio button is selected and enable events was set for radio
+        """
         if self.Key is not None:
             self.ParentForm.LastButtonClicked = self.Key
         else:
@@ -547,7 +567,9 @@ class Element():
             self.ParentForm.TKroot.quit()
 
     def _CheckboxHandler(self):
-        """ """
+        """
+        Internal callback for when a checkbnox is selected and enable events was set for checkbox
+        """
         if self.Key is not None:
             self.ParentForm.LastButtonClicked = self.Key
         else:
@@ -558,9 +580,9 @@ class Element():
 
     def _TabGroupSelectHandler(self, event):
         """
+        Internal callback for when a Tab is selected and enable events was set for TabGroup
 
-        :param event: 
-
+        :param event: Event data passed in by tkinter (not used)
         """
         if self.Key is not None:
             self.ParentForm.LastButtonClicked = self.Key
@@ -572,9 +594,9 @@ class Element():
 
     def _KeyboardHandler(self, event):
         """
+        Internal callback for when a key is pressed andd return keyboard events was set for window
 
-        :param event: 
-
+        :param event: Event data passed in by tkinter (not used)
         """
         if self.Key is not None:
             self.ParentForm.LastButtonClicked = self.Key
@@ -586,9 +608,9 @@ class Element():
 
     def _ClickHandler(self, event):
         """
+        Internal callback for when a mouse was clicked... I think.
 
-        :param event: 
-
+        :param event: Event data passed in by tkinter (not used)
         """
         if self.Key is not None:
             self.ParentForm.LastButtonClicked = self.Key
@@ -600,9 +622,9 @@ class Element():
 
     def SetTooltip(self, tooltip_text):
         """
+        Called by application to change the tooltip text for the Widget.  Normally invoked using the Element Object such as: window.Element('key').SetToolTip('New tip').
 
-        :param tooltip_text: 
-
+        :param tooltip_text: (str) the text to show in tooltip.
         """
         self.TooltipObject = ToolTip(self.Widget, text=tooltip_text, timeout=DEFAULT_TOOLTIP_TIME)
 
@@ -630,30 +652,32 @@ class Element():
 #                           Input Class                                  #
 # ---------------------------------------------------------------------- #
 class InputText(Element):
-    """Shows a single line of input."""
+    """
+    Display a single text input field.  Based on the tkinter Widget `Entry`
+    """
     def __init__(self, default_text='', size=(None, None), disabled=False, password_char='',
                  justification=None, background_color=None,   text_color=None, font=None, tooltip=None,
                  change_submits=False, enable_events=False, do_not_clear=True, key=None, focus=False, pad=None,
                  right_click_menu=None, visible=True):
         """
 
-        :param default_text: Text initially shown in the input box (Default value = '')
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
-        :param disabled: set disable state for element (Default = False)
-        :param password_char: Passwork character if this is a password field (Default value = '')
-        :param justification: justification for data display 
-        :param background_color: color of background 
-        :param text_color: color of the text 
-        :param font: ▲ specifies the font family, size, etc 
-        :param tooltip: text, that will appear the you hover on 
-        :param change_submits: If True, pressing Enter key submits window- DEPRICATED DO NOT USE! (Default = False)
-        :param enable_events: Turns on the element specific events. Use this instead of change_submits (Default = False)
-        :param do_not_clear: see docx (Default = True)
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param focus: if focus should be set to this 
-        :param pad: ▲ Amount of padding to put around element 
-        :param right_click_menu: see "Right Click Menus" 
-        :param visible: set visibility state of the element (Default = True)
+        :param default_text: (str) Text initially shown in the input box as a default value(Default value = '')
+        :param size: (int, int)  (width, height) w=characters-wide, h=rows-high
+        :param disabled: (bool) set disable state for element (Default = False)
+        :param password_char: (char) Password character if this is a password field (Default value = '')
+        :param justification: (str) justification for data display. Valid choices - left, right, center
+        :param background_color: (str) color of background in one of the color formats
+        :param text_color: (str) color of the text
+        :param font: (str / tuple)  specifies the font family, size, etc
+        :param tooltip: (str) Text shown when cursor hovers over the element
+        :param change_submits: (bool) * DEPRICATED DO NOT USE! Same as enable_events
+        :param enable_events: (bool) If True then changes to this element are immediately reported as an event. Use this instead of change_submits (Default = False)
+        :param do_not_clear: (bool) If False then the field will be set to blank after ANY event (button, any event) (Default = True)
+        :param key:  (any)  Value that uniquely identifies this element from all other elements. Used when Finding an element or in return values. Must be unique to the window
+        :param focus: (bool) Determines if initial focus should go to this element.
+        :param pad:  (int, int) or ((int, int), (int, int)) Tuple(s). Amount of padding to put around element. Normally (horizontal pixels, vertical pixels) but can be split apart further into ((horizontal left, horizontal right), (vertical above, vertical below))
+        :param right_click_menu: (list(list)) [ [ ] ]  A list of lists of Menu items to show when this element is right clicked. See docs for format.
+        :param visible: (bool) set visibility state of the element (Default = True)
         """
         self.DefaultText = default_text
         self.PasswordCharacter = password_char
@@ -671,11 +695,12 @@ class InputText(Element):
 
     def Update(self, value=None, disabled=None, select=None, visible=None):
         """
+        Changes some of the settings for the Input Element. Must call `Window.Read` or `Window.Finalize` prior
 
-        :param value:  new text to display
-        :param disabled: disable or enable state of the element 
-        :param select:  ????????????????????????????
-        :param visible:  change visibility of element 
+        :param value: (str) new text to display as default text in Input field
+        :param disabled: (bool) disable or enable state of the element (sets Entry Widget to readonly or normal)
+        :param select: (bool) if True, then the text will be selected
+        :param visible: (bool) change visibility of element
 
         """
         #NOTE - Read or Finalize must be called on Window prior to Update call
@@ -697,7 +722,11 @@ class InputText(Element):
             self.TKEntry.pack()
 
     def Get(self):
-        """ """
+        """
+        Read and return the current value of the input element. Must call `Window.Read` or `Window.Finalize` prior
+
+        :return: (str) current value of Input field or '' if error encountered
+        """
         try:
             text = self.TKStringVar.get()
         except:
@@ -705,7 +734,11 @@ class InputText(Element):
         return text
 
     def SetFocus(self, force=False):
-        """ """
+        """
+        Sets focus to this element using focus_set. Will use focus_force if force flag set. Must call `Window.Read` or `Window.Finalize` prior
+
+        :param force: (bool) if True then tkinter's `Entry.focus_force` will be called instead of `Entry.focus_set`
+        """
         try:
             if force:
                 self.TKEntry.focus_force()
@@ -729,28 +762,29 @@ I = InputText
 #                           Combo                                        #
 # ---------------------------------------------------------------------- #
 class Combo(Element):
-    """ComboBox Element"""
+    """
+    ComboBox Element - A combination of a single-line input and a drop-down menu. User can type in their own value or choose from list.
+    """
     def __init__(self, values, default_value=None, size=(None, None), auto_size_text=None, background_color=None,
                  text_color=None, change_submits=False, enable_events=False, disabled=False, key=None, pad=None,
                  tooltip=None, readonly=False, font=None, visible=True):
-        """Combo Element - Combo Box, Drop Down Menu, ...
+        """
 
         :param values: values to choice
         :param default_value: Choices to be displayed. List of strings 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param auto_size_text: True if size should fit the text length 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param change_submits: If True, pressing Enter key submits window (Default = False)
-        :param enable_events: Turns on the element specific events.(Default = False)
-        :param disabled: set disable state for element (Default = False)
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
-        :param tooltip: text, that will appear the you hover on 
-        :param readonly:  make element readonly (Default = False)
-        :param font: ▲ specifies the font family, size, etc 
-        :param visible: set visibility state of the element (Default = True)
-
+        :param change_submits: (bool) DEPRICATED DO NOT USE. Use `enable_events` instead (Default = False)
+        :param enable_events: (bool) Turns on the element specific events.(Default = False)
+        :param disabled: (bool) set disable state for element (Default = False)
+        :param key: (any) Used with window.FindElement and with return values
+        :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
+        :param tooltip: (str) text that will appear when mouse hovers over this element
+        :param readonly: (combo) make element readonly (user can't change). True means user cannot change (Default = False)
+        :param font: (str, tuple)  specifies the font family, size, etc
+        :param visible: (bool) set visibility state of the element (Default = True)
         """
         self.Values = values
         self.DefaultValue = default_value
@@ -767,14 +801,15 @@ class Combo(Element):
 
     def Update(self, value=None, values=None, set_to_index=None, disabled=None, readonly=None, font=None, visible=None):
         """
-        :param value: change which value is current selected 
+        Changes some of the settings for the Combo Element. Must call `Window.Read` or `Window.Finalize` prior
+
+        :param value: change which value is current selected
         :param values: change list of choices 
         :param set_to_index: change selection to a particular choice 
         :param disabled: disable or enable state of the element 
         :param readonly:  make element readonly 
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param visible:  change visibility of element 
-
         """
         if values is not None:
             try:
@@ -842,12 +877,11 @@ Drop = InputCombo
 #                           Option Menu                                  #
 # ---------------------------------------------------------------------- #
 class OptionMenu(Element):
-    """Option Menu is an Element available ONLY on the tkinter port of PySimpleGUI.  It's is a widget that is unique
+    """
+    Option Menu is an Element available ONLY on the tkinter port of PySimpleGUI.  It's is a widget that is unique
     to tkinter.  However, it looks much like a ComboBox.  Instead of an arrow to click to pull down the list of
     choices, another little graphic is shown on the widget to indicate where you click.  After clicking to activate,
     it looks like a Combo Box that you scroll to select a choice.
-
-
     """
     def __init__(self, values, default_value=None, size=(None, None), disabled=False, auto_size_text=None,
                  background_color=None, text_color=None, key=None, pad=None, tooltip=None, visible=True):
@@ -855,13 +889,13 @@ class OptionMenu(Element):
 
         :param values: ??????????????????
         :param default_value:  ?????????????????????????//
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param disabled: set disable state for element (Default = False)
         :param auto_size_text: True if size should fit the text length 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
         :param tooltip: text, that will appear the you hover on 
         :param visible: set visibility state of the element (Default = True)
 
@@ -929,10 +963,9 @@ InputOptionMenu = OptionMenu
 #                           Listbox                                      #
 # ---------------------------------------------------------------------- #
 class Listbox(Element):
-    """A List Box.  Provide a list of values for the user to choose one or more of.   Returns a list of selected rows
+    """
+    A List Box.  Provide a list of values for the user to choose one or more of.   Returns a list of selected rows
     when a window.Read() is executed.
-
-
     """
     def __init__(self, values, default_values=None, select_mode=None, change_submits=False, enable_events=False,
                  bind_return_key=False, size=(None, None), disabled=False, auto_size_text=None, font=None,
@@ -940,20 +973,20 @@ class Listbox(Element):
                  visible=True):
         """Listbox Element
 
-        :param values: list of values to display
+        :param values: list of values to display. Can be any type including mixed types as long as they have __str__ method
         :param default_values: list of objects for listbox 
         :param select_mode: can be a string or a constant value defined as a variable.  Generally speaking strings are used for these kinds of options 
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
         :param bind_return_key:  (Default = False)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param disabled: set disable state for element (Default = False)
         :param auto_size_text: True if size should fit the text length 
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -986,8 +1019,8 @@ class Listbox(Element):
 
     def Update(self, values=None, disabled=None, set_to_index=None, scroll_to_index=None, visible=None):
         """
-
-        :param values: new list of choices 
+        Update some of the element's settings
+        :param values: new list of choices to be shown to user
         :param disabled: disable or enable state of the element 
         :param set_to_index: highlights the item at this index as if user clicked 
         :param scroll_to_index: scroll the listbox so that this index is the first shown 
@@ -1039,12 +1072,19 @@ class Listbox(Element):
 
 
     def GetListValues(self):
-        """ """
+        # type: (Listbox) -> []
+        """
+        Returns list of Values provided by the user in the user's format
+        :return: List. List of values. Can be any / mixed types -> []
+        """
         return self.Values
 
 
     def SetFocus(self, force=False):
-        """ """
+        """
+        Moves the focus to this element
+        :param force: Bool. If True, will call focus_force instead of focus_set
+        """
         try:
             if force:
                 self.TKListbox.focus_force()
@@ -1081,13 +1121,13 @@ class Radio(Element):
         :param group_id: Groups together multiple Radio Buttons. Can be any value
         :param default: Bool. Initial state (Default = False)
         :param disabled: set disable state for element (Default = False)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param auto_size_text: True if size should fit the text length 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param font: ▲ specifies the font family, size, etc 
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
+        :param font:  specifies the font family, size, etc 
+        :param key:  Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
         :param tooltip: text, that will appear the you hover on 
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
@@ -1170,16 +1210,16 @@ class Checkbox(Element):
 
         :param text: Text to display next to checkbox
         :param default: Bool + None.  Initial state. True = Checked, False = unchecked, None = Not available (grayed out) (Default = False)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param auto_size_text: True if size should fit the text length 
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param background_color: color of background 
         :param text_color: color of the text 
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
         :param disabled: set disable state for element (Default = False)
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
         :param tooltip: text, that will appear the you hover on 
         :param visible: set visibility state of the element (Default = True)
 
@@ -1253,13 +1293,13 @@ class Spin(Element):
         :param disabled: set disable state for element (Default = False)
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param auto_size_text: True if size should fit the text length 
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
         :param tooltip: text, that will appear the you hover on 
         :param visible: set visibility state of the element (Default = True)
 
@@ -1353,17 +1393,17 @@ class Multiline(Element):
         :param disabled: set disable state for element (Default = False)
         :param autoscroll: ?????????? (Default = False)
         :param border_width:  width of border around element
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param auto_size_text: True if size should fit the text length 
         :param background_color: color of background 
         :param text_color: color of the text 
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
         :param do_not_clear: see docx (Default = True)
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param focus: if focus should be set to this 
-        :param font: ▲ specifies the font family, size, etc 
-        :param pad: ▲ Amount of padding to put around element 
+        :param font:  specifies the font family, size, etc 
+        :param pad:  Amount of padding to put around element 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -1394,7 +1434,7 @@ class Multiline(Element):
         :param value:  new text to display
         :param disabled: disable or enable state of the element 
         :param append:  (Default = False)
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param text_color: color of the text 
         :param background_color: color of background 
         :param visible:  change visibility of element 
@@ -1467,17 +1507,17 @@ class Text(Element):
         """
 
         :param text: The text to display (required)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param auto_size_text: True if size should fit the text length 
         :param click_submits:  ????????????????????(Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
         :param relief:  relief style. Values are same as progress meter relief values.  Can be a constant or a string: `RELIEF_RAISED RELIEF_SUNKEN RELIEF_FLAT RELIEF_RIDGE RELIEF_GROOVE RELIEF_SOLID`
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param text_color: color of the text 
         :param background_color: color of background 
         :param justification: justification for data display 
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param right_click_menu: see "Right Click Menus" 
         :param tooltip: text, that will appear the you hover on 
         :param visible: set visibility state of the element (Default = True)
@@ -1506,7 +1546,7 @@ class Text(Element):
         :param value: new value to show 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param visible:  change visibility of element 
 
         """
@@ -1548,17 +1588,17 @@ class StatusBar(Element):
         """
 
         :param text: (required) text that is to be displayed in the widget
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param auto_size_text: True if size should fit the text length 
         :param click_submits:  ????????????????????
         :param enable_events: Turns on the element specific events.(Default = False)
         :param relief:  relief style. Values are same as progress meter relief values.  Can be a constant or a string: `RELIEF_RAISED RELIEF_SUNKEN RELIEF_FLAT RELIEF_RIDGE RELIEF_GROOVE RELIEF_SOLID` (Default value = RELIEF_SUNKEN)
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param text_color: color of the text 
         :param background_color: color of background 
         :param justification: justification for data display 
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param visible: set visibility state of the element (Default = True)
 
@@ -1585,7 +1625,7 @@ class StatusBar(Element):
         :param value:  ??????????????????????????
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param visible:  change visibility of element 
 
         """
@@ -1632,7 +1672,7 @@ class TKProgressBar():
         :param border_width:  (Default value = DEFAULT_PROGRESS_BAR_BORDER_WIDTH)
         :param orientation:  'horizontal' or 'vertical' ('h' or 'v' work) (Default value = 'vertical')(Default value = 'horizontal')
         :param BarColor:  ????????????????????????
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
 
         """
 
@@ -1715,8 +1755,8 @@ class TKOutput(tk.Frame):
         :param bd: 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param font: ▲ specifies the font family, size, etc 
-        :param pad: ▲ Amount of padding to put around element 
+        :param font:  specifies the font family, size, etc 
+        :param pad:  Amount of padding to put around element 
 
         """
         self.frame = tk.Frame(parent)
@@ -1778,13 +1818,13 @@ class Output(Element):
                  key=None, right_click_menu=None, visible=True):
         """
 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param pad: ▲ Amount of padding to put around element 
-        :param font: ▲ specifies the font family, size, etc 
+        :param pad:  Amount of padding to put around element 
+        :param font:  specifies the font family, size, etc 
         :param tooltip: text, that will appear the you hover on 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
 
@@ -1858,14 +1898,14 @@ class Button(Element):
         :param image_size: size of button image in pixels  (Default = (None))
         :param image_subsample:amount to reduce the size of the image 
         :param border_width:  width of border around button in pixels
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+        :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
         :param auto_size_button:  True if button size is determined by button text
         :param button_color: (text color, backound color)
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param bind_return_key: If True the return key will cause this button to fire (Default = False)
         :param focus: if focus should be set to this 
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param visible: set visibility state of the element (Default = True)
 
         """
@@ -2182,12 +2222,12 @@ class ButtonMenu(Element):
         :param image_size: size of button image in pixels  (Default = (None))
         :param image_subsample:amount to reduce the size of the image 
         :param border_width:  width of border around button in pixels
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+        :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
         :param auto_size_button:  True if button size is determined by button text
         :param button_color: (text color, backound color)
-        :param font: ▲ specifies the font family, size, etc 
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param font:  specifies the font family, size, etc 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param tearoff: ?????????????????? (Default = False)
         :param visible: set visibility state of the element (Default = True)
 
@@ -2267,14 +2307,14 @@ class ProgressBar(Element):
 
         :param max_value: max value of progressbar
         :param orientation:  'horizontal' or 'vertical' ('h' or 'v' work) (Default value = 'vertical')
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param auto_size_text: True if size should fit the text length 
         :param bar_color:  (Default = (None))
         :param style:  ????????????????????????????
         :param border_width:   width of border around button 
         :param relief:  ????????????????????????????
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
         :param visible: set visibility state of the element (Default = True)
 
         """
@@ -2346,9 +2386,9 @@ class Image(Element):
         :param filename:  file name if the image is in a file
         :param data:  if image is in RAM (PIL format?)
         :param background_color: color of background 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -2379,7 +2419,7 @@ class Image(Element):
 
         :param filename:  
         :param data:  
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param visible:  change visibility of element 
 
         """
@@ -2469,9 +2509,9 @@ class Canvas(Element):
 
         :param canvas:  ????????????????????????
         :param background_color: color of background 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -2514,11 +2554,11 @@ class Graph(Element):
         :param graph_bottom_left: ????????????????????????
         :param graph_top_right: ????????????????????????
         :param background_color: color of background 
-        :param pad: ▲ Amount of padding to put around element 
+        :param pad:  Amount of padding to put around element 
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param drag_submits: ???????????????????????? (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -2604,7 +2644,7 @@ class Graph(Element):
         """
 
         :param point: 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default value = 2)
+        :param size:  (w,h) w=characters-wide, h=rows-high (Default value = 2)
         :param color:  (Default value = 'black')
 
         """
@@ -2725,7 +2765,7 @@ class Graph(Element):
         :param text: 
         :param location: 
         :param color:  (Default value = 'black')
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param angle:  (Default value = 0)
 
         """
@@ -2750,7 +2790,7 @@ class Graph(Element):
         :param data:  
         :param location:  
         :param color:  (Default value = 'black')
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param angle:  (Default value = 0)
 
         """
@@ -2965,11 +3005,11 @@ class Frame(Element):
         :param background_color: color of background
         :param title_location: ????????????????????????
         :param relief:  relief style. Values are same as progress meter relief values.  Can be a constant or a string: `RELIEF_RAISED RELIEF_SUNKEN RELIEF_FLAT RELIEF_RIDGE RELIEF_GROOVE RELIEF_SOLID` (Default value = DEFAULT_FRAME_RELIEF)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
-        :param font: ▲ specifies the font family, size, etc 
-        :param pad: ▲ Amount of padding to put around element 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
+        :param font:  specifies the font family, size, etc 
+        :param pad:  Amount of padding to put around element 
         :param border_width:   width of border around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -3068,7 +3108,7 @@ class VerticalSeparator(Element):
     def __init__(self, pad=None):
         """
 
-        :param pad: ▲ Amount of padding to put around element 
+        :param pad:  Amount of padding to put around element 
 
         """
         
@@ -3099,11 +3139,11 @@ class Tab(Element):
         :param layout: ?????????????????????
         :param title_color:  
         :param background_color: color of background 
-        :param font: ▲ specifies the font family, size, etc 
-        :param pad: ▲ Amount of padding to put around element 
+        :param font:  specifies the font family, size, etc 
+        :param pad:  Amount of padding to put around element 
         :param disabled: set disable state for element (Default = False)
         :param border_width:  width of border around element
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -3216,13 +3256,13 @@ class TabGroup(Element):
         :param title_color:  
         :param selected_title_color:  
         :param background_color: color of background 
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
-        :param pad: ▲ Amount of padding to put around element 
+        :param pad:  Amount of padding to put around element 
         :param border_width:  width of border around element
         :param theme:  
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param visible: set visibility state of the element (Default = True)
 
@@ -3344,12 +3384,12 @@ class Slider(Element):
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
         :param disabled: set disable state for element (Default = False)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
-        :param font: ▲ specifies the font family, size, etc 
+        :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
+        :param font:  specifies the font family, size, etc 
         :param background_color: color of background 
         :param text_color: color of the text 
-        :param key: ▲ Used with window.FindElement and with return values 
-        :param pad: ▲ Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
         :param tooltip: text, that will appear the you hover on 
         :param visible: set visibility state of the element (Default = True)
 
@@ -3572,12 +3612,12 @@ class Column(Element):
 
         :param layout: ????????????????????????
         :param background_color: color of background 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
-        :param pad: ▲ Amount of padding to put around element 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
+        :param pad:  Amount of padding to put around element 
         :param scrollable: ???????????????????????? (Default = False)
         :param vertical_scroll_only: ???????????????????????? (Default = False)
         :param right_click_menu: see "Right Click Menus" 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param visible: set visibility state of the element (Default = True)
 
         """
@@ -3684,14 +3724,14 @@ class Pane(Element):
 
         :param pane_list: 
         :param background_color: color of background 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
-        :param pad: ▲ Amount of padding to put around element 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
+        :param pad:  Amount of padding to put around element 
         :param orientation:  'horizontal' or 'vertical' ('h' or 'v' work) (Default value = 'vertical')
         :param show_handle:  (Default = True)
         :param relief:  relief style. Values are same as progress meter relief values.  Can be a constant or a string: `RELIEF_RAISED RELIEF_SUNKEN RELIEF_FLAT RELIEF_RIDGE RELIEF_GROOVE RELIEF_SOLID`
         :param handle_size:  
         :param border_width:  width of border around element
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param visible: set visibility state of the element (Default = True)
 
         """
@@ -4011,10 +4051,10 @@ class Menu(Element):
 
         :param menu_definition: 
         :param background_color: color of background 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param tearoff:  (Default = False)
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param visible: set visibility state of the element (Default = True)
 
         """
@@ -4105,7 +4145,7 @@ class Table(Element):
         :param display_row_numbers:  (Default = False)
         :param num_rows:  
         :param row_height:  
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param justification:  (Default value = 'right')
         :param text_color: color of the text 
         :param background_color: color of background 
@@ -4113,12 +4153,12 @@ class Table(Element):
         :param row_colors:  
         :param vertical_scroll_only:  (Default = True)
         :param hide_vertical_scroll:  (Default = False)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
         :param bind_return_key:  (Default = False)
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -4257,14 +4297,14 @@ class Tree(Element):
         :param show_expanded:  (Default = False)
         :param change_submits: If True, pressing Enter key submits window (Default = False)
         :param enable_events: Turns on the element specific events.(Default = False)
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param justification:  (Default value = 'right')
         :param text_color: color of the text 
         :param background_color: color of background 
         :param num_rows:  
         :param row_height:  
-        :param pad: ▲ Amount of padding to put around element 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param pad:  Amount of padding to put around element 
+        :param key:  Used with window.FindElement and with return values 
         :param tooltip: text, that will appear the you hover on 
         :param right_click_menu: see "Right Click Menus" 
         :param visible: set visibility state of the element (Default = True)
@@ -4345,7 +4385,7 @@ class Tree(Element):
         """
 
         :param values:  
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
         :param value:  
         :param text:  
         :param icon:  
@@ -4398,7 +4438,7 @@ class TreeData(object):
             """
 
             :param parent: 
-            :param key: ▲ Used with window.FindElement and with return values
+            :param key:  Used with window.FindElement and with return values
             :param text: 
             :param values: 
             :param icon:  
@@ -4428,7 +4468,7 @@ class TreeData(object):
     def _AddNode(self, key, node):
         """
 
-        :param key: ▲ Used with window.FindElement and with return values
+        :param key:  Used with window.FindElement and with return values
         :param node: 
 
         """
@@ -4438,7 +4478,7 @@ class TreeData(object):
         """
 
         :param parent: 
-        :param key: ▲ Used with window.FindElement and with return values
+        :param key:  Used with window.FindElement and with return values
         :param text: 
         :param values: 
         :param icon:  
@@ -4473,7 +4513,7 @@ class ErrorElement(Element):
     def __init__(self, key=None):
         """Error Element
 
-        :param key: ▲ Used with window.FindElement and with return values 
+        :param key:  Used with window.FindElement and with return values 
 
         """
         self.Key = key
@@ -4544,11 +4584,11 @@ class Window:
         :param auto_size_text: True if size should fit the text length 
         :param auto_size_buttons:  
         :param location:  (Default = (None))
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+        :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
         :param element_padding:  
         :param margins:  (Default = (None))
     :param button_color: button color (foreground, background)
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param progress_bar_color:  (Default = (None))
         :param background_color: color of background 
         :param border_depth:  
@@ -4850,7 +4890,7 @@ class Window:
         """
         # ensure called only 1 time through a single read cycle
         if not Window.read_call_from_debugger:
-            refresh_debugger()
+            _refresh_debugger()
         timeout = int(timeout) if timeout is not None else None
         if timeout == 0:  # timeout of zero runs the old readnonblocking
             event, values = self.ReadNonBlocking()
@@ -5019,7 +5059,7 @@ class Window:
         Find element object associated with the provided key
         :returns Found element object, an Error Element, or None
 
-        :param key: ▲ Used with window.FindElement and with return values
+        :param key:  Used with window.FindElement and with return values
         :param silent_on_error:  (Default = False)
 
         """
@@ -5362,7 +5402,7 @@ class Window:
     def Size(self, size):
         """
 
-        :param size: ▲ 
+        :param size:  
 
         """
         try:
@@ -5474,15 +5514,15 @@ def FolderBrowse(button_text='Browse', target=(ThisRow, -1), initial_folder=None
     :param target: key or (row,col) target for the button (Default value = (ThisRow, -1))
     :param initial_folder:  starting path for folders and files
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param change_submits: If True, pressing Enter key submits window (Default = False)
     :param enable_events: Turns on the element specific events.(Default = False)
-    :param font: ▲ specifies the font family, size, etc 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param font:  specifies the font family, size, etc 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     
@@ -5504,15 +5544,15 @@ def FileBrowse(button_text='Browse', target=(ThisRow, -1), file_types=(("ALL Fil
     :param file_types:  (Default value = (("ALL Files", "*.*")))
     :param initial_folder:  starting path for folders and files
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param change_submits: If True, pressing Enter key submits window (Default = False)
     :param enable_events: Turns on the element specific events.(Default = False)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param disabled: set disable state for element (Default = False)
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_BROWSE_FILE, target=target, file_types=file_types,
@@ -5534,14 +5574,14 @@ def FilesBrowse(button_text='Browse', target=(ThisRow, -1), file_types=(("ALL Fi
     :param disabled: set disable state for element (Default = False)
     :param initial_folder:  starting path for folders and files
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param change_submits: If True, pressing Enter key submits window (Default = False)
     :param enable_events: Turns on the element specific events.(Default = False)
-    :param font: ▲ specifies the font family, size, etc 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param font:  specifies the font family, size, etc 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_BROWSE_FILES, target=target, file_types=file_types,
@@ -5563,14 +5603,14 @@ def FileSaveAs(button_text='Save As...', target=(ThisRow, -1), file_types=(("ALL
     :param initial_folder:  starting path for folders and files
     :param disabled: set disable state for element (Default = False)
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param change_submits: If True, pressing Enter key submits window (Default = False)
     :param enable_events: Turns on the element specific events.(Default = False)
-    :param font: ▲ specifies the font family, size, etc 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param font:  specifies the font family, size, etc 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_SAVEAS_FILE, target=target, file_types=file_types,
@@ -5592,14 +5632,14 @@ def SaveAs(button_text='Save As...', target=(ThisRow, -1), file_types=(("ALL Fil
     :param initial_folder:  starting path for folders and files
     :param disabled: set disable state for element (Default = False)
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param change_submits: If True, pressing Enter key submits window (Default = False)
     :param enable_events: Turns on the element specific events.(Default = False)
-    :param font: ▲ specifies the font family, size, etc 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param font:  specifies the font family, size, etc 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_SAVEAS_FILE, target=target, file_types=file_types,
@@ -5614,16 +5654,16 @@ def Save(button_text='Save', size=(None, None), auto_size_button=None, button_co
     """
 
     :param button_text: text in the button (Default value = 'Save')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param bind_return_key:  (Default = True)
     :param disabled: set disable state for element (Default = False)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5637,16 +5677,16 @@ def Submit(button_text='Submit', size=(None, None), auto_size_button=None, butto
     """
 
     :param button_text: text in the button (Default value = 'Submit')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param bind_return_key:  (Default = True)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5661,16 +5701,16 @@ def Open(button_text='Open', size=(None, None), auto_size_button=None, button_co
     """
 
     :param button_text: text in the button (Default value = 'Open')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param bind_return_key:  (Default = True)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5684,16 +5724,16 @@ def OK(button_text='OK', size=(None, None), auto_size_button=None, button_color=
     """
 
     :param button_text: text in the button (Default value = 'OK')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param bind_return_key:  (Default = True)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5707,16 +5747,16 @@ def Ok(button_text='Ok', size=(None, None), auto_size_button=None, button_color=
     """
 
     :param button_text: text in the button (Default value = 'Ok')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param bind_return_key:  (Default = True)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5730,16 +5770,16 @@ def Cancel(button_text='Cancel', size=(None, None), auto_size_button=None, butto
     """
 
     :param button_text: text in the button (Default value = 'Cancel')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5753,16 +5793,16 @@ def Quit(button_text='Quit', size=(None, None), auto_size_button=None, button_co
     """
 
     :param button_text: text in the button (Default value = 'Quit')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5776,16 +5816,16 @@ def Exit(button_text='Exit', size=(None, None), auto_size_button=None, button_co
     """
 
     :param button_text: text in the button (Default value = 'Exit')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5799,16 +5839,16 @@ def Yes(button_text='Yes', size=(None, None), auto_size_button=None, button_colo
     """
 
     :param button_text: text in the button (Default value = 'Yes')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = True)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5822,16 +5862,16 @@ def No(button_text='No', size=(None, None), auto_size_button=None, button_color=
     """
 
     :param button_text: text in the button (Default value = 'No')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
     :param tooltip: text, that will appear the you hover on 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5845,16 +5885,16 @@ def Help(button_text='Help', size=(None, None), auto_size_button=None, button_co
     """
 
     :param button_text: text in the button (Default value = 'Help')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param tooltip: text, that will appear the you hover on 
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
@@ -5868,16 +5908,16 @@ def Debug(button_text='', size=(None, None), auto_size_button=None, button_color
     """
 
     :param button_text: text in the button (Default value = '')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param tooltip: text, that will appear the you hover on 
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_SHOW_DEBUGGER, tooltip=tooltip, size=size,
@@ -5899,15 +5939,15 @@ def SimpleButton(button_text, image_filename=None, image_data=None, image_size=(
     :param image_subsample:amount to reduce the size of the image 
     :param border_width:  width of border around element
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+    :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param disabled: set disable state for element (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_CLOSES_WIN, image_filename=image_filename,
@@ -5930,15 +5970,15 @@ def CloseButton(button_text, image_filename=None, image_data=None, image_size=(N
     :param image_subsample:amount to reduce the size of the image 
     :param border_width:  width of border around element
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+    :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param disabled: set disable state for element (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_CLOSES_WIN, image_filename=image_filename,
@@ -5964,15 +6004,15 @@ def ReadButton(button_text, image_filename=None, image_data=None, image_size=(No
     :param image_subsample:amount to reduce the size of the image 
     :param border_width:  width of border around element
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+    :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param disabled: set disable state for element (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, image_filename=image_filename,
@@ -5999,15 +6039,15 @@ def RealtimeButton(button_text, image_filename=None, image_data=None, image_size
     :param image_subsample:amount to reduce the size of the image 
     :param border_width:  width of border around element
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+    :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param disabled: set disable state for element (Default = False)
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_REALTIME, image_filename=image_filename,
@@ -6030,15 +6070,15 @@ def DummyButton(button_text, image_filename=None, image_data=None, image_size=(N
     :param image_subsample:amount to reduce the size of the image 
     :param border_width:  width of border around element
     :param tooltip: text, that will appear the you hover on 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+    :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param disabled: set disable state for element (Default = False)
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_CLOSES_WIN_ONLY, image_filename=image_filename,
@@ -6067,15 +6107,15 @@ def CalendarButton(button_text, target=(None, None), close_when_date_chosen=True
     :param image_subsample:amount to reduce the size of the image 
     :param tooltip: text, that will appear the you hover on 
     :param border_width:  width of border around element
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+    :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
     :param locale:  
     :param format:  
 
@@ -6107,15 +6147,15 @@ def ColorChooserButton(button_text, target=(None, None), image_filename=None, im
     :param image_subsample:amount to reduce the size of the image 
     :param tooltip: text, that will appear the you hover on 
     :param border_width:  width of border around element
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default = (None))
+    :param size:  (w,h) w=characters-wide, h=rows-high (Default = (None))
     :param auto_size_button:  True if button size is determined by button text
     :param button_color: button color (foreground, background)
     :param disabled: set disable state for element (Default = False)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param bind_return_key:  (Default = False)
     :param focus: if focus should be set to this 
-    :param pad: ▲ Amount of padding to put around element 
-    :param key: ▲ Used with window.FindElement and with return values 
+    :param pad:  Amount of padding to put around element 
+    :param key:  Used with window.FindElement and with return values 
 
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_COLOR_CHOOSER, target=target,
@@ -6496,7 +6536,7 @@ def _FindElementFromKeyInSubForm(form, key):
     """
 
     :param form: 
-    :param key: ▲ Used with window.FindElement and with return values
+    :param key:  Used with window.FindElement and with return values
 
     """
     for row_num, row in enumerate(form.Rows):
@@ -6526,9 +6566,10 @@ def _FindElementFromKeyInSubForm(form, key):
 
 
 def _FindElementWithFocusInSubForm(form):
+    # type: (...) -> Element or None
     """
-
-    :param form: 
+    Searches through a "sub-form" (can be a window or container) for the current element with focus
+    :param form: a Window, Column, Frame, or TabGroup (container elements)
 
     """
     for row_num, row in enumerate(form.Rows):
@@ -6561,7 +6602,7 @@ def _FindElementWithFocusInSubForm(form):
                 if element.TKButton is not None:
                     if element.TKButton is element.TKButton.focus_get():
                         return element
-
+    return None
 
 if sys.version_info[0] >= 3:
     def AddMenuItem(top_menu, sub_menu_info, element, is_sub_menu=False, skip=False):
@@ -7119,7 +7160,11 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     # print(unique_field)
                     # Clones over the TCombobox.field element from the "alt" theme.
                     # This is what will allow us to change the background color without altering the whole programs theme
-                    combostyle.element_create(unique_field, "from", "alt")
+
+                    try:        # if this element is in a window that's shown TWICE, will get an error here, so skip error
+                        combostyle.element_create(unique_field, "from", "alt")
+                    except:
+                        pass
 
                     # Create widget layout using cloned "alt" field
                     combostyle.layout(style_name, [
@@ -8178,12 +8223,12 @@ class QuickMeter(object):
         :param title: text to display in eleemnt
         :param current_value: current value
         :param max_value: max value of QuickMeter
-        :param key: ▲ Used with window.FindElement and with return values
+        :param key:  Used with window.FindElement and with return values
         :param *args: stuff to output
         :param orientation:  'horizontal' or 'vertical' ('h' or 'v' work) (Default value = 'vertical')(Default value = 'v')
         :param bar_color:  ???????????????????????????????????
         :param button_color: button color (foreground, background)
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default value = DEFAULT_PROGRESS_BAR_SIZE)
+        :param size:  (w,h) w=characters-wide, h=rows-high (Default value = DEFAULT_PROGRESS_BAR_SIZE)
         :param border_width:  width of border around element
         :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
 
@@ -8292,12 +8337,12 @@ def OneLineProgressMeter(title, current_value, max_value, key, *args, orientatio
     :param title: text to display
     :param current_value: current progressbar value
     :param max_value: max value of progressbar
-    :param key: ▲ Used with window.FindElement and with return values
+    :param key:  Used with window.FindElement and with return values
     :param *args: stuff to output.
     :param orientation:  'horizontal' or 'vertical' ('h' or 'v' work) (Default value = 'vertical')(Default value = 'v')
     :param bar_color:  
     :param button_color: button color (foreground, background)
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high (Default value = DEFAULT_PROGRESS_BAR_SIZE)
+    :param size:  (w,h) w=characters-wide, h=rows-high (Default value = DEFAULT_PROGRESS_BAR_SIZE)
     :param border_width:  width of border around element
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
 
@@ -8317,7 +8362,7 @@ def OneLineProgressMeter(title, current_value, max_value, key, *args, orientatio
 def OneLineProgressMeterCancel(key):
     """
 
-    :param key: ▲ Used with window.FindElement and with return values
+    :param key:  Used with window.FindElement and with return values
 
     """
     try:
@@ -8359,9 +8404,9 @@ class DebugWin():
                  grab_anywhere=False, keep_on_top=False, do_not_reroute_stdout=True):
         """
 
-        :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+        :param size:  (w,h) w=characters-wide, h=rows-high 
         :param location:  (Default = (None))
-        :param font: ▲ specifies the font family, size, etc 
+        :param font:  specifies the font family, size, etc 
         :param no_titlebar:  (Default = False)
         :param no_button:  (Default = False)
         :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
@@ -8443,11 +8488,11 @@ def EasyPrint(*args, size=(None, None), end=None, sep=None, location=(None, None
     """
 
     :param *args: 
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param end:  
     :param sep:  
     :param location:  (Default = (None))
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param no_button:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
@@ -8484,7 +8529,7 @@ def PopupScrolled(*args, button_color=None, yes_no=False, auto_close=False, auto
     :param yes_no:  (Default = False)
     :param auto_close:  (Default = False)
     :param auto_close_duration:  
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param location:  (Default = (None))
     :param title:  
     :param non_blocking:  (Default = False)
@@ -8578,7 +8623,7 @@ def SetOptions(icon=None, button_color=None, element_size=(None, None), button_e
     :param element_padding:  (Default = (None))
     :param auto_size_text: True if size should fit the text length 
     :param auto_size_buttons:  
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param border_width:  width of border around element
     :param slider_border_width:  
     :param slider_relief:  
@@ -9134,7 +9179,7 @@ def Popup(*args, title=None, button_color=None, background_color=None, text_colo
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9246,7 +9291,7 @@ def PopupNoButtons(*args, title=None, button_color=None, background_color=None, 
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9280,7 +9325,7 @@ def PopupNonBlocking(*args, title=None, button_type=POPUP_BUTTONS_OK, button_col
     :param non_blocking:  (Default = True)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9316,7 +9361,7 @@ def PopupQuick(*args, title=None, button_type=POPUP_BUTTONS_OK, button_color=Non
     :param non_blocking:  (Default = True)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9350,7 +9395,7 @@ def PopupQuickMessage(*args, title=None, button_type=POPUP_BUTTONS_NO_BUTTONS, b
     :param non_blocking:  (Default = True)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = True)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9383,7 +9428,7 @@ def PopupNoTitlebar(*args, title=None, button_type=POPUP_BUTTONS_OK, button_colo
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param grab_anywhere:  (Default = True)
     :param location: Location on screen to display 
     :param location:  
@@ -9421,7 +9466,7 @@ def PopupAutoClose(*args, title=None, button_type=POPUP_BUTTONS_OK, button_color
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9455,7 +9500,7 @@ def PopupError(*args, title=None, button_color=(None, None), background_color=No
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9487,7 +9532,7 @@ def PopupCancel(*args, title=None, button_color=None, background_color=None, tex
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9518,7 +9563,7 @@ def PopupOK(*args, title=None, button_color=None, background_color=None, text_co
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9548,7 +9593,7 @@ def PopupOKCancel(*args, title=None, button_color=None, background_color=None, t
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9579,7 +9624,7 @@ def PopupYesNo(*args, title=None, button_color=None, background_color=None, text
     :param non_blocking:  (Default = False)
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
     :param line_width: Width of lines in characters 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9610,12 +9655,12 @@ def PopupGetFolder(message, title=None, default_path='', no_window=False, size=(
     :param title:  
     :param default_path:  (Default value = '')
     :param no_window:  (Default = False)
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param button_color: button color (foreground, background)
     :param background_color: color of background 
     :param text_color: color of the text 
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9689,12 +9734,12 @@ def PopupGetFile(message, title=None, default_path='', default_extension='', sav
     :param multiple_files:  (Default = False)
     :param file_types:  (Default value = (("ALL Files", "*.*")))
     :param no_window:  (Default = False)
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param button_color: button color (foreground, background)
     :param background_color: color of background 
     :param text_color: color of the text 
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9777,12 +9822,12 @@ def PopupGetText(message, title=None, default_text='', password_char='', size=(N
     :param title:  
     :param default_text:  (Default value = '')
     :param password_char: Passwork character if this is a password field (Default value = '')
-    :param size: ▲ (w,h) w=characters-wide, h=rows-high 
+    :param size:  (w,h) w=characters-wide, h=rows-high 
     :param button_color: button color (foreground, background)
     :param background_color: color of background 
     :param text_color: color of the text 
     :param icon: Icon to display (Default value = DEFAULT_WINDOW_ICON)
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = False)
     :param grab_anywhere: If True can grab anywhere to move the window (Default = False)
     :param location: Location on screen to display 
@@ -9819,7 +9864,7 @@ def PopupAnimated(image_source, message=None, background_color=None, text_color=
     :param message:  
     :param background_color: color of background 
     :param text_color: color of the text 
-    :param font: ▲ specifies the font family, size, etc 
+    :param font:  specifies the font family, size, etc 
     :param no_titlebar:  (Default = True)
     :param grab_anywhere:  (Default = True)
     :param keep_on_top:  (Default = True)
@@ -10399,13 +10444,17 @@ def show_debugger_popout_window(location=(None, None), *args):
     debugger._build_floating_window(location=location)
 
 
-def refresh_debugger():
-    """ """
+def _refresh_debugger():
+    """
+    Refreshes the debugger windows. USERS should NOT be calling this function. Within PySimpleGUI it is called for the USER every time the Window.Read function is called.
+
+    :return rc (bool) False if user closed the main debugger window.
+    """
     if _Debugger.debugger is None:
         _Debugger.debugger = _Debugger()
     debugger = _Debugger.debugger
     Window.read_call_from_debugger = True
-    frame = inspect.currentframe()
+    # frame = inspect.currentframe()
     frame = inspect.currentframe().f_back
     # frame, *others = inspect.stack()[1]
     try:
