@@ -1333,6 +1333,7 @@ layout = [[sg.Multiline('This is what a Multi-line Text Element looks like', siz
 ## Text Input Element  | `InputText == Input == In`
 
 <!-- <+InputText.doc+> -->
+
 ```python
 layout = [[sg.InputText('Default text')]]
 ```

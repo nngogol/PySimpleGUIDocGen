@@ -254,7 +254,7 @@ def readfile(fname):
 	with open(fname, 'r', encoding='utf-8') as ff:
 		return ff.read()
 
-def main(do_full_readme=False, files_to_include:list=[], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True):
+def main(do_full_readme=False, files_to_include:list=[], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True, allow_multiple_tags=True):
 	"""
 	Goal is:
 	1) load 1_ 2_ 3_ 4_
@@ -302,7 +302,7 @@ def main(do_full_readme=False, files_to_include:list=[], logger=None, output_nam
 	regex_pattern = re.compile(r'<!-- <\+[a-zA-Z_]+\.([a-zA-Z_]+)\+> -->'); mark_points = [i for i in readme.split('\n') if regex_pattern.match(i)]
 
 	# if there are REPEATED tags -> show them.
-	if len(list(set(mark_points))) != len(mark_points):
+	if not allow_multiple_tags and len(list(set(mark_points))) != len(mark_points):
 		[mark_points.remove(x) for x in set(mark_points)];
 		if logger: logger.error("You have repeated tags! \n {0}".format(','.join(mark_points)))
 		return ''
