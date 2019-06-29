@@ -12,7 +12,11 @@ from make_real_readme import main
 #                                   |___/                              #
 ########################################################################
 # method = 'simple, no log'
+from vispy.ext.gdi32plus import OUTLINETEXTMETRIC
+
 method = 'with logs'
+
+OUTPUT_FILENAME = 'readme.md'
 
 ##############
 #     __     #
@@ -27,7 +31,7 @@ method = 'with logs'
 if method == 'simple, no log':
     main(logger=None,
          files_to_include=[0, 1, 2, 3],
-         output_name='readme.md',
+         output_name=OUTPUT_FILENAME,
          delete_html_comments=True)
 
 ################
@@ -54,7 +58,7 @@ if method == 'with logs':
     logger.info('STARTING')
     main(logger=logger,
          files_to_include=[0, 1, 2, 3],
-         output_name='readme.md',
+         output_name=OUTPUT_FILENAME,
          delete_html_comments=True)
 
 
@@ -68,4 +72,4 @@ if method == 'with logs':
 #               | |         | |        #
 #               |_|         |_|        #
 ########################################
-sg.Popup('Completed making readme.md')
+sg.Popup('Completed making {}'.format(OUTPUT_FILENAME))
