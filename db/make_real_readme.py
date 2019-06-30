@@ -6,7 +6,6 @@ import logging
 import json
 import re
 import os
-# TAB_char = '\t'
 TAB_char = '    '
 TABLE_TEMPLATE='''
                     Parameters explained:
@@ -19,7 +18,6 @@ TABLE_TEMPLATE='''
                         '''
 TABLE_ROW_TEMPLATE = '|{name}|{desc}|'
 TABLE_RETURN_TEMPLATE = '|||\n| **return** | {return_guy} |'
-
 
 """
 injection_points:
@@ -257,6 +255,185 @@ def get_sig_table_parts(function_obj, function_name, doc_string):
     return sign, params_TABLE
 
 
+
+def get_params_part(code: str) -> dict:
+    """
+    Find ":param " part in given "doc string".
+
+    from __doc__ to {
+        'parameter' :  'desctiption',
+        'parameter2' : 'desctiption2',
+        'parameter3' : 'desctiption3',
+    }
+    """
+
+    # if doc_string is empty
+    if '' == code.strip():
+        return {}
+
+    only_params = code[code.index(':param'):]  # get_only_params_string(code)
+
+    # making dict
+    param_lines = only_params.split(':param ')
+    param_lines = [i.strip()
+                   for i in param_lines if i.strip()]  # filter empty lines
+
+    args_kwargs_pairs = {}
+    for index, i in enumerate(param_lines):
+
+        cols = i.split(':')
+        param_name, els = cols[0], '\n'.join(
+            [j.strip() for j in ':'.join(cols[1:]).split('\n')])
+        # param_name, els = cols[0],  ' '.join([j.strip() for j in ':'.join(cols).split('\n')]) # can be this:
+
+        param_name, els = param_name.strip(), els.strip()
+        args_kwargs_pairs[param_name] = els
+
+    return args_kwargs_pairs
+
+
+def get_return_part(code: str) -> str:
+    """ Find ":return:" part in given "doc string"."""
+    if ':return:' not in code:
+        return ''
+    return code[code.index(':return:')+len(':return:'):].strip()
+
+
+def special_cases(function_name, sig, doc_string):
+
+    doca = doc_string.strip()
+    params_names = list(dict(sig).keys())
+    if 'self' in params_names and params_names[0] == params_names[-1] and not doca:
+        """
+        def Get(self):
+            ''' '''
+
+        ->
+        ```python
+        Get()
+        ```
+        """
+        return True, f'\n\n```python\n{function_name}()\n```\n\n'
+
+    if 'self' in params_names and params_names[0] == params_names[-1] and doca and ':param' not in doca and ':return' not in doca:
+        """
+        def Get(self):
+            ''' 
+            blah blah blah
+            '''
+
+        ->
+
+        ```python
+        Get() # blah blah blah
+        ```
+
+        """
+        return True, f'\n\n```python\n{function_name}() # {doca}\n```\n\n'
+
+    if 'self' in params_names and params_names[0] == params_names[-1] and doca and ':param' not in doca and ':return' in doca:
+        """
+        def Get(self):
+            ''' 
+            blah blah blah
+            :return: blah-blah
+            '''
+
+        ->
+
+        ```python
+        Get() -> blah-blah # blah blah blah
+        ```
+
+        """
+        return_part = get_return_part(doca)
+        return True, f'\n\n```python\n{function_name}() -> {return_part} # {doca}\n```\n\n'
+
+    return False, ''
+
+
+def get_doc_discription(doc_string):
+
+    if ':param' in doc_string:  doc_string = doc_string[:doc_string.index(':param')]
+    if ':return' in doc_string: doc_string = doc_string[:doc_string.index(':return')]
+
+    desc = doc_string.strip()
+
+    return f'\n{desc}' if desc else ''
+
+
+def get_sig_table_parts(function_obj, function_name, doc_string):
+    """
+    Convert "function + __doc__" tp "method call + params table" in MARKDOWN
+    """
+
+    doc_string = doc_string.strip()
+
+    # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
+    # 0   0            Making INIT_CALL          0   0 #
+    # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
+
+    sig, rows = signature(function_obj).parameters, []
+    for index, key in enumerate(sig):
+        val = sig[key].default
+        if 'self' == str(key):
+            continue
+        if val == _empty:        rows.append(key)
+        elif val == None:        rows.append(f'{key}=None')
+        elif type(val) is int:   rows.append(f'{key}={val}')
+        elif type(val) is str:   rows.append(f'{key}="{val}"')
+        elif type(val) is tuple: rows.append(f'{key}={val}')
+        elif type(val) is bool:  rows.append(f'{key}={val}')
+        else:
+            raise Exception(f'IDK this type -> {key, val}')
+
+    sig_content = ',\n\t'.join(rows)
+    sign = "\n```python{0}\n{1}({2})\n```".format(
+        get_doc_discription(doc_string), function_name, sig_content)
+
+    # --------------
+    # SPECIAL CASES
+    # --------------
+    result = special_cases(function_name, sig, doc_string)
+    if result:
+        return result[1], ''
+
+    # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
+    # 0   0          Making params_TABLE         0   0 #
+    # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
+
+    # 1
+    return_guy = get_return_part(doc_string)
+    if not return_guy:
+        return_guy = ''
+        md_return = ''
+    else:
+        return_guy = return_guy[0].strip()[8:]
+        md_return = f'|||\n| return | {return_guy} |'
+        # return_guy = f'\n\nreturn value: {return_guy}\n'
+        # return_guy_val_str = return_guy
+
+    # 2
+    md_table = '\n'.join([f'|{name}|{desc}|'
+                           for name, desc in
+                           get_params_part(doc_string).items()])
+
+    # 3
+    params_TABLE = f'''\nParameters explained:\n
+                        |Name|Meaning|
+                        |---|---|
+                        {md_table}
+                        {md_return}
+                        \n'''.replace('\t', '')
+
+    if not md_table.strip():
+        params_TABLE = ''
+        if return_guy:
+            sign += sign[:-3] + f'\nRETURN: {return_guy}```'
+
+    return sign, params_TABLE
+
+
 def pad_n(text): return f'\n{text}\n'
 
 
@@ -282,7 +459,6 @@ def render(injection):
 def readfile(fname):
     with open(fname, 'r', encoding='utf-8') as ff:
         return ff.read()
-
 
 
 def main(do_full_readme=False, files_to_include: list = [], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True, allow_multiple_tags=True):
@@ -559,7 +735,6 @@ def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
                 os.remove(log_file)
             except Exception as e:
                 print(str(e))
-
 
 if __name__ == '__main__':
     # my_mode = 'debug-mode'

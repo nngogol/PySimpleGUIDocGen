@@ -1,0 +1,3 @@
+2019-06-29 16:36:00,315>INFO: STARTING
+2019-06-29 16:36:00,318>ERROR: METHOD not found!: type object 'Output' has no attribute 'UpdateBar'
+2019-06-29 16:36:00,328>INFO: Deleting html comments

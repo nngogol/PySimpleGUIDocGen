@@ -10,9 +10,12 @@ from make_real_readme import main
 #                                    __/ |                             #
 #                                   |___/                              #
 ########################################################################
-enable_popup = not True
+OUTPUT_FILENAME = 'readme.md'
+enable_popup = True
+
 # method = 'simple, no log'
 method = 'with logs'
+
 
 ##############
 #     __     #
@@ -25,7 +28,7 @@ method = 'with logs'
 if method == 'simple, no log':
     main(logger=None,
          files_to_include=[0, 1, 2, 3],
-         output_name='This_is_FINAL_readme.md',
+         output_name=OUTPUT_FILENAME,
          delete_html_comments=True)
 
 ################
@@ -37,12 +40,21 @@ if method == 'simple, no log':
 #    |____|    #
 ################
 if method == 'with logs':
-    import logging; logger = logging.getLogger(__name__); logger.setLevel(logging.DEBUG)
-    my_file = logging.FileHandler('usage.log.txt', mode='w'); my_file.setLevel(logging.DEBUG)
+
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    my_file = logging.FileHandler('usage.log.txt', mode='w')
+    my_file.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s>%(levelname)s: %(message)s')
-    my_file.setFormatter(formatter); logger.addHandler(my_file); logger.info('STARTING')
-    main(logger=logger, files_to_include=[0, 1, 2, 3],
-         output_name='This_is_FINAL_readme.md',
+    my_file.setFormatter(formatter)
+    logger.addHandler(my_file)
+    logger.info('STARTING')
+    
+    main(logger=logger,
+         files_to_include=[0, 1, 2, 3],
+         output_name=OUTPUT_FILENAME,
          delete_html_comments=True)
 
 ########################################
@@ -57,4 +69,5 @@ if method == 'with logs':
 ########################################
 if enable_popup:
     import PySimpleGUI as sg
-    sg.Popup('DOCS ARE BAKED')
+    sg.Popup('Completed making {}'.format(OUTPUT_FILENAME))
+
