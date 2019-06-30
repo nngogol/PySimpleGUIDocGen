@@ -31,6 +31,7 @@ import inspect
 #             d8888P                          dP
 
 
+
 g_time_start = 0
 g_time_end = 0
 g_time_delta = 0
@@ -222,9 +223,9 @@ MENU_KEY_SEPARATOR = '::'
 def RGB(red, green, blue):
     """
     Given integer values of Red, Green, Blue, return a color string "#RRGGBB"
-    :param (int) red: int: Red portion from 0 to 255
-    :param (int) green: int: Green portion from 0 to 255
-    :param (int) blue: int: Blue portion from 0 to 255
+    :param red: (int) Red portion from 0 to 255
+    :param green: (int) Green portion from 0 to 255
+    :param  blue: (int) Blue portion from 0 to 255
     :return: (str) A single RGB String in the format "#RRGGBB" where each pair is a hex number.
     """
     return '#%02x%02x%02x' % (red, green, blue)
@@ -449,7 +450,7 @@ class Element():
         """
         Callback function called when user chooses a menu item from menubar, Button Menu or right click menu
 
-        :param item_chosen: str. String holding the value chosen.
+        :param item_chosen: (str) String holding the value chosen.
 
         """
         # print('IN MENU ITEM CALLBACK', item_chosen)
@@ -465,7 +466,7 @@ class Element():
         "Container Element" is encountered. Func has to walk entire window including these "sub-forms"
 
         :param form: the Window object to search
-        :return Button Object if a button is found, else None if no button found
+        :return union[Button, None] Button Object if a button is found, else None if no button found
         """
         for row in form.Rows:
             for element in row:
@@ -1084,6 +1085,7 @@ class Listbox(Element):
         """
         Moves the focus to this element
         :param force: Bool. If True, will call focus_force instead of focus_set
+        :return:
         """
         try:
             if force:
