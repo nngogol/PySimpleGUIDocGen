@@ -267,9 +267,12 @@ def render(injection):
                                          doc_string=injection['function_object'].__doc__)
     else:  # class method
         function_name = injection['parent_class'].__name__ if injection['part2'] == '__init__' else injection['part2']
+        # print(f'function_name = {function_name}')
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=function_name,
                                          doc_string=injection['function_object'].__doc__)
+        # print(f'sig = {sig}')
+        # print(f'table = {table}')
 
     if injection['number'] == '':
         return pad_n(sig) + pad_n(table)
@@ -282,7 +285,6 @@ def render(injection):
 def readfile(fname):
     with open(fname, 'r', encoding='utf-8') as ff:
         return ff.read()
-
 
 
 def main(do_full_readme=False, files_to_include: list = [], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True, allow_multiple_tags=True):
@@ -301,10 +303,10 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
     # 888888888888888888888888888888888888888888
     # ===========  1 loading files =========== #
     # 888888888888888888888888888888888888888888
-    HEADER_top_part = readfile('1_HEADER_top_part.md')  # 1
+    # HEADER_top_part = readfile('1_HEADER_top_part.md')  # 1
     readme          = readfile('2_readme.md')           # 2
-    FOOTER          = readfile('3_FOOTER.md')           # 3
-    Release_notes   = readfile('4_Release_notes.md')    # 4
+    # FOOTER          = readfile('3_FOOTER.md')           # 3
+    # Release_notes   = readfile('4_Release_notes.md')    # 4
 
 
     # 8888888888888888888888888888888888888888888888888888888888888888888888888
@@ -462,10 +464,10 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
     # 8888888888888888888888888888888888
 
     files = []
-    if 0 in files_to_include: files.append(HEADER_top_part)
+    # if 0 in files_to_include: files.append(HEADER_top_part)
     if 1 in files_to_include: files.append(readme)
-    if 2 in files_to_include: files.append(FOOTER)
-    if 3 in files_to_include: files.append(Release_notes)
+    # if 2 in files_to_include: files.append(FOOTER)
+    # if 3 in files_to_include: files.append(Release_notes)
 
     Joined_MARKDOWN = '\n\n'.join(files) if do_full_readme or files else readme
 
@@ -562,21 +564,10 @@ def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
 
 
 if __name__ == '__main__':
-    # my_mode = 'debug-mode'
-    my_mode = 'debug-mode2'
-    # my_mode = 'cli-mode'
-
-    if my_mode == 'cli-mode':
-        cli()
-    elif my_mode == 'debug-mode':
-        main(files_to_include=[0, 1, 2, 3],
-             output_name='johnson_n_johnson.txt',
-             delete_html_comments=True)
-    elif my_mode == 'debug-mode2':
-        import logging; logger = logging.getLogger(__name__); logger.setLevel(logging.DEBUG)
-        my_file = logging.FileHandler('usage.log.txt', mode='w'); my_file.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s>%(levelname)s: %(message)s')
-        my_file.setFormatter(formatter); logger.addHandler(my_file); logger.info('STARTING')
-        main(logger=logger, files_to_include=[1],
-             output_name='johnson_n_johnson.txt',
-             delete_html_comments=True)
+    import logging; logger = logging.getLogger(__name__); logger.setLevel(logging.DEBUG)
+    my_file = logging.FileHandler('JOHNSON_N_JOHNSON.LOG', mode='w'); my_file.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s>%(levelname)s: %(message)s')
+    my_file.setFormatter(formatter); logger.addHandler(my_file); logger.info('STARTING')
+    main(logger=logger, files_to_include=[1],
+         output_name='johnson_n_johnson.txt',
+         delete_html_comments=True)
