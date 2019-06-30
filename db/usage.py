@@ -1,4 +1,3 @@
-import PySimpleGUI as sg
 from make_real_readme import main
 
 ########################################################################
@@ -11,12 +10,12 @@ from make_real_readme import main
 #                                    __/ |                             #
 #                                   |___/                              #
 ########################################################################
-# method = 'simple, no log'
-from vispy.ext.gdi32plus import OUTLINETEXTMETRIC
+OUTPUT_FILENAME = 'readme.md'
+enable_popup = True
 
+# method = 'simple, no log'
 method = 'with logs'
 
-OUTPUT_FILENAME = 'readme.md'
 
 ##############
 #     __     #
@@ -25,8 +24,6 @@ OUTPUT_FILENAME = 'readme.md'
 #     | |    #
 #     | |    #
 #     |_|    #
-#            #
-#            #
 ##############
 if method == 'simple, no log':
     main(logger=None,
@@ -41,8 +38,6 @@ if method == 'simple, no log':
 #      / /     #
 #     / /_     #
 #    |____|    #
-#              #
-#              #
 ################
 if method == 'with logs':
 
@@ -56,11 +51,11 @@ if method == 'with logs':
     my_file.setFormatter(formatter)
     logger.addHandler(my_file)
     logger.info('STARTING')
+    
     main(logger=logger,
          files_to_include=[0, 1, 2, 3],
          output_name=OUTPUT_FILENAME,
          delete_html_comments=True)
-
 
 ########################################
 #     _____                            #
@@ -72,4 +67,7 @@ if method == 'with logs':
 #               | |         | |        #
 #               |_|         |_|        #
 ########################################
-sg.Popup('Completed making {}'.format(OUTPUT_FILENAME))
+if enable_popup:
+    import PySimpleGUI as sg
+    sg.Popup('Completed making {}'.format(OUTPUT_FILENAME))
+
