@@ -159,7 +159,7 @@ def special_cases(function_name, sig, doc_string):
         """
         return_part = get_return_part(doca)
         desc_ = get_doc_desc(doca)
-        return True, f'\n\n{desc_}\n\n```\n{function_name}() -> {return_part}\n```\n\n'
+        return True, f'\n\n```{desc_}\n{function_name}() -> {return_part}\n```\n\n'
 
     # +return -param
     elif 'self' in params_names and len(params_names) == 1 and doca and ':param' not in doca and ':return:' in doca:
@@ -187,10 +187,11 @@ def get_doc_desc(doc_string):
     return f'\n{desc}' if desc else ''
 
 
-def get_sig_table_parts(function_obj, function_name, doc_string, logger=None):
+def get_sig_table_parts(function_obj, function_name, doc_string):
     """
     Convert "function + __doc__" tp "method call + params table" in MARKDOWN
     """
+
 
     doc_string = doc_string.strip()
 
@@ -198,11 +199,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None):
     # 0   0            Making INIT_CALL          0   0 #
     # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
 
-    try:
-        sig, rows = signature(function_obj).parameters, []
-    except Exception as e:
-        if logger: logger.error(f'PROBLEM WITH {function_obj} {function_name}')
-        return '', ''
+    sig, rows = signature(function_obj).parameters, []
     for index, key in enumerate(sig):
         val = sig[key].default
         if 'self' == str(key):
@@ -217,7 +214,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None):
             raise Exception(f'IDK this type -> {key, val}')
 
     sig_content = f',\n{TAB_char}'.join(rows)
-    sign = "\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
+    sign = "\n```{0}\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
 
     if function_name == 'method34': import pdb; pdb.set_trace();
     # --------------
@@ -247,13 +244,10 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None):
                            get_params_part(doc_string).items()])
 
     # 3
-    params_TABLE = TABLE_TEMPLATE.format(md_table=md_table, md_return=md_return).replace(TAB_char, '').replace('    ', '').replace('\t', '')
-
-    # 1 and N
-    # if len(get_params_part(doc_string).items()) == 1:
-    #     params_TABLE = TABLE_TEMPLATE.replace('Parameters Descriptions:', 'Parameter Description:').format(md_table=md_table, md_return=md_return).replace(TAB_char, '').replace('    ', '').replace('\t', '')
-    # else:
-    #     params_TABLE = TABLE_TEMPLATE.format(md_table=md_table, md_return=md_return).replace(TAB_char, '').replace('    ', '').replace('\t', '')
+    if len(get_params_part(doc_string).items()) == 1:
+        params_TABLE = TABLE_TEMPLATE.replace('Parameters explained:', 'Parameter explained:').format(md_table=md_table, md_return=md_return).replace(TAB_char, '').replace('    ', '').replace('\t', '')
+    else:
+        params_TABLE = TABLE_TEMPLATE.format(md_table=md_table, md_return=md_return).replace(TAB_char, '').replace('    ', '').replace('\t', '')
 
     if not md_table.strip():
         params_TABLE = ''
@@ -267,16 +261,16 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None):
 def pad_n(text): return f'\n{text}\n'
 
 
-def render(injection, logger=None):
+def render(injection):
     if injection['part1'] == 'func':  # function
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=injection['part2'],
-                                         doc_string=injection['function_object'].__doc__, logger=logger)
+                                         doc_string=injection['function_object'].__doc__)
     else:  # class method
         function_name = injection['parent_class'].__name__ if injection['part2'] == '__init__' else injection['part2']
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=function_name,
-                                         doc_string=injection['function_object'].__doc__, logger=logger)
+                                         doc_string=injection['function_object'].__doc__)
 
     if injection['number'] == '':
         return pad_n(sig) + pad_n(table)
@@ -301,7 +295,8 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
     5) replaces classes, functions.
     6) join 1 big readme file
     """
-    if logger: logger.info(f'STARTING')
+    print('starting main')
+    # if logger == None: raise Exception('give me a logger')
 
     # 888888888888888888888888888888888888888888
     # ===========  1 loading files =========== #
@@ -375,10 +370,12 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
             founded_function = [func for func_name,
                                 func in psg_funcs if func_name == function_name]
             if not founded_function:
-                if logger: logger.error(f'function "{function_name}" not found in PySimpleGUI')
+                if logger:
+                    logger.error(f'function "{function_name}" not found in PySimpleGUI')
                 continue
             if len(founded_function) > 1:
-                if logger: logger.error(f'more than 1 function named "{function_name}" found in PySimpleGUI')
+                if logger:
+                    logger.error(f'more than 1 function named "{function_name}" found in PySimpleGUI')
                 continue
 
             # {{{{{{{{{ collect }}}}}}}}}
@@ -411,31 +408,27 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
             founded_class = [a_class_obj for a_class_name,
                              a_class_obj in psg_classes if a_class_name == class_name]
             if not founded_class:
-                if logger: logger.error(f'class "{tag}" not found in PySimpleGUI')
+                if logger:
+                    logger.error(f'class "{tag}" not found in PySimpleGUI')
                 continue
             if len(founded_class) > 1:
-                if logger: logger.error(f'more than 1 class named "{tag}" found in PySimpleGUI')
+                if logger:
+                    logger.error(f'more than 1 class named "{tag}" found in PySimpleGUI')
                 continue
 
             # {{{{{{{{{ find method }}}}}}}}}
             try:
                 if method_name != 'doc':
                     founded_method = getattr(founded_class[0], method_name)
-                    # GLG.append([founded_method, founded_class[0], method_name])
-                    # string_type = str(type(founded_method))
-                    # if 'property' in string_type or 'bound' in string_type:
-                    #     print(string_type)
-                    #     # import pdb; pdb.set_trace();
-                    #     if logger:
-                    #         logger.error(f'Property "{founded_method}" is not parsed.')
-                    #     continue
                 else:
                     founded_method = None
             except AttributeError as e:
-                if logger: logger.error(f'METHOD not found!: {str(e)}')
+                if logger:
+                    logger.error(f'METHOD not found!: {str(e)}')
                 continue
             except Exception as e:
-                if logger: logger.error(str(e))
+                if logger:
+                    logger.error(str(e))
                 continue
 
             # {{{{{{{{{ collect }}}}}}}}}
@@ -456,18 +449,14 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
     # ===========  5 injecting  =========== #
     # 888888888888888888888888888888888888888
 
-    success_tags = []
     for injection in injection_points:
         if injection['part2'] == 'doc':  # our special snowflake "doc"
             readme = readme.replace(injection['tag'], injection['parent_class'].__doc__)
         else:
             tag = injection['tag']
-            content = render(injection, logger=logger)
-            if content:
-                success_tags.append(f'{tag} - COMPLETE')
+            content = render(injection)
             readme = readme.replace(injection['tag'], content)
-    if logger:
-        logger.info('DONE TAGS:\n' + '\n'.join(success_tags))
+
     # 8888888888888888888888888888888888
     # ===========  6 join  =========== #
     # 8888888888888888888888888888888888
@@ -487,7 +476,8 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
 
             # {{{{{{{{{ html removing }}}}}}}}}
             if delete_html_comments:
-                if logger: logger.info('Deleting html comments')
+                if logger:
+                    logger.info('Deleting html comments')
 
                 # remove html comments
                 filt_readme = re.sub(
@@ -517,10 +507,9 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
             content = content.strip()
             ff.write(content)
 
-        if logger: logger.info(f'ending. writing to a file///////////////')
+        print('ending. writing to a file///////////////')
         return content
-
-    if logger: logger.error(f'Error in main')
+    print('err in main')
 
 
 @click.command()
@@ -530,6 +519,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
 @click.option('-o', '--output_name',                default='FINALreadme.md',   type=click.Path(), help='Name for generated .md file')
 @click.option('-lo', '--log_file',                  default='LOGS.log',         type=click.Path(), help='Name for log file')
 def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
+    print('starting cli')
     # --------------------
     # ----- logging setup-
     # --------------------
@@ -547,11 +537,14 @@ def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
 
     my_file.setFormatter(formatter)
     logger.addHandler(my_file)
+    logger.info('STARTING')
 
     main(logger=logger,
          files_to_include=[0, 1, 2, 3],
          output_name=output_name,
          delete_html_comments=delete_html_comments)
+
+    logger.info('FINISHED')
 
     # --------------------
     # ----- POST process--
@@ -565,7 +558,7 @@ def cli(no_log, delete_log, delete_html_comments, output_name, log_file):
             try:
                 os.remove(log_file)
             except Exception as e:
-                logger.error(str(e))
+                print(str(e))
 
 if __name__ == '__main__':
     # my_mode = 'cli-mode'
@@ -582,7 +575,7 @@ if __name__ == '__main__':
         import logging; logger = logging.getLogger(__name__); logger.setLevel(logging.DEBUG)
         my_file = logging.FileHandler('usage.log.txt', mode='w'); my_file.setLevel(logging.DEBUG)
         formatter = logging.Formatter('%(asctime)s>%(levelname)s: %(message)s')
-        my_file.setFormatter(formatter); logger.addHandler(my_file);
+        my_file.setFormatter(formatter); logger.addHandler(my_file); logger.info('STARTING')
         main(logger=logger, files_to_include=[1],
              output_name='johnson_n_johnson.txt',
              delete_html_comments=True)

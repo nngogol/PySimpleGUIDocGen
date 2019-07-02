@@ -81,23 +81,10 @@ Preview of popups:
 	<img src="https://user-images.githubusercontent.com/13696193/44957595-9e15da00-aea1-11e8-8909-6b6121b74509.jpg">
 </p>
 
-```
-Popup(*args,  Variable number of arguments you want to display
-	button_color=None, Color of buttons (text_color, background_color)
-	background_color=None, Color of background
-	text_color=None, Color of text
-	button_type=POPUP_BUTTONS_OK, Type of button layout
-	auto_close=False, If True window will automatically close
-	auto_close_duration=None, Number of seconds for autoclose
-	non_blocking=False, If True returns immediately
-	icon=DEFAULT_WINDOW_ICON, Icon to use on the taskbar
-	line_width=None, Width of lines in characters
-	font=None, Font to use for characters
-	no_titlebar=False, If True no titlebar will be shown
-	grab_anywhere=False, If True can move window by grabbing anywhere
-	keep_on_top=False, If True window will be on top of other windows
-	location=(None,None)): (x,y) coordinates to show the window
-```
+<!-- <+func.Popup+> -->
+
+The other output Popups are variations on parameters.  Usually the button_type parameter is the primary one changed.
+
 
 
 The other output Popups are variations on parameters.  Usually the button_type parameter is the primary one changed.
@@ -156,21 +143,8 @@ Use these Popups instead of making  a custom window to get one data value, call 
 ### PopupGetText
 Use this Popup to get a line of text from the user.
 
-```
-PopupGetText(message,The message you wish to display with the input field
-		default_text='', Text to initially fill into the input field
-		password_char='', Passwork character if this is a password field
-		size=(None,None), Size of the window
-		button_color=None, Color to use for buttons (foreground, background)
-		background_color=None, Background color for window
-		text_color=None, Text color for window
-		icon=DEFAULT_WINDOW_ICON, Icon to display on taskbar
-		font=None, Font to use for text
-		no_titlebar=False, If True no titlebar will be shown
-		grab_anywhere=False, If True can grab anywhere to move the window
-		keep_on_top=False, If True window will stay on top of other windows
-		location=(None,None))  Location on screen to display window
-```
+<!-- <+func.PopupGetText+> -->
+
 
 ```python
 import PySimpleGUI as sg
@@ -185,24 +159,8 @@ sg.Popup('Results', 'The value returned from PopupGetText', text)
 ### PopupGetFile
 Gets a filename from the user.  There are options to configure the type of dialog box to show.  Normally an "Open File" dialog box is shown.
 
-```
-PopupGetFile(message, Message to show in the window
-		default_path='', Path browsing should start from
-		default_extension='', Which filetype is the default
-		save_as=False, Determines which dialog box stype to show
-		file_types=(("ALL Files", "*.*"),), Which filetypes are displayed
-		no_window=False, if True no window is displayed except the dialog box
-		size=(None,None), Size of window
-		button_color=None, Color of buttons
-		background_color=None, Color of window background
-		text_color=None, Color of text in window
-		icon=DEFAULT_WINDOW_ICON, Icon to show on taskbar
-		font=None, Font to use
-		no_titlebar=False, If True does not display a titlebar
-		grab_anywhere=False, if True can grab window anywhere to move it
-		keep_on_top=False, if True window will be on top of others
-		location=(None,None)) Location on screen to show window
-```
+<!-- <+func.PopupGetFile+> -->
+
 
 If configured as an Open File Popup then (save_as is not True)  the dialog box will look like this. 
 
@@ -227,21 +185,7 @@ sg.Popup('Results', 'The value returned from PopupGetFile', text)
 
 The window created to get a folder name looks the same as the get a file name.  The difference is in what the browse button does.  `PopupGetFile` shows an Open File dialog box while `PopupGetFolder`  shows an Open Folder dialog box.
 
-```
-PopupGetFolder(message,  Message to display in window
-		default_path='',  Path to start browsing
-		no_window=False,  If True no window will be shown
-		size=(None,None), Size of window
-		button_color=None, Color of buttons
-		background_color=None, Background color of window
-		text_color=None,  Color of window text
-		icon=DEFAULT_WINDOW_ICON, Icon to show on taskbar
-		font=None,  Font to use for window
-		no_titlebar=False,  If True no titlebar will be shown
-		grab_anywhere=False,  If True can grab anywhere on window to move
-		keep_on_top=False,  If True window will be on top
-		location=(None, None))  Location on screen to create window
-```
+<!-- <+func.PopupGetFolder+> -->
 
 This is a typpical call
 
@@ -260,32 +204,6 @@ The animated Popup enables you to easily display a "loading" style animation spe
 
 <!-- <+func.PopupAnimated+> -->
 
-<!-- ```python
-def PopupAnimated(image_source,
-		message=None,
-		background_color=None,
-		text_color=None,
-		font=None,
-		no_titlebar=True,
-		grab_anywhere=True,
-		keep_on_top=True,
-		location=(None, None),
-		alpha_channel=.8,
-		time_between_frames=0)
-```
-
-|Name|Meaning|
-|-----|-----|
-|image_source           | The GIF file specified as a string filename or a base64 variable |
-|message                | optional text message to be displayed under the animation |
-|background_color       | the background color to use for the window and all of the other parts of the window |
-|text_color                 | color to use for optional text |
-|font                   | font to use for the optional text |
-|no_titlebar            | no titlebar window setting |
-|location               | location to show the window |
-|alpha_channel          | alpha channel to use for the window |
-|time_between_frames    | amount of time in milliseconds to use between frames |
-||| -->
 
 ***To close animated popups***, call PopupAnimated with `image_source=None`.  This will close all of the currently open PopupAnimated windows.
 
@@ -935,6 +853,70 @@ You can learn more about these async / non-blocking windows toward the end of th
 
 # Window Object - Beginning a window
 The first step is to create the window object using the desired window customization.
+
+
+<!-- <+Window.doc+> -->
+
+<!-- <+Window.__init__+> -->
+
+## Methods
+<!-- <+Window.AddRow+> -->
+<!-- <+Window.AddRows+> -->
+<!-- <+Window.AlphaChannel+> -->
+<!-- <+Window.BringToFront+> -->
+<!-- <+Window.BuildKeyDict+> -->
+<!-- <+Window.Close+> -->
+<!-- <+Window.CloseNonBlocking+> -->
+<!-- <+Window.CloseNonBlockingForm+> -->
+<!-- <+Window.CurrentLocation+> -->
+<!-- <+Window.DecrementOpenCount+> -->
+<!-- <+Window.Disable+> -->
+<!-- <+Window.DisableDebugger+> -->
+<!-- <+Window.Disappear+> -->
+<!-- <+Window.Element+> -->
+<!-- <+Window.Enable+> -->
+<!-- <+Window.EnableDebugger+> -->
+<!-- <+Window.Fill+> -->
+<!-- <+Window.Finalize+> -->
+<!-- <+Window.Find+> -->
+<!-- <+Window.FindElement+> -->
+<!-- <+Window.FindElementWithFocus+> -->
+<!-- <+Window.GetAContainerNumber+> -->
+<!-- <+Window.GetScreenDimensions+> -->
+<!-- <+Window.GrabAnyWhereOff+> -->
+<!-- <+Window.GrabAnyWhereOn+> -->
+<!-- <+Window.Hide+> -->
+<!-- <+Window.IncrementOpenCount+> -->
+<!-- <+Window.Layout+> -->
+<!-- <+Window.LayoutAndRead+> -->
+<!-- <+Window.LayoutAndShow+> -->
+<!-- <+Window.LoadFromDisk+> -->
+<!-- <+Window.Maximize+> -->
+<!-- <+Window.Minimize+> -->
+<!-- <+Window.Move+> -->
+<!-- <+Window.Normal+> -->
+<!-- <+Window.NumOpenWindows+> -->
+<!-- <+Window.OnClosingCallback+> -->
+<!-- <+Window.OnMotion+> -->
+<!-- <+Window.Read+> -->
+<!-- <+Window.ReadNonBlocking+> -->
+<!-- <+Window.Reappear+> -->
+<!-- <+Window.Refresh+> -->
+<!-- <+Window.SaveToDisk+> -->
+<!-- <+Window.SetAlpha+> -->
+<!-- <+Window.SetIcon+> -->
+<!-- <+Window.SetTransparentColor+> -->
+<!-- <+Window.Show+> -->
+<!-- <+Window.Size+> -->
+<!-- <+Window.StartMove+> -->
+<!-- <+Window.StopMove+> -->
+<!-- <+Window.UnHide+> -->
+<!-- <+Window.VisibilityChanged+> -->
+
+
+
+
+OLD OLD OLD
 
 This is the definition of the Window object:
 
@@ -1901,8 +1883,6 @@ Output(size=(None, None))
 ### Methods
 
 <!-- <+Output.Update+> -->
-
-<!-- <+Output.UpdateBar+> -->
 
 ----
 

@@ -570,10 +570,19 @@ Preview of popups:
 	<img src="https://user-images.githubusercontent.com/13696193/44957595-9e15da00-aea1-11e8-8909-6b6121b74509.jpg">
 </p>
 
-Popup - Display a popup Window with as many parms as you wish to include.  This is the GUI equivalent of the
-"print" statement.  It's also great for "pausing" your program's flow until the user can read some error messages
+## Popup Functions Defined
+
+## Popup
+
+This is the basic Popup.  It's the one you'll use the most.  It's the one that all other Popups are built on top of.
+
+`Popup` is your `print` equivalent in many ways.  Or it's a mechanism to pausee the execution of a program for long enough to deliver a message or to pause the program's execution.
+
+Call `Popup` with as many parameter as you want printed.  It's like a print so feel free to load it up with stuff.  Everything will be converted into a string before showing it so don't worry about convertig anything.
 
 ```
+Popup - Display a popup Window with as many parms as you wish to include.  This is the GUI equivalent of the
+"print" statement.  It's also great for "pausing" your program's flow until the user can read some error messages
 Popup(args,
     title=None,
     button_color=None,
@@ -592,8 +601,6 @@ Popup(args,
     keep_on_top=False,
     location=(None, None))
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -617,25 +624,36 @@ Parameter Descriptions:
 
 The other output Popups are variations on parameters.  Usually the button_type parameter is the primary one changed.
 
-The other output Popups are variations on parameters.  Usually the button_type parameter is the primary one changed.
-
-The choices for button_type are:
-```
-POPUP_BUTTONS_YES_NO
-POPUP_BUTTONS_CANCELLED
-POPUP_BUTTONS_ERROR
-POPUP_BUTTONS_OK_CANCEL
-POPUP_BUTTONS_OK
-POPUP_BUTTONS_NO_BUTTONS
-```
-Note that you should not call Popup yourself with different button_types.  Rely on the Popup function named that sets that value for you.  For example PopupYesNo will set the button type to POPUP_BUTTONS_YES_NO for you.
-
 #### Scrolled Output
 There is a scrolled version of Popups should you have a lot of information to display.
 
-```python
-PopupScrolled(*args, button_color=None, yes_no=False, auto_close=False, auto_close_duration=None, size=(None, None), location=(None, None), title=None, non_blocking=False)
 ```
+Show a scrolled Popup window containing the user's text that was supplied.  Use with as many items to print as you
+want, just like a print statement.
+PopupScrolled(args,
+    button_color=None,
+    yes_no=False,
+    auto_close=False,
+    auto_close_duration=None,
+    size=(None, None),
+    location=(None, None),
+    title=None,
+    non_blocking=False)
+```
+
+|Name|Meaning|
+|---|---|
+|*args|Variable number of items to print|
+|button_color|button color (foreground, background)|
+|yes_no|(Default = False)|
+|auto_close|(Default = False)|
+|auto_close_duration||
+|size|(w,h) w=characters-wide, h=rows-high|
+|location|(Default = (None))|
+|title||
+|non_blocking|(Default = False)
+:return Union[str, None] Returns text of the button that was pressed.  None will be returned if user closed window with X|
+
 Typical usage:
 
 ```python
@@ -669,9 +687,8 @@ Use these Popups instead of making  a custom window to get one data value, call 
 ### PopupGetText
 Use this Popup to get a line of text from the user.
 
-Display Popup with text entry field
-
 ```
+Display Popup with text entry field
 PopupGetText(message,
     title=None,
     default_text="",
@@ -687,8 +704,6 @@ PopupGetText(message,
     keep_on_top=False,
     location=(None, None))
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -720,9 +735,8 @@ sg.Popup('Results', 'The value returned from PopupGetText', text)
 ### PopupGetFile
 Gets a filename from the user.  There are options to configure the type of dialog box to show.  Normally an "Open File" dialog box is shown.
 
-Display popup with text entry field and browse button. Browse for file
-
 ```
+Display popup with text entry field and browse button. Browse for file
 PopupGetFile(message,
     title=None,
     default_path="",
@@ -743,8 +757,6 @@ PopupGetFile(message,
     location=(None, None),
     initial_folder=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -790,9 +802,8 @@ sg.Popup('Results', 'The value returned from PopupGetFile', text)
 
 The window created to get a folder name looks the same as the get a file name.  The difference is in what the browse button does.  `PopupGetFile` shows an Open File dialog box while `PopupGetFolder`  shows an Open Folder dialog box.
 
-Display popup with text entry field and browse button. Browse for folder
-
 ```
+Display popup with text entry field and browse button. Browse for folder
 PopupGetFolder(message,
     title=None,
     default_path="",
@@ -809,8 +820,6 @@ PopupGetFolder(message,
     location=(None, None),
     initial_folder=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -844,11 +853,10 @@ This is a typpical call
 
 The animated Popup enables you to easily display a "loading" style animation specified through a GIF file that is either stored in a file or a base64 variable.
 
+```
 "Plays" an animated GIF file.  This function has its own internal clocking meaning you can call it at any frequency
  and the rate the frames of video is shown remains constant.  Maybe your frames update every 30 ms but your
  event loop is running every 10 ms.
-
-```
 PopupAnimated(image_source,
     message=None,
     background_color=None,
@@ -862,8 +870,6 @@ PopupAnimated(image_source,
     time_between_frames=0,
     transparent_color=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -1515,422 +1521,6 @@ You can learn more about these async / non-blocking windows toward the end of th
 # Window Object - Beginning a window
 The first step is to create the window object using the desired window customization.
 
-    Represents a single Window
-
-```
-Window(title,
-    layout=None,
-    default_element_size=(45, 1),
-    default_button_element_size=(None, None),
-    auto_size_text=None,
-    auto_size_buttons=None,
-    location=(None, None),
-    size=(None, None),
-    element_padding=None,
-    margins=(None, None),
-    button_color=None,
-    font=None,
-    progress_bar_color=(None, None),
-    background_color=None,
-    border_depth=None,
-    auto_close=False,
-    auto_close_duration=3,
-    icon=None,
-    force_toplevel=False,
-    alpha_channel=1,
-    return_keyboard_events=False,
-    use_default_focus=True,
-    text_justification=None,
-    no_titlebar=False,
-    grab_anywhere=False,
-    keep_on_top=False,
-    resizable=False,
-    disable_close=False,
-    disable_minimize=False,
-    right_click_menu=None,
-    transparent_color=None,
-    debugger_enabled=True)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|title||
-|layout||
-|default_element_size|(Default value = DEFAULT_ELEMENT_SIZE)|
-|default_button_element_size||
-|auto_size_text|True if size should fit the text length|
-|auto_size_buttons||
-|location|Location on screen to display|
-|size|(w,h) w=characters-wide, h=rows-high (Default = (None))|
-|element_padding||
-|margins|(Default = (None))|
-|button_color|button color (foreground, background)|
-|font|specifies the font family, size, etc|
-|progress_bar_color|(Default = (None))|
-|background_color|color of background|
-|border_depth||
-|auto_close|(Default = False)|
-|auto_close_duration|(Default value = DEFAULT_AUTOCLOSE_TIME)|
-|icon|Icon to display. Filled in with default icon in init (Default value = None)|
-|force_toplevel|(Default = False)|
-|alpha_channel|(Default value = 1)|
-|return_keyboard_events|(Default = False)|
-|use_default_focus|(Default = True)|
-|text_justification||
-|no_titlebar|(Default = False)|
-|grab_anywhere|If True can grab anywhere to move the window (Default = False)|
-|resizable|(Default = False)|
-|disable_close|(Default = False)|
-|disable_minimize|(Default = False)|
-|right_click_menu|see "Right Click Menus"|
-|transparent_color||
-|debugger_enabled|(Default = True)|
-
-## Methods
-
-Parms are a variable number of Elements
-
-```
-AddRow(args)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|*args||
-
-```
-AddRows(rows)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|rows||
-
-```python
-BringToFront()
-```
-
-```python
-BuildKeyDict()
-```
-
-```python
-Close()
-```
-
-```python
-CloseNonBlocking()
-```
-
-```python
-CloseNonBlockingForm()
-```
-
-```python
-CurrentLocation()
-```
-
-```
-DecrementOpenCount()
-```
-
-```python
-Disable()
-```
-
-```python
-DisableDebugger()
-```
-
-```python
-Disappear()
-```
-
-Find element object associated with the provided key
-:returns Found element object, an Error Element, or None
-
-```
-Element(key,
-    silent_on_error=False)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|key|Used with window.FindElement and with return values|
-|silent_on_error|(Default = False)|
-
-```python
-Enable()
-```
-
-```python
-EnableDebugger()
-```
-
-```
-Fill(values_dict)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|values_dict|?????????????????|
-
-```python
-Finalize()
-```
-
-Find element object associated with the provided key
-:returns Found element object, an Error Element, or None
-
-```
-Find(key,
-    silent_on_error=False)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|key|Used with window.FindElement and with return values|
-|silent_on_error|(Default = False)|
-
-Find element object associated with the provided key
-:returns Found element object, an Error Element, or None
-
-```
-FindElement(key,
-    silent_on_error=False)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|key|Used with window.FindElement and with return values|
-|silent_on_error|(Default = False)|
-
-```python
-FindElementWithFocus()
-```
-
-```
-GetAContainerNumber()
-```
-
-```python
-GetScreenDimensions()
-```
-
-```python
-GrabAnyWhereOff()
-```
-
-```python
-GrabAnyWhereOn()
-```
-
-```python
-Hide()
-```
-
-```
-IncrementOpenCount()
-```
-
-```
-Layout(rows)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|rows||
-
-```
-LayoutAndRead(rows,
-    non_blocking=False)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|rows||
-|non_blocking|(Default = False)|
-
-```
-LayoutAndShow(rows)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|rows||
-
-```
-LoadFromDisk(filename)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|filename|?????????????????|
-
-```python
-Maximize()
-```
-
-```python
-Minimize()
-```
-
-```
-Move(x,
-    y)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|x|x coordinate|
-|y|y coordinate|
-
-```python
-Normal()
-```
-
-```python
-OnClosingCallback()
-```
-
-```
-OnMotion(event)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|event||
-
-```
-Read(timeout=None,
-    timeout_key="__TIMEOUT__")
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|timeout|timeout to wait, till Read will execute itself|
-|timeout_key|(Default value = TIMEOUT_KEY)|
-
-```python
-ReadNonBlocking()
-```
-
-```python
-Reappear()
-```
-
-```python
-Refresh()
-```
-
-```
-SaveToDisk(filename)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|filename|?????????????????|
-
-```
-SetAlpha(alpha)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|alpha||
-
-```
-SetIcon(icon=None,
-    pngbase64=None)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|icon||
-|pngbase64||
-
-```
-SetTransparentColor(color)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|color||
-
-```
-Show(non_blocking=False)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|non_blocking|(Default = False)|
-
-```
-StartMove(event)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|event||
-
-```
-StopMove(event)
-```
-
-Parameter Descriptions:
-
-|Name|Meaning|
-|---|---|
-|event||
-
-```python
-UnHide()
-```
-
-```python
-VisibilityChanged()
-```
-
 OLD OLD OLD
 
 This is the definition of the Window object:
@@ -2283,8 +1873,6 @@ Text(text,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |text|The text to display (required)|
@@ -2312,8 +1900,6 @@ Update(value=None,
     font=None,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2376,8 +1962,6 @@ Multiline(default_text="",
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |default_text|text to display in multiline (Default value = '')|
@@ -2412,8 +1996,6 @@ Update(value=None,
     visible=None,
     autoscroll=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2456,8 +2038,6 @@ InputText(default_text="",
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |default_text|(str) Text initially shown in the input box as a default value(Default value = '')|
@@ -2480,16 +2060,13 @@ Parameter Descriptions:
 
 ### Methods
 
-Changes some of the settings for the Input Element. Must call `Window.Read` or `Window.Finalize` prior
-
 ```
+Changes some of the settings for the Input Element. Must call `Window.Read` or `Window.Finalize` prior
 Update(value=None,
     disabled=None,
     select=None,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2498,19 +2075,15 @@ Parameter Descriptions:
 |select|(bool) if True, then the text will be selected|
 |visible|(bool) change visibility of element|
 
-Read and return the current value of the input element. Must call `Window.Read` or `Window.Finalize` prior
-
 ```
+Read and return the current value of the input element. Must call `Window.Read` or `Window.Finalize` prior
 Get() -> (str) current value of Input field or '' if error encountered
 ```
 
-Sets focus to this element using focus_set. Will use focus_force if force flag set. Must call `Window.Read` or `Window.Finalize` prior
-
 ```
+Sets focus to this element using focus_set. Will use focus_force if force flag set. Must call `Window.Read` or `Window.Finalize` prior
 SetFocus(force=False)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2551,8 +2124,6 @@ Combo(values,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |values|List[Any]  values to choose. While displayed as text, the items returned are what the caller supplied, not text|
@@ -2573,9 +2144,8 @@ Parameter Descriptions:
 
 ### Methods
 
-Changes some of the settings for the Combo Element. Must call `Window.Read` or `Window.Finalize` prior
-
 ```
+Changes some of the settings for the Combo Element. Must call `Window.Read` or `Window.Finalize` prior
 Update(value=None,
     values=None,
     set_to_index=None,
@@ -2584,8 +2154,6 @@ Update(value=None,
     font=None,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2609,9 +2177,8 @@ layout = [[sg.Listbox(values=['Listbox 1', 'Listbox 2', 'Listbox 3'], size=(30, 
 
 ![listbox 2](https://user-images.githubusercontent.com/13696193/44959859-b4cd2880-aec3-11e8-881c-1e369d5c6337.jpg)
 
-Listbox Element
-
 ```
+Listbox Element
 Listbox(values,
     default_values=None,
     select_mode=None,
@@ -2630,8 +2197,6 @@ Listbox(values,
     right_click_menu=None,
     visible=True)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2655,17 +2220,14 @@ Parameter Descriptions:
 
 ### Methods
 
-Update some of the element's settings
-
 ```
+Update some of the element's settings
 Update(values=None,
     disabled=None,
     set_to_index=None,
     scroll_to_index=None,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2679,15 +2241,12 @@ Parameter Descriptions:
 SetValue(values)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |values|new values to choice|
 
-Returns list of Values provided by the user in the user's format
-
 ```
+Returns list of Values provided by the user in the user's format
 GetListValues() -> List. List of values. Can be any / mixed types -> []
 ```
 
@@ -2733,8 +2292,6 @@ Slider(range=(None, None),
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |range|(min, max) slider's range|
@@ -2769,8 +2326,6 @@ Update(value=None,
     disabled=None,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2811,8 +2366,6 @@ Radio(text,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |text|Text to display next to button|
@@ -2838,8 +2391,6 @@ Update(value=None,
     disabled=None,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2872,8 +2423,6 @@ Checkbox(text,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |text|Text to display next to checkbox|
@@ -2898,8 +2447,6 @@ Update(value=None,
     disabled=None,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -2937,8 +2484,6 @@ Spin(values,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |values|List of valid values|
@@ -2971,8 +2516,6 @@ Update(value=None,
     visible=None)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |value|set the current value|
@@ -3003,8 +2546,6 @@ Image(filename=None,
     enable_events=False)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |filename|file name if the image is in a file|
@@ -3027,8 +2568,6 @@ Update(filename=None,
     visible=None)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |filename||
@@ -3048,8 +2587,6 @@ You can specify an animated GIF as an image and can animate the GIF by calling `
 UpdateAnimation(source,
     time_between_frames=0)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3138,8 +2675,6 @@ Button(button_text="",
     key=None,
     visible=True)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3374,8 +2909,6 @@ Update(text=None,
     image_size=None)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |text|sets button text|
@@ -3387,9 +2920,8 @@ Parameter Descriptions:
 |image_subsample|amount to reduce the size of the image|
 |image_size||
 
-Returns the current text shown on a button
-
 ```
+Returns the current text shown on a button
 GetText() -> string value of button
 ```
 
@@ -3422,8 +2954,6 @@ ButtonMenu(button_text,
     tearoff=False,
     visible=True)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3465,8 +2995,6 @@ VerticalSeparator(pad=None)
 ```
 VerticalSeparator(pad=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3528,8 +3056,6 @@ ProgressBar(max_value,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |max_value|max value of progressbar|
@@ -3567,8 +3093,6 @@ Output(size=(None, None),
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |size|(w,h) w=characters-wide, h=rows-high|
@@ -3587,8 +3111,6 @@ Parameter Descriptions:
 Update(value=None,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3645,8 +3167,6 @@ Column(layout,
     key=None,
     visible=True)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3723,8 +3243,6 @@ Frame(title,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |title|title for frame above|
@@ -3773,8 +3291,6 @@ Canvas(canvas=None,
     right_click_menu=None,
     visible=True)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3873,8 +3389,6 @@ Graph(canvas_size,
     float_values=False)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |canvas_size|????????????????????????|
@@ -3918,8 +3432,6 @@ DrawLine(point_from,
     width=1)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |point_from||
@@ -3932,8 +3444,6 @@ DrawPoint(point,
     size=2,
     color="black")
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3948,8 +3458,6 @@ DrawCircle(center_location,
     line_color="black")
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |center_location||
@@ -3963,8 +3471,6 @@ DrawOval(top_left,
     fill_color=None,
     line_color=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -3982,8 +3488,6 @@ DrawArc(top_left,
     arc_color="black")
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |top_left||
@@ -4000,8 +3504,6 @@ DrawRectangle(top_left,
     line_color=None)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |top_left||
@@ -4016,8 +3518,6 @@ DrawText(text,
     font=None,
     angle=0)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -4035,8 +3535,6 @@ Erase()
 DeleteFigure(id)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |id||
@@ -4045,8 +3543,6 @@ Parameter Descriptions:
 Update(background_color,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -4057,8 +3553,6 @@ Parameter Descriptions:
 Move(x_direction,
     y_direction)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -4071,8 +3565,6 @@ MoveFigure(figure,
     y_direction)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |figure||
@@ -4084,8 +3576,6 @@ RelocateFigure(figure,
     x,
     y)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -4127,8 +3617,6 @@ Table(values,
     right_click_menu=None,
     visible=True)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -4176,8 +3664,6 @@ Update(values=None,
     select_rows=None)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |values||
@@ -4219,8 +3705,6 @@ Tree(data=None,
     right_click_menu=None,
     visible=True)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -4357,8 +3841,6 @@ TabGroup(layout,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |layout||
@@ -4391,8 +3873,6 @@ Tab(title,
     visible=True)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |title||
@@ -4423,8 +3903,6 @@ Update(values=None,
     visible=None)
 ```
 
-Parameter Descriptions:
-
 |Name|Meaning|
 |---|---|
 |values||
@@ -4453,8 +3931,6 @@ Pane(pane_list,
     key=None,
     visible=True)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
@@ -5132,8 +4608,6 @@ Note the placement of ',' and of [].  It's tricky to get the nested menus correc
 Update(menu_definition,
     visible=None)
 ```
-
-Parameter Descriptions:
 
 |Name|Meaning|
 |---|---|
