@@ -214,7 +214,7 @@ def get_doc_desc(doc_string):
     return f'\n{desc}' if desc else ''
 
 
-def get_sig_table_parts(function_obj, function_name, doc_string, logger=None):
+def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is_method=False):
     """
     Convert "function + __doc__" tp "method call + params table" in MARKDOWN
     """
@@ -228,7 +228,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None):
     try:
         sig, rows = signature(function_obj).parameters, []
     except Exception as e:
-        if logger: logger.error(f'PROBLEM WITH {function_obj} {function_name}')
+        if logger: logger.error(f'PROBLEM WITH "{function_obj}" "{function_name}":\nit\'s signature is BS. Ok, I will just return \'\' for \'signature\' and \'param_table\'\nOR BETTER - delete it from the 2_readme.md.\n======')
         return '', ''
     for index, key in enumerate(sig):
         val = sig[key].default
@@ -245,6 +245,8 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None):
 
     sig_content = f',\n{TAB_char}'.join(rows)
     sign = "\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
+
+    if is_method: sign = "#### {1}\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
 
     if function_name == 'method34': import pdb; pdb.set_trace();
     # --------------
@@ -302,7 +304,7 @@ def render(injection, logger=None):
     else:  # class method
         function_name = injection['parent_class'].__name__ if injection['part2'] == '__init__' else injection['part2']
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
-                                         function_name=function_name,
+                                         function_name=function_name, is_method=True,
                                          doc_string=injection['function_object'].__doc__, logger=logger)
 
     if injection['number'] == '':

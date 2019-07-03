@@ -862,7 +862,7 @@ The first step is to create the window object using the desired window customiza
 ## Methods
 <!-- <+Window.AddRow+> -->
 <!-- <+Window.AddRows+> -->
-<!-- <+Window.AlphaChannel+> -->
+<!-- <~~~~~~~~~~~~~~~~this will not render, that's good~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+Window.AlphaChannel+> -->
 <!-- <+Window.BringToFront+> -->
 <!-- <+Window.BuildKeyDict+> -->
 <!-- <+Window.Close+> -->
@@ -895,7 +895,7 @@ The first step is to create the window object using the desired window customiza
 <!-- <+Window.Minimize+> -->
 <!-- <+Window.Move+> -->
 <!-- <+Window.Normal+> -->
-<!-- <+Window.NumOpenWindows+> -->
+<!-- <~~~~~~~~~~~~~~~~~~~~this will not render, that's good~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+Window.NumOpenWindows+> -->
 <!-- <+Window.OnClosingCallback+> -->
 <!-- <+Window.OnMotion+> -->
 <!-- <+Window.Read+> -->
@@ -907,7 +907,7 @@ The first step is to create the window object using the desired window customiza
 <!-- <+Window.SetIcon+> -->
 <!-- <+Window.SetTransparentColor+> -->
 <!-- <+Window.Show+> -->
-<!-- <+Window.Size+> -->
+<!-- <~~~~~~~~~~~~~~~~~~~this will not render, that's good~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+Window.Size+> -->
 <!-- <+Window.StartMove+> -->
 <!-- <+Window.StopMove+> -->
 <!-- <+Window.UnHide+> -->
