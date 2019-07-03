@@ -74,14 +74,41 @@ def get_params_part(code: str) -> dict:
     """
 
     # if doc_string is empty
-    if '' == code.strip():
-        return {}
-    if ':param' not in code.strip():
-        return {}
-    if ':return:' in code.strip(): # strip ':return:'
-        code = code[:code.index(':return:')]
+    if code == None:           return {}
+    elif '' == code.strip():   return {}
+    elif ':param' not in code: return {}
+    elif ':return:' in code.strip(): # strip ':return:'
+        regg_ = re.compile(r':return[\d\D]*?:param', flags=re.MULTILINE)
+        new_code = code[:code.index(':return:')]
+        
+        if len(list(regg_.finditer(code))) > 0:
+            if versbose: print(f'warning-> ":return" MUST BY AT THE END. FIX IT NOW in {name_}!!!\nBut i will try to parse it...')
+            code = re.sub(regg_, r':param', code)
 
-    only_params = code[code.index(':param'):]  # get_only_params_string(code)
+    try:
+        only_params = code[code.index(':param'):]  # get_only_params_string(code)
+    except Exception as e:
+        if versbose: print(f'SORRY, fail at parsing that stuff in {name_}')
+        return {}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # making dict
     param_lines = only_params.split(':param ')
@@ -280,10 +307,12 @@ def render(injection, logger=None):
 
     if injection['number'] == '':
         return pad_n(sig) + pad_n(table)
-    if injection['number'] == '1':
+    elif injection['number'] == '1':
         return pad_n(sig)
-    if injection['number'] == '2':
+    elif injection['number'] == '2':
         return pad_n(table)
+    else:
+        if logger: logger.error(f'Error in processing {injection}')
 
 
 def readfile(fname):
@@ -457,6 +486,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
     # 888888888888888888888888888888888888888
 
     success_tags = []
+    bad_tags = []
     for injection in injection_points:
         if injection['part2'] == 'doc':  # our special snowflake "doc"
             readme = readme.replace(injection['tag'], injection['parent_class'].__doc__)
@@ -465,9 +495,16 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
             content = render(injection, logger=logger)
             if content:
                 success_tags.append(f'{tag} - COMPLETE')
+            else:
+                bad_tags.append(f'{tag} - FAIL')
             readme = readme.replace(injection['tag'], content)
     if logger:
-        logger.info('DONE TAGS:\n' + '\n'.join(success_tags))
+        success_tags_str    = '\n'.join(success_tags).strip()
+        bad_tags_str        = '\n'.join(bad_tags).strip()
+        good_message        = f'DONE {len(success_tags)} TAGS:\n' + '\n'.join(success_tags) if success_tags_str else 'All tags are wrong//'
+        bad_message         = f'FAIL WITH {len(bad_tags)} TAGS:\n' + '\n'.join(bad_tags) if bad_tags_str else 'No bad tags, YES!'
+        logger.info(good_message)
+        logger.info(bad_message)
     # 8888888888888888888888888888888888
     # ===========  6 join  =========== #
     # 8888888888888888888888888888888888
