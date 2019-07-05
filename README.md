@@ -14,6 +14,8 @@ Simple and easy.
 |`polygon/` | testing new ideas|
 |`make_real_readme.py` | the builder|
 |`PySimpleGUIlib.py` | some version of PySimpleGUI|
+|`get_CF_insight.py` | it's a core part for **SDK quick reference** in PySimpleGUI (or, in fact, any package).  Basicly, CF gives you a `dict`, that shows info about for classes and function in you given module.|
+
 
 
 # Usage
@@ -73,14 +75,23 @@ Remove log after generating + remove html triple '\n' in output file (**I use th
 python3 make_real_readme.py -o test.md -rml -rmh -nol
 ```
 
+You can `use usage.py`. It contains config data inside. It's like a `makefile`, but for windows :D
+
+```bash
+python3 usage.py
+```
+
 
 ### GUI:
 
 I removed it. *LEARN SHELL.*
 
+---
+
+
 # Everything is a `function` (maybe even you are)
 
-FUNTION is:
+FUNCTION is:
 
 - simple `def test1()`
 - class method (it's a function INSIDE of class defenition)
@@ -150,12 +161,29 @@ Here is mapping between tags and doc_strings:
 ![mdfile](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/img/tags.png)
 
 
+----
+
+"`testmethod`" can be any method, that really exists in class: "`__init__, hello, blabla`" etc.
+
+**Big exception is "`.doc`"** - it will render doc string **of your class**.
+
+If you have method, called `doc` in your class - it's bad for your (it wouldn't show in generated docs - it will insted show doc string of class).
+
+----
+
+The function tag  `<!-- <+func.function_name+> -->` is like class tag, but with word `func` in first part. Why? Because there is no class (KO).
+
+Just say `func.`  + your func name. No more no less.
+
 ---
+
 ---
 
 #### Comprehensive Example
 
-Let's take this `Person` class:
+Now. No rush. Just spent 3 minutes on reading. Let's start.
+
+Imagine some `Person` class:
 
 ```python
 
@@ -235,27 +263,13 @@ class Animal(object):
 
 ```
 
-Let's make simple block:
+Now look at the pictures. Here is simple block:
 
 ![mdfile](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/img/mdfile1.png)
 
 Now, look on this diagram:
 
 ![fulldiag](https://github.com/nngogol/PySimpleGUIDocGen/blob/master/img/full-diag.png)
-
-----
-
-"`testmethod`" can be any method, that really exists in class: "`__init__, hello, blabla`" etc.
-
-**Big exception is "`.doc`"** - it will render doc string **for your class**.
-
-If you have method `doc` in your class - it's bad for your (it wouldn't show in generated docs - it will insted show doc string of class).
-
-----
-
-The function tag  `<!-- <+func.function_name+> -->` is like class tag.
-Just say `func.`  + your func name. No more no less.
-
 
 
 ### Examples
