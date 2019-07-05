@@ -1,7 +1,7 @@
 # PySimpleGUIDocGen
 PySimpleGUIDocGen - is software for generating *some* documentation.
 
-This project is created for generating and maintaining `readme.md` for PySimpleGUI library.
+This project is created for generating and maintaining `readme.md` for ![PySimpleGUI](https://github.com/PySimpleGUI/PySimpleGUI) library.
 
 Simple and easy.
 
