@@ -18,6 +18,11 @@ TABLE_TEMPLATE='''
                         '''
 TABLE_ROW_TEMPLATE = '|{name}|{desc}|'
 TABLE_RETURN_TEMPLATE = '|||\n| **return** | {return_guy} |'
+TABLE_Only_table_RETURN_TEMPLATE = '''|Name|Meaning|\n|---|---|\n| **return** | $ |'''
+
+from collections import namedtuple
+special_case = namedtuple('special_case', 'ok sig table just_text'.split(' '))
+
 
 """
 injection_points:
@@ -95,21 +100,6 @@ def get_params_part(code: str) -> dict:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     # making dict
     param_lines = only_params.split(':param ')
     param_lines = [i.strip()
@@ -129,14 +119,17 @@ def get_params_part(code: str) -> dict:
     return args_kwargs_pairs
 
 
-def get_return_part(code: str) -> str:
+def get_return_part(code: str, line_break=None) -> str:
     """ Find ":return:" part in given "doc string"."""
+    if not line_break:
+        line_break = ' <br> '
+
     if ':return:' not in code:
         return ''
-    return code[code.index(':return:')+len(':return:'):].strip()
+    return code[code.index(':return:')+len(':return:'):].strip().replace('\n', line_break)
 
 
-def special_cases(function_name, sig, doc_string):
+def special_cases(function_name, sig, doc_string, line_break=None):
 
     doca, params_names = doc_string.strip(), list(dict(sig).keys())
     if 'self' in params_names and len(params_names) == 1 and not doca:
@@ -149,7 +142,7 @@ def special_cases(function_name, sig, doc_string):
         Get()
         ```
         """
-        return True, f'\n\n```python\n{function_name}()\n```\n\n'
+        return special_case(ok=True, just_text=f'\n\n```python\n{function_name}()\n```\n\n', sig='', table='')
 
     # -return -param
     elif 'self' in params_names and len(params_names) == 1 and doca and ':param' not in doca and ':return:' not in doca:
@@ -166,7 +159,7 @@ def special_cases(function_name, sig, doc_string):
         ```
 
         """
-        return True, f'\n\n```python\n{function_name}() # {doca}\n```\n\n'
+        return special_case(ok=True, just_text=f'\n\n```python\n{function_name}() # {doca}\n```\n\n', sig='', table='')
 
     # +return -param
     elif 'self' in params_names and len(params_names) == 1 and doca and ':param' not in doca and ':return:' in doca:
@@ -180,13 +173,16 @@ def special_cases(function_name, sig, doc_string):
         ->
 
         ```python
-        Get() -> blah-blah # blah blah blah
+        Get()
         ```
 
+        *table*
+
         """
-        return_part = get_return_part(doca)
-        desc_ = get_doc_desc(doca)
-        return True, f'\n\n{desc_}\n\n```\n{function_name}() -> {return_part}\n```\n\n'
+        return_part, desc = get_return_part(doca, line_break=line_break), get_doc_desc(doca)
+        return special_case(ok=True, just_text='',
+                                     sig=f'\n\n{desc}\n\n`{function_name}()`\n\n',
+                                     table=TABLE_Only_table_RETURN_TEMPLATE.replace('$', return_part) + '\n\n')
 
     # +return -param
     elif 'self' in params_names and len(params_names) == 1 and doca and ':param' not in doca and ':return:' in doca:
@@ -198,14 +194,14 @@ def special_cases(function_name, sig, doc_string):
             :param elem: qwerty
             '''
         """
-        return False, ''
-
-
-    return False, ''
+        return special_case(ok=False, just_text='', sig='', table='')
+    return special_case(ok=False, just_text='', sig='', table='')
 
 
 def get_doc_desc(doc_string):
 
+    if ':param' in doc_string:  doc_string = doc_string[:doc_string.index(':param')]
+    if ':return:' in doc_string: doc_string = doc_string[:doc_string.index(':return:')]
     if ':param' in doc_string:  doc_string = doc_string[:doc_string.index(':param')]
     if ':return:' in doc_string: doc_string = doc_string[:doc_string.index(':return:')]
 
@@ -214,7 +210,7 @@ def get_doc_desc(doc_string):
     return f'\n{desc}' if desc else ''
 
 
-def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is_method=False):
+def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is_method=False, line_break=None):
     """
     Convert "function + __doc__" tp "method call + params table" in MARKDOWN
     """
@@ -243,27 +239,35 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
         else:
             raise Exception(f'IDK this type -> {key, val}')
 
-    sig_content = f',\n{TAB_char}'.join(rows)
+
+    sig_content = f',\n{TAB_char}'.join(rows) if len(rows) > 2 else f', '.join(rows)
+    # # # make 2 line signature into 1-line
+    # # # sig_content = f',\n{TAB_char}'.join(rows)
+    # # # if sig_content.count('\n') < 3: sig_content = re.sub(r'\n[ \t]{,8}', ' ', sig_content, flags=re.MULTILINE)
+
     sign = "\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
 
-    if is_method: sign = "#### {1}\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
+    if is_method:
+        sign = "#### {1}\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
 
     if function_name == 'method34': import pdb; pdb.set_trace();
     # --------------
     # SPECIAL CASES
     # --------------
-    result = special_cases(function_name, sig, doc_string)
-    if result[0]:
-        return result[1], ''
+    result = special_cases(function_name, sig, doc_string, line_break=line_break)
+    if result.ok:
+        if result.just_text:
+            return result.just_text, ''
+        else:
+            return result.sig, result.table
     # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
     # 0   0          Making params_TABLE         0   0 #
     # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
 
     # 1
-    return_guy = get_return_part(doc_string)
+    return_guy = get_return_part(doc_string, line_break=line_break)
     if not return_guy:
-        return_guy = ''
-        md_return = ''
+        md_return = return_guy = ''
     else:
         return_guy = return_guy.strip()
         md_return = TABLE_RETURN_TEMPLATE.format(return_guy=return_guy)
@@ -296,16 +300,16 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
 def pad_n(text): return f'\n{text}\n'
 
 
-def render(injection, logger=None):
+def render(injection, logger=None, line_break=None):
     if injection['part1'] == 'func':  # function
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=injection['part2'],
-                                         doc_string=injection['function_object'].__doc__, logger=logger)
+                                         doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break)
     else:  # class method
         function_name = injection['parent_class'].__name__ if injection['part2'] == '__init__' else injection['part2']
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=function_name, is_method=True,
-                                         doc_string=injection['function_object'].__doc__, logger=logger)
+                                         doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break)
 
     if injection['number'] == '':
         return pad_n(sig) + pad_n(table)
@@ -322,15 +326,26 @@ def readfile(fname):
         return ff.read()
 
 
-def main(do_full_readme=False, files_to_include: list = [], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True, allow_multiple_tags=True):
+def main(do_full_readme=False, files_to_include: list = [], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True, allow_multiple_tags=True, line_break=None):
+
+    
     """
     Goal is:
-    1) load 1_ 2_ 3_ 4_
+    1) load 1_.md 2_.md 3_.md 4_.md
     2) get memes - classes and functions in PSG
     3) find all tags in 2_
     4) structure tags and REAL objects
     5) replaces classes, functions.
     6) join 1 big readme file
+
+    :param do_full_readme: if False - use only 2_readme.md
+    :param files_to_include: list of markdown files to include in output markdown
+    :param logger: logger object from logging module
+    :param delete_html_comments: flag for preprocessing input markwon text e.g. deleting every html tag, that is injection_point
+    :param allow_multiple_tags: flag for replacing every tag in "input markdown text"
+    :param delete_x3_newlines: flag for deleting '\\n\\n\\n' in final output makrdown text
+    :param output_name: base filename of output markdown file
+    :param line_break: linebreak_character in "return part"
     """
     if logger: logger.info(f'STARTING')
 
@@ -494,7 +509,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
             readme = readme.replace(injection['tag'], injection['parent_class'].__doc__)
         else:
             tag = injection['tag']
-            content = render(injection, logger=logger)
+            content = render(injection, logger=logger, line_break=line_break)
             if content:
                 success_tags.append(f'{tag} - COMPLETE')
             else:
