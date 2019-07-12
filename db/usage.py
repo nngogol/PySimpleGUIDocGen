@@ -11,10 +11,29 @@ from make_real_readme import main
 #                                   |___/                              #
 ########################################################################
 OUTPUT_FILENAME = 'readme.md'
-enable_popup = True
 
-# method = 'simple, no log'
+##-#-#-# ##-#-#-#
+# Pre-process logic
+##-#-#-# ##-#-#-#
+
+line_break = '<br>'
+# line_break can be:
+# - '<br>'
+# - ' \n '
+
 method = 'with logs'
+# method can be:
+# - 'simple, no log'
+# - 'with logs'
+
+
+##-#-#-# ##-#-#-#
+# Post-process logic
+##-#-#-# ##-#-#-#
+enable_popup = True
+insert_md_section_for__class_methods = False
+remove_repeated_sections_classmethods = False
+
 
 
 ##############
@@ -27,6 +46,8 @@ method = 'with logs'
 ##############
 if method == 'simple, no log':
     main(logger=None,
+         insert_md_section_for__class_methods=insert_md_section_for__class_methods,
+         remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
          files_to_include=[0, 1, 2, 3],
          output_name=OUTPUT_FILENAME,
          delete_html_comments=True)
@@ -53,6 +74,8 @@ if method == 'with logs':
     logger.info('STARTING')
     
     main(logger=logger,
+         insert_md_section_for__class_methods=insert_md_section_for__class_methods,
+         remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
          files_to_include=[0, 1, 2, 3],
          output_name=OUTPUT_FILENAME,
          delete_html_comments=True)

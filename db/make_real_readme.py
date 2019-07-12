@@ -77,18 +77,22 @@ def get_params_part(code: str) -> dict:
         'parameter3' : 'desctiption3',
     }
     """
-
+    code = code.strip()
+    
     # if doc_string is empty
     if code == None:           return {}
     elif '' == code.strip():   return {}
     elif ':param' not in code: return {}
-    elif ':return:' in code.strip(): # strip ':return:'
-        regg_ = re.compile(r':return[\d\D]*?:param', flags=re.MULTILINE)
+    elif ':return' in code: # strip ':return:'
         new_code = code[:code.index(':return:')]
         
-        if len(list(regg_.finditer(code))) > 0:
-            if versbose: print(f'warning-> ":return" MUST BY AT THE END. FIX IT NOW in {name_}!!!\nBut i will try to parse it...')
+        regg_ = re.compile(r':return[\d\D]*?:param', flags=re.MULTILINE)
+        if len(list(regg_.finditer(new_code))) > 0:
+            if versbose:
+                print(f'warning-> ":return" MUST BY AT THE END. FIX IT NOW in {name_}!!!\nBut i will try to parse it...')
             code = re.sub(regg_, r':param', code)
+        else:
+            code = new_code
 
     try:
         only_params = code[code.index(':param'):]  # get_only_params_string(code)
@@ -130,6 +134,7 @@ def get_return_part(code: str, line_break=None) -> str:
 
 
 def special_cases(function_name, sig, doc_string, line_break=None):
+
 
     doca, params_names = doc_string.strip(), list(dict(sig).keys())
     if 'self' in params_names and len(params_names) == 1 and not doca:
@@ -210,7 +215,7 @@ def get_doc_desc(doc_string):
     return f'\n{desc}' if desc else ''
 
 
-def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is_method=False, line_break=None):
+def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is_method=False, line_break=None, insert_md_section_for__class_methods=False):
     """
     Convert "function + __doc__" tp "method call + params table" in MARKDOWN
     """
@@ -248,9 +253,10 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
     sign = "\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
 
     if is_method:
-        sign = "#### {1}\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
-
-    if function_name == 'method34': import pdb; pdb.set_trace();
+        if insert_md_section_for__class_methods:
+            sign = "#### {1}\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
+        else:
+            sign = "{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string), function_name, sig_content)
     # --------------
     # SPECIAL CASES
     # --------------
@@ -274,6 +280,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
         # return_guy = f'\n\nreturn value: {return_guy}\n'
         # return_guy_val_str = return_guy
 
+    
     # 2
     md_table = '\n'.join([TABLE_ROW_TEMPLATE.format(name=name, desc=desc)
                            for name, desc in
@@ -300,16 +307,19 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
 def pad_n(text): return f'\n{text}\n'
 
 
-def render(injection, logger=None, line_break=None):
+def render(injection, logger=None, line_break=None, insert_md_section_for__class_methods=False):
     if injection['part1'] == 'func':  # function
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=injection['part2'],
+                                         insert_md_section_for__class_methods=insert_md_section_for__class_methods,
                                          doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break)
     else:  # class method
         function_name = injection['parent_class'].__name__ if injection['part2'] == '__init__' else injection['part2']
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=function_name, is_method=True,
+                                         insert_md_section_for__class_methods=insert_md_section_for__class_methods,
                                          doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break)
+
 
     if injection['number'] == '':
         return pad_n(sig) + pad_n(table)
@@ -326,9 +336,8 @@ def readfile(fname):
         return ff.read()
 
 
-def main(do_full_readme=False, files_to_include: list = [], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True, allow_multiple_tags=True, line_break=None):
+def main(do_full_readme=False, files_to_include: list = [], logger=None, output_name=None, delete_html_comments=True, delete_x3_newlines=True, allow_multiple_tags=True, line_break=None, insert_md_section_for__class_methods=True, remove_repeated_sections_classmethods=False):
 
-    
     """
     Goal is:
     1) load 1_.md 2_.md 3_.md 4_.md
@@ -509,7 +518,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
             readme = readme.replace(injection['tag'], injection['parent_class'].__doc__)
         else:
             tag = injection['tag']
-            content = render(injection, logger=logger, line_break=line_break)
+            content = render(injection, logger=logger, line_break=line_break, insert_md_section_for__class_methods=insert_md_section_for__class_methods,)
             if content:
                 success_tags.append(f'{tag} - COMPLETE')
             else:
@@ -566,6 +575,17 @@ def main(do_full_readme=False, files_to_include: list = [], logger=None, output_
                 # removing \n
                 content = re.sub(r'\n{3,}', '\n\n',
                                  content, flags=re.MULTILINE)
+
+            # {{{{{{{{{ remove repeated sections classmethods }}}}}}}}}
+            if remove_repeated_sections_classmethods:
+
+                rega = re.compile(r'((\#+\s\w+)\n\s){2}', flags=re.MULTILINE)
+                for index, i in enumerate(re.finditer(rega, content)):
+                    print(f'{index} - > {i.group(0)}')
+                    print(f'{index} - > {i.group(1)}')
+                    content = content.replace(i.group(0), i.group(1))
+                # re
+                # content = re.sub(rega, r'\1', content, flags=re.MULTILINE)
 
             # FINISH
             content = content.strip()
