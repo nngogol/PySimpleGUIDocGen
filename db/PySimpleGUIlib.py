@@ -1,5 +1,18 @@
 #!/usr/bin/python3
-version = __version__ = "4.1.0.7 Unreleased"
+version = __version__ = "4.1.0.8 Unreleased"
+
+
+#  888888ba           .d88888b  oo                     dP           .88888.  dP     dP dP
+#  88    `8b          88.    "'                        88          d8'   `88 88     88 88
+# a88aaaa8P' dP    dP `Y88888b. dP 88d8b.d8b. 88d888b. 88 .d8888b. 88        88     88 88
+#  88        88    88       `8b 88 88'`88'`88 88'  `88 88 88ooood8 88   YP88 88     88 88
+#  88        88.  .88 d8'   .8P 88 88  88  88 88.  .88 88 88.  ... Y8.   .88 Y8.   .8P 88
+#  dP        `8888P88  Y88888P  dP dP  dP  dP 88Y888P' dP `88888P'  `88888'  `Y88888P' dP
+#                 .88                         88
+#             d8888P                          dP
+
+
+
 
 #  __                                      __
 # /  |                                    /  |
@@ -22,7 +35,7 @@ OK, let's get the bullshit out of the way
 
 This software is available for your use under a MODIFIED LGPL3+ license
 
-This notice, these first 83 lines of code shall remain unchanged
+This notice, these first 100 lines of code shall remain unchanged
 
  #     #                                        
  ##   ##  ####  #####  # ###### # ###### #####  
@@ -42,19 +55,18 @@ This notice, these first 83 lines of code shall remain unchanged
 888     Y88b  d88P 888        888     Y88b  d88P         
 88888888 "Y8888P88 888        88888888 "Y8888P"          
       
-      
-                                                         
 
 And just what the fuck is that?  Well, it's LPGL3+ and these FOUR simple stipulations.
 1. These and all comments are to remain in this document
 2. You will not post this software in a repository or a location for others to download from:
    A. Unless you have made 10 lines of changes
+   B. A notice is posted with the code that it is not the original code but instead derived from an original
 3. Forking is OK and does NOT require any changes as long as it is obvious forked and stated on the page
    where your software is being hosted.  For example, GitHub does a fantastic job of indicating if a repository
    is the result of a fork.
-4. The "Official" version of PySimpleGUI and the associated documentation lives on two (and only two) places:
+4. The "Official" version of PySimpleGUI and the associated documentation lives on two (and **only** two) places:
        1. GitHub - (http://www.PySimpleGUI.com) currently pointing at:
-            # https://github.com/PySimpleGUI/PySimpleGUI
+          https://github.com/PySimpleGUI/PySimpleGUI
        2. Read the Docs (via http://www.PySimpleGUI.org).  Currently is pointed at: 
           https://pysimplegui.readthedocs.io/en/latest/
    If you've obtained this software in any other way, then those listed here, then SUPPORT WILL NOT BE PROVIDED.
@@ -62,9 +74,9 @@ And just what the fuck is that?  Well, it's LPGL3+ and these FOUR simple stipula
 
 -----------------------------------------------------------------------------------------------------------------
 
-I absolutely hate having to include that nonsense, but every word is there for solid reasons.
+I absolutely hate having to include this kind of nonsense, but every word is here for solid reasons.
 
-How about having FUN with this package.  Terrible note to begin this journey of actually having fun making
+How about having FUN with this package??  Terrible note to begin this journey of actually having fun making
 GUI based applications so I'll try to make it up to you.
 
 The first bit of good news for you is that literally 100s of pages of documentation await you.  And nearly 200
@@ -82,6 +94,7 @@ http://Cookbook.PySimpleGUI.org
 The User Manual and the Cookbook are both designed to paint some nice looking GUIs on your screen within 5 minutes of you deciding to PySimpleGUI out.
 
 """
+
 
 
 
@@ -108,18 +121,9 @@ import pickle
 import calendar
 import textwrap
 import inspect
-from typing import List, Any, Union, Tuple, Dict
+from typing import List, Any, Union, Tuple, Dict    # because this code has to run on 2.7 can't use real type hints.  Must do typing only in comments
 from random import randint
 import warnings
-
-#  888888ba           .d88888b  oo                     dP           .88888.  dP     dP dP
-#  88    `8b          88.    "'                        88          d8'   `88 88     88 88
-# a88aaaa8P' dP    dP `Y88888b. dP 88d8b.d8b. 88d888b. 88 .d8888b. 88        88     88 88
-#  88        88    88       `8b 88 88'`88'`88 88'  `88 88 88ooood8 88   YP88 88     88 88
-#  88        88.  .88 d8'   .8P 88 88  88  88 88.  .88 88 88.  ... Y8.   .88 Y8.   .8P 88
-#  dP        `8888P88  Y88888P  dP dP  dP  dP 88Y888P' dP `88888P'  `88888'  `Y88888P' dP
-#                 .88                         88
-#             d8888P                          dP
 
 
 
@@ -1711,12 +1715,12 @@ class StatusBar(Element):
                  key=None, tooltip=None, visible=True):
         """
 
-        :param text: Text that is to be displayed in the widget
-        :param size:  (w,h) w=characters-wide, h=rows-high
-        :param auto_size_text: True if size should fit the text length
+        :param text: (str) Text that is to be displayed in the widget
+        :param size: Tuple[(int), (int)]  (w,h) w=characters-wide, h=rows-high
+        :param auto_size_text: (bool)  True if size should fit the text length
         :param click_submits: (bool) DO NOT USE. Only listed for backwards compat - Use enable_events instead
         :param enable_events: (bool) Turns on the element specific events. StatusBar events occur when the bar is clicked
-        :param relief:  relief style. Values are same as progress meter relief values.  Can be a constant or a string: `RELIEF_RAISED RELIEF_SUNKEN RELIEF_FLAT RELIEF_RIDGE RELIEF_GROOVE RELIEF_SOLID`
+        :param relief: (enum) relief style. Values are same as progress meter relief values.  Can be a constant or a string: `RELIEF_RAISED RELIEF_SUNKEN RELIEF_FLAT RELIEF_RIDGE RELIEF_GROOVE RELIEF_SOLID`
         :param font: Union[str, tuple] specifies the font family, size, etc
         :param text_color: (str) color of the text
         :param background_color: (str) color of background
@@ -1746,7 +1750,6 @@ class StatusBar(Element):
     def Update(self, value=None, background_color=None, text_color=None, font=None, visible=None):
         """
         Changes some of the settings for the Status Bar Element. Must call `Window.Read` or `Window.Finalize` prior
-
         :param value: (str) new text to show
         :param background_color: (str) color of background
         :param text_color: (str) color of the text
@@ -1869,7 +1872,9 @@ class TKProgressBar():
 #       Scroll bar will span the length of the frame                     #
 # ---------------------------------------------------------------------- #
 class TKOutput(tk.Frame):
-    """ """
+    """
+    tkinter style class. Inherits Frame class from tkinter. Adds a tk.Text and a scrollbar together
+    """
     def __init__(self, parent, width, height, bd, background_color=None, text_color=None, font=None, pad=None):
         """
 
@@ -1936,25 +1941,24 @@ class TKOutput(tk.Frame):
 #  Routes stdout, stderr to a scrolled window                            #
 # ---------------------------------------------------------------------- #
 class Output(Element):
-    """ """
-
+    """
+    Output Element - a multi-lined text area where stdout and stderr are re-routed to.
+    """
     def __init__(self, size=(None, None), background_color=None, text_color=None, pad=None, font=None, tooltip=None,
                  key=None, right_click_menu=None, visible=True):
         """
-
-        :param size:  (w,h) w=characters-wide, h=rows-high
-        :param background_color: color of background
-        :param text_color: color of the text
-        :param pad:  Amount of padding to put around element
-        :param font:  specifies the font family, size, etc
+        :param size: Tuple[(int), (int)]  (w,h) w=characters-wide, h=rows-high
+        :param background_color: (str) color of background
+        :param text_color: (str) color of the text
+        :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
+        :param font: Union[str, tuple] specifies the font family, size, etc
         :param tooltip: (str) text, that will appear when mouse hovers over the element
-        :param key:  Used with window.FindElement and with return values to uniquely identify this element to uniquely identify this element
-        :param right_click_menu: List[List[str]] see "Right Click Menus" for format
-        :param visible: set visibility state of the element (Default = True)
-
+        :param key: (Any) Used with window.FindElement and with return values to uniquely identify this element to uniquely identify this element
+        :param right_click_menu: List[List[str]]  see "Right Click Menus"
+        :param visible: (bool) set visibility state of the element
         """
 
-        self._TKOut = None
+        self._TKOut = self.Widget = None        # type: TKOutput
         bg = background_color if background_color else DEFAULT_INPUT_ELEMENTS_COLOR
         fg = text_color if text_color is not None else DEFAULT_INPUT_TEXT_COLOR
         self.RightClickMenu = right_click_menu
@@ -1974,7 +1978,7 @@ class Output(Element):
         """
         Changes some of the settings for the Output Element. Must call `Window.Read` or `Window.Finalize` prior
 
-        :param value:
+        :param value: (str) string that will replace current contents of the output area
         :param visible: (bool) control visibility of element
         """
 
@@ -4807,21 +4811,29 @@ class Window:
 
     @classmethod
     def GetAContainerNumber(cls):
-        """ """
+        """
+        Not user callable!
+        :return: A simple counter that makes each container element unique
+        """
         cls.container_element_counter += 1
         return cls.container_element_counter
 
     @classmethod
     def IncrementOpenCount(self):
-        """ """
+        """
+        Not user callable!  Increments the number of open windows
+        Note - there is a bug where this count easily gets out of sync. Issue has been opened already. No ill effects
+        """
         self.NumOpenWindows += 1
-        print('+++++ INCREMENTING Num Open Windows = {} ---'.format(Window.NumOpenWindows))
+        # print('+++++ INCREMENTING Num Open Windows = {} ---'.format(Window.NumOpenWindows))
 
     @classmethod
     def DecrementOpenCount(self):
-        """ """
+        """
+        Not user callable!  Decrements the number of open windows
+        """
         self.NumOpenWindows -= 1 * (self.NumOpenWindows != 0)  # decrement if not 0
-        print('----- DECREMENTING Num Open Windows = {} ---'.format(Window.NumOpenWindows))
+        # print('----- DECREMENTING Num Open Windows = {} ---'.format(Window.NumOpenWindows))
 
     # ------------------------- Add ONE Row to Form ------------------------- #
     def AddRow(self, *args):
@@ -4865,7 +4877,9 @@ class Window:
     # ------------------------- Add Multiple Rows to Form ------------------------- #
     def AddRows(self, rows):
         """
-        Loops through a list of lists of elements and adds each row, list, to the layout
+        Loops through a list of lists of elements and adds each row, list, to the layout.
+        This is NOT the best way to go about creating a window.  Sending the entire layout at one time and passing
+        it as a parameter to the Window call is better.
 
         :param rows: List[List[Elements]] A list of a list of elements
 
@@ -4876,22 +4890,24 @@ class Window:
     def Layout(self, rows):
         """
         Second of two preferred ways of telling a Window what its layout is. The other way is to pass the layout as
-        a parameter to Window object.  The parameter method is the currently preferred method.  This call to Layout
-        has been removed from examples contained in documents and in the Demo Programs.  Trying to remove this call
+        a parameter to Window object.  The parameter method is the currently preferred method. This call to Layout
+        has been removed from examples contained in documents and in the Demo Programs. Trying to remove this call
         from history and replace with sending as a parameter to Window.
 
         :param rows: List[List[Elements]] Your entire layout
+        :return: (Window} self so that you can chain method calls
         """
         self.AddRows(rows)
-        self.BuildKeyDict()
+        self._BuildKeyDict()
         return self
+
 
     def LayoutAndRead(self, rows, non_blocking=False):
         """
-        Deprecated.  Now you layout your window's rows (layout) and then separately call Read.
-        :param rows:
-        :param non_blocking:  (Default = False)
+        Deprecated!!  Now your layout your window's rows (layout) and then separately call Read.
 
+        :param rows: (List[List[Element]]) The layout of the window
+        :param non_blocking: (bool) if True the Read call will not block
         """
         raise DeprecationWarning(
             'LayoutAndRead is no longer supported... change your call window.Layout(layout).Read()\nor window(title, layout).Read()')
@@ -4911,9 +4927,10 @@ class Window:
     def _Show(self, non_blocking=False):
         """
         NOT TO BE CALLED BY USERS.  INTERNAL ONLY!
-        It's this
+        It's this method that first shows the window to the user, collects results
 
         :param non_blocking: (bool) if True, this is a non-blocking call
+        :return: Tuple[Any, Dict] The event, values turple that is returned from Read calls
         """
         self.Shown = True
         # Compute num rows & num cols (it'll come in handy debugging)
@@ -4945,16 +4962,19 @@ class Window:
         StartupTK(self)
         # If a button or keyboard event happened but no results have been built, build the results
         if self.LastKeyboardEvent is not None or self.LastButtonClicked is not None:
-            return BuildResults(self, False, self)
+            return _BuildResults(self, False, self)
         return self.ReturnValues
 
     # ------------------------- SetIcon - set the window's fav icon ------------------------- #
     def SetIcon(self, icon=None, pngbase64=None):
         """
-        Sets the icon that is shown on the title bar and on the task bar.  Can pass in a filename
-        :param icon:
-        :param pngbase64:
+        Sets the icon that is shown on the title bar and on the task bar.  Can pass in:
+        * a filename which must be a .ICO icon file.
+        * a bytes object
+        * a BASE64 encoded file held in a variable
 
+        :param icon: (str) Filename or bytes object
+        :param pngbase64: (str) Base64 encoded GIF or PNG file
         """
         if type(icon) is bytes:
             wicon = tkinter.PhotoImage(data=icon)
@@ -4978,23 +4998,34 @@ class Window:
         except:
             pass
 
+
     def _GetElementAtLocation(self, location):
         """
+        Given a (row, col) location in a layout, return the element located at that position
 
-        :param location:
-
+        :param location: Tuple[int, int] Return the element located at (row, col) in layout
+        :return:  (Element) The Element located at that position in this window
         """
+
         (row_num, col_num) = location
         row = self.Rows[row_num]
         element = row[col_num]
         return element
 
     def _GetDefaultElementSize(self):
-        """ """
+        """
+        Returns the default elementSize
+
+        :return: Tuple[int, int] (width, height) of the default element size
+        """
+
         return self.DefaultElementSize
 
     def _AutoCloseAlarmCallback(self):
-        """ """
+        """
+        Function that's called by tkinter when autoclode timer expires.  Closes the window
+
+        """
         try:
             window = self
             if window:
@@ -5008,7 +5039,9 @@ class Window:
             pass
 
     def _TimeoutAlarmCallback(self):
-        """ """
+        """
+        Read Timeout Alarm callback. Will kick a mainloop call out of the tkinter event loop and cause it to return
+        """
         # first, get the results table built
         # modify the Results table in the parent FlexForm object
         # print('TIMEOUT CALLBACK')
@@ -5019,19 +5052,25 @@ class Window:
         self.FormRemainedOpen = True
         self.TKroot.quit()  # kick the users out of the mainloop
 
+
     def Read(self, timeout=None, timeout_key=TIMEOUT_KEY):
+        # type: (int, Any) -> Tuple[Any, Union[Dict, List]]
         """
+        THE biggest deal method in the Window class! This is how you get all of your data from your Window.
+            Pass in a timeout (in milliseconds) to wait for a maximum of timeout milliseconds. Will return timeout_key
+            if no other GUI events happen first.
 
-        :param timeout: timeout to wait, till Read will execute itself
-        :param timeout_key:  (Default value = TIMEOUT_KEY)
-
+        :param timeout: (int) Milliseconds to wait until the Read will return IF no other GUI events happen first
+        :param timeout_key: (Any) The value that will be returned from the call if the timer expired
+        :return: Tuple[(Any), Union[Dict[Any:Any], List[Any], None] (event, values)
+                 (event or timeout_key or None, Dictionary of values or List of values from all elements in the Window
         """
         # ensure called only 1 time through a single read cycle
         if not Window.read_call_from_debugger:
             _refresh_debugger()
         timeout = int(timeout) if timeout is not None else None
         if timeout == 0:  # timeout of zero runs the old readnonblocking
-            event, values = self.ReadNonBlocking()
+            event, values = self._ReadNonBlocking()
             if event is None:
                 event = timeout_key
             if values is None:
@@ -5049,7 +5088,7 @@ class Window:
             # if already have a button waiting, the return previously built results
             if self.LastButtonClicked is not None and not self.LastButtonClickedWasRealtime:
                 # print(f'*** Found previous clicked saved {self.LastButtonClicked}')
-                results = BuildResults(self, False, self)
+                results = _BuildResults(self, False, self)
                 self.LastButtonClicked = None
                 return results
             InitializeResults(self)
@@ -5066,7 +5105,7 @@ class Window:
                     Window.DecrementOpenCount()
                     # _my_windows.Decrement()
                     # print('ROOT Destroyed')
-                results = BuildResults(self, False, self)
+                results = _BuildResults(self, False, self)
                 if results[0] != None and results[0] != timeout_key:
                     return results
                 else:
@@ -5091,8 +5130,8 @@ class Window:
                 self.TKAfterID = self.TKroot.after(timeout, self._TimeoutAlarmCallback)
             self.CurrentlyRunningMainloop = True
             # print(f'In main {self.Title} {self.TKroot}')
-            # self.TKroot.protocol("WM_DESTROY_WINDOW", self.OnClosingCallback)
-            # self.TKroot.protocol("WM_DELETE_WINDOW", self.OnClosingCallback)
+            # self.TKroot.protocol("WM_DESTROY_WINDOW", self._OnClosingCallback)
+            # self.TKroot.protocol("WM_DELETE_WINDOW", self._OnClosingCallback)
             self.TKroot.mainloop()
             # print('Out main')
             self.CurrentlyRunningMainloop = False
@@ -5120,7 +5159,7 @@ class Window:
                 # _my_windows.Decrement()
         # Determine return values
         if self.LastKeyboardEvent is not None or self.LastButtonClicked is not None:
-            results = BuildResults(self, False, self)
+            results = _BuildResults(self, False, self)
             if not self.LastButtonClickedWasRealtime:
                 self.LastButtonClicked = None
             return results
@@ -5134,8 +5173,14 @@ class Window:
                 self.ReturnValues = self.TimeoutKey, self.ReturnValues[1]  # fake a timeout
             return self.ReturnValues
 
-    def ReadNonBlocking(self):
-        """ """
+
+    def _ReadNonBlocking(self):
+        """
+        Should be NEVER called directly by the user.  The user can call Window.Read(timeout=0) to get same effect
+
+        :return: Tuple[(Any), Union[Dict[Any:Any], List[Any], None] (event, values)
+                 (event or timeout_key or None, Dictionary of values or List of values from all elements in the Window
+        """
         if self.TKrootDestroyed:
             try:
                 self.TKroot.quit()
@@ -5162,10 +5207,18 @@ class Window:
             self.Values = None
             self.LastButtonClicked = None
             return None, None
-        return BuildResults(self, False, self)
+        return _BuildResults(self, False, self)
+
 
     def Finalize(self):
-        """ """
+        """
+        Use this method to cause your layout to built into a real tkinter window.  In reality this method is like
+        Read(timeout=0).  It doesn't block and uses your layout to create tkinter widgets to represent the elements.
+        Lots of action!
+
+        :return: (Window) Returns 'self' so that method "Chaining" can happen (read up about it as it's very cool!)
+        """
+
         if self.TKrootDestroyed:
             return self
         if not self.Shown:
@@ -5179,8 +5232,16 @@ class Window:
             # return None, None
         return self
 
+
     def Refresh(self):
-        """ """
+        """
+        Refreshes the window by calling tkroot.update().  Can sometimes get away with a refresh instead of a Read.
+        Use this call when you want something to appear in your Window immediately (as soon as this function is called).
+        Without this call your changes to a Window will not be visible to the user until the next Read call
+
+        :return: (Window) `self` so that method calls can be easily "chained"
+        """
+
         if self.TKrootDestroyed:
             return self
         try:
@@ -5189,23 +5250,34 @@ class Window:
             pass
         return self
 
+
     def Fill(self, values_dict):
         """
+        Fill in elements that are input fields with data based on a 'values dictionary'
 
-        :param values_dict: ?????????????????
-
+        :param values_dict: (Dict[Any:Any]) {Element key : value} pairs
+        :return: (Window) returns self so can be chained with other methods
         """
+
         FillFormWithValues(self, values_dict)
         return self
 
+
     def FindElement(self, key, silent_on_error=False):
         """
-        Find element object associated with the provided key
-        :returns Found element object, an Error Element, or None
+        Find element object associated with the provided key.  This call can be abbreviated to any of these:
+        FindElement == Element == Find
+        So take your pick as to how much typing you want to do.
+        Rememeber that this call will return None if no match is found which may cause your code to crash if not
+        checked for.
 
-        :param key:  Used with window.FindElement and with return values to uniquely identify this element
-        :param silent_on_error:  (Default = False)
+        :param key: (Any) Used with window.FindElement and with return values to uniquely identify this element
+        :param silent_on_error: (bool)  If True do not display popup nor print warning of key errors
 
+        :return:  Union[Element, Error Element, None] Return value can be:
+                  * the Element that matches the supplied key if found
+                  * an Error Element if silent_on_error is False
+                  * None if silent_on_error True
         """
         try:
             element = self.AllKeysDict[key]
@@ -5224,24 +5296,33 @@ class Window:
     Element = FindElement  # Shortcut function
     Find = FindElement
 
+
     def FindElementWithFocus(self):
-        """ """
+        """
+        Returns the Element that currently has focus as reported by tkinter. If no element is found None is returned!
+        :return: Union[Element, None] An Element if one has been found with focus or None if no element found
+        """
         element = _FindElementWithFocusInSubForm(self)
         return element
 
-    def BuildKeyDict(self):
-        """ """
+    def _BuildKeyDict(self):
+        """
+        Used internally only! Not user callable
+        Builds a dictionary containing all elements with keys for this window.
+        """
         dict = {}
         self.AllKeysDict = self._BuildKeyDictForWindow(self, self, dict)
         # print(f'keys built = {self.AllKeysDict}')
 
     def _BuildKeyDictForWindow(self, top_window, window, key_dict):
         """
+        Loop through all Rows and all Container Elements for this window and create the keys for all of them.
+        Note that the calls are recursive as all pathes must be walked
 
-        :param top_window:
-        :param window:
-        :param key_dict:
-
+        :param top_window: (Window) The highest level of the window
+        :param window: Union[Column, Frame, TabGroup, Pane, Tab] The "sub-window" (container element) to be searched
+        :param key_dict: The dictionary as it currently stands.... used as part of recursive call
+        :return: (dict) Dictionary filled with all keys in the window
         """
         for row_num, row in enumerate(window.Rows):
             for col_num, element in enumerate(row):
@@ -5278,12 +5359,13 @@ class Window:
 
     def SaveToDisk(self, filename):
         """
-
-        :param filename: ?????????????????
-
+        Saves the values contained in each of the input areas of the form. Basically saves what would be returned
+        from a call to Read.  It takes these results and saves them to disk using pickle
+        
+        :param filename: (str) Filename to save the values to in pickled form
         """
         try:
-            results = BuildResults(self, False, self)
+            results = _BuildResults(self, False, self)
             with open(filename, 'wb') as sf:
                 pickle.dump(results[1], sf)
         except:
@@ -5291,9 +5373,9 @@ class Window:
 
     def LoadFromDisk(self, filename):
         """
-
-        :param filename: ?????????????????
-
+        Restore values from a previous call to SaveToDisk which saves the returned values dictionary in Pickle format
+        
+        :param filename: (str) Pickle Filename to load 
         """
         try:
             with open(filename, 'rb') as df:
@@ -5301,8 +5383,13 @@ class Window:
         except:
             print('*** Error loading form to disk ***')
 
+
     def GetScreenDimensions(self):
-        """ """
+        """
+        Get the screen dimensions.  NOTE - you must have a window already open for this to work (blame tkinter not me)
+        
+        :return: Union[Tuple[None, None], Tuple[width, height]] Tuple containing width and height of screen in pixels
+        """
         if self.TKrootDestroyed:
             return None, None
         screen_width = self.TKroot.winfo_screenwidth()  # get window info to move to middle of screen
@@ -5311,10 +5398,9 @@ class Window:
 
     def Move(self, x, y):
         """
-
-        :param x: x coordinate
-        :param y: y coordinate
-
+        Move the upper left corner of this window to the x,y coordinates provided
+        :param x: (int) x coordinate in pixels
+        :param y: (int) y coordinate in pixels
         """
         try:
             self.TKroot.geometry("+%s+%s" % (x, y))
@@ -5322,11 +5408,17 @@ class Window:
             pass
 
     def Minimize(self):
-        """ """
+        """
+        Minimize this window to the task bar        
+        """
         self.TKroot.iconify()
 
     def Maximize(self):
-        """ """
+        """
+        Maximize the window. This is done differently on a windows system versus a linux or mac one.  For non-Windows
+        the root attribute '-fullscreen' is set to True.  For Windows the "root" state is changed to "zoomed"
+        The reason for the difference is the title bar is removed in some cases when using fullscreen option        
+        """
         if sys.platform != 'linux':
             self.TKroot.state('zoomed')
         else:
@@ -5335,17 +5427,18 @@ class Window:
         # self.TKroot.attributes('-fullscreen', True)
 
     def Normal(self):
-        """ """
+        """
+        Restore a window to a non-maximized state.  Does different things depending on platform.  See Maximize for more.
+        """
         if sys.platform != 'linux':
             self.TKroot.state('normal')
         else:
             self.TKroot.attributes('-fullscreen', False)
 
-    def StartMove(self, event):
+    def _StartMove(self, event):
         """
-
-        :param event:
-
+        Used by "Grab Anywhere" style windows. This function is bound to mouse-down. It marks the beginning of a drag.
+        :param event: (event) event information passed in by tkinter. Contains x,y position of mouse
         """
         try:
             self.TKroot.x = event.x
@@ -5354,11 +5447,12 @@ class Window:
             pass
         # print('Start move {},{}'.format(event.x,event.y))
 
-    def StopMove(self, event):
+
+    def _StopMove(self, event):
         """
-
-        :param event:
-
+        Used by "Grab Anywhere" style windows. This function is bound to mouse-up. It marks the ending of a drag.
+        Sets the position of the window to this final x,y coordinates
+        :param event: (event) event information passed in by tkinter. Contains x,y position of mouse
         """
         try:
             self.TKroot.x = None
@@ -5367,27 +5461,28 @@ class Window:
             pass
         # print('-Stop- move {},{}'.format(event.x,event.y))
 
-    def OnMotion(self, event):
+    def _OnMotion(self, event):
         """
-
-        :param event:
-
+        Used by "Grab Anywhere" style windows. This function is bound to mouse motion. It actually moves the window
+        :param event: (event) event information passed in by tkinter. Contains x,y position of mouse
         """
         try:
             deltax = event.x - self.TKroot.x
             deltay = event.y - self.TKroot.y
             x = self.TKroot.winfo_x() + deltax
             y = self.TKroot.winfo_y() + deltay
-            self.TKroot.geometry("+%s+%s" % (x, y))
+            self.TKroot.geometry("+%s+%s" % (x, y))     # this is what really moves the window
             # print('{},{}'.format(x,y))
         except:
             pass
 
+
     def _KeyboardCallback(self, event):
         """
-
-        :param event:
-
+        Window keyboard callback. Called by tkinter.  Will kick user out of the tkinter event loop. Should only be
+        called if user has requested window level keyboard events
+        
+        :param event: (event) object provided by tkinter that contains the key information
         """
         self.LastButtonClicked = None
         self.FormRemainedOpen = True
@@ -5396,63 +5491,68 @@ class Window:
         else:
             self.LastKeyboardEvent = str(event.keysym) + ':' + str(event.keycode)
         if not self.NonBlocking:
-            BuildResults(self, False, self)
+            _BuildResults(self, False, self)
         if self.CurrentlyRunningMainloop:  # quit if this is the current mainloop, otherwise don't quit!
             self.TKroot.quit()
 
     def _MouseWheelCallback(self, event):
         """
-
-        :param event:
-
+        Called by tkinter when a mouse wheel event has happened. Only called if keyboard events for the window
+        have been enabled
+        
+        :param event: (event) object sent in by tkinter that has the wheel direction
         """
         self.LastButtonClicked = None
         self.FormRemainedOpen = True
         self.LastKeyboardEvent = 'MouseWheel:Down' if event.delta < 0 else 'MouseWheel:Up'
         if not self.NonBlocking:
-            BuildResults(self, False, self)
+            _BuildResults(self, False, self)
         if self.CurrentlyRunningMainloop:  # quit if this is the current mainloop, otherwise don't quit!
             self.TKroot.quit()
 
     def _Close(self):
-        """ """
+        """
+        The internal close call that does the real work of building. This method basically sets up for closing
+        but doesn't destroy the window like the User's version of Close does
+        """
         try:
             self.TKroot.update()
         except:
             pass
         if not self.NonBlocking:
-            BuildResults(self, False, self)
+            _BuildResults(self, False, self)
         if self.TKrootDestroyed:
-            return None
+            return
         self.TKrootDestroyed = True
         self.RootNeedsDestroying = True
-        return None
+        return
 
     def Close(self):
-        """ """
+        """
+        Closes window.  Users can safely call even if window has been destroyed.   Should always call when done with
+        a window so that resources are properly freed up within your thread.  
+        """
         if self.TKrootDestroyed:
             return
         try:
             self.TKroot.destroy()
             Window.DecrementOpenCount()
-            # _my_windows.Decrement()
         except:
             pass
         # if down to 1 window, try and destroy the hidden window, if there is one
         if Window.NumOpenWindows == 1:
-            print('Trying to destroy hidden')
             try:
                 Window.hidden_master_root.destroy()
                 Window.NumOpenWindows = 0  # if no hidden window, then this won't execute
             except:
                 pass
 
-    CloseNonBlockingForm = Close
-    CloseNonBlocking = Close
 
     # IT FINALLY WORKED! 29-Oct-2018 was the first time this damned thing got called
-    def OnClosingCallback(self):
-        """ """
+    def _OnClosingCallback(self):
+        """
+        Internally used method ONLY. Not sure callable.  tkinter calls this when the window is closed by clicking X
+        """
         # global _my_windows
         # print('Got closing callback', self.DisableClose)
         if self.DisableClose:
@@ -5468,42 +5568,57 @@ class Window:
             self.RootNeedsDestroying = True
         self.RootNeedsDestroying = True
 
-        return
 
     def Disable(self):
-        """ """
+        """
+        Disables window from taking any input from the user
+        """
         self.TKroot.attributes('-disabled', 1)
         # self.TKroot.grab_set_global()
 
     def Enable(self):
-        """ """
+        """
+        Re-enables window to take user input after having it be Disabled previously
+        """
         self.TKroot.attributes('-disabled', 0)
         # self.TKroot.grab_release()
 
+
     def Hide(self):
-        """ """
+        """
+        Hides the window from the screen and the task bar
+        """
         self._Hidden = True
         self.TKroot.withdraw()
 
     def UnHide(self):
-        """ """
+        """
+        Used to bring back a window that was previously hidden using the Hide method
+        """
         if self._Hidden:
             self.TKroot.deiconify()
             self._Hidden = False
 
+
     def Disappear(self):
-        """ """
+        """
+        Causes a window to "disappear" from the screen, but remain on the taskbar. It does this by turning the alpha
+        channel to 0.  NOTE that on some platforms alpha is not supported. The window will remain showing on these
+        platforms.  The Raspberry Pi for example does not have an alpha setting
+        """
         self.TKroot.attributes('-alpha', 0)
 
     def Reappear(self):
-        """ """
+        """
+        Causes a window previously made to "Disappear" (using that method). Does this by restoring the alpha channel
+        """
         self.TKroot.attributes('-alpha', 255)
 
     def SetAlpha(self, alpha):
         """
+        Sets the Alpha Channel for a window.  Values are between 0 and 1 where 0 is completely transparent
 
-        :param alpha:
-
+        :param alpha: (float) 0 to 1. 0 is completely transparent.  1 is completely visible and solid (can't see through)
         """
         # Change the window's transparency
         # :param alpha: From 0 to 1 with 0 being completely transparent
@@ -5512,34 +5627,49 @@ class Window:
 
     @property
     def AlphaChannel(self):
-        """ """
+        """
+        A property that changes the current alpha channel value (internal value)
+        :return: (float) the current alpha channel setting according to self, not read directly from tkinter
+        """
         return self._AlphaChannel
 
     @AlphaChannel.setter
     def AlphaChannel(self, alpha):
         """
-
-        :param alpha:
-
+        The setter method for this "property".
+        Planning on depricating so that a Set call is always used by users. This is more in line with the SDK
+        :param alpha: (float) 0 to 1. 0 is completely transparent.  1 is completely visible and solid (can't see through)
         """
         self._AlphaChannel = alpha
         self.TKroot.attributes('-alpha', alpha)
 
+
     def BringToFront(self):
-        """ """
+        """
+        Brings this window to the top of all other windows (perhaps may not be brought before a window made to "stay
+        on top")
+        """
         try:
             self.TKroot.lift()
         except:
             pass
 
     def CurrentLocation(self):
-        """ """
+        """
+        Get the current location of the window's top left corner
+
+        :return: Tuple[(int), (int)] The x and y location in tuple form (x,y)
+        """
         return int(self.TKroot.winfo_x()), int(self.TKroot.winfo_y())
 
 
     @property
     def Size(self):
-        """ """
+        """
+        Return the current size of the window in pixels
+
+        :return: Tuple[(int), (int)] the (width, height) of the window
+        """
         win_width = self.TKroot.winfo_width()
         win_height = self.TKroot.winfo_height()
         return win_width, win_height
@@ -5547,9 +5677,9 @@ class Window:
     @Size.setter
     def Size(self, size):
         """
+        Changes the size of the window, if possible
 
-        :param size:
-
+        :param size: Tuple[(int), (int)] (width, height) of the desired window size
         """
         try:
             self.TKroot.geometry("%sx%s" % (size[0], size[1]))
@@ -5558,15 +5688,18 @@ class Window:
             pass
 
     def VisibilityChanged(self):
-        """ """
+        """
+        Not used in tkinter, but supplied becuase it is used in Qt. Want to remain source code compatible
+        """
         # A dummy function.  Needed in Qt but not tkinter
         return
 
+
     def SetTransparentColor(self, color):
         """
+        Set the color that will be transparent in your window. Areas with this color will be SEE THROUGH.
 
-        :param color:
-
+        :param color: (str) Color string that defines the transparent color
         """
         try:
             self.TKroot.attributes('-transparentcolor', color)
@@ -5574,55 +5707,71 @@ class Window:
             print('Transparent color not supported on this platform (windows only)')
 
     def GrabAnyWhereOn(self):
-        """ """
-        self.TKroot.bind("<ButtonPress-1>", self.StartMove)
-        self.TKroot.bind("<ButtonRelease-1>", self.StopMove)
-        self.TKroot.bind("<B1-Motion>", self.OnMotion)
+        """
+        Turns on Grab Anywhere functionality AFTER a window has been created.  Don't try on a window that's not yet
+        been Finalized or Read.
+        """
+        self.TKroot.bind("<ButtonPress-1>", self._StartMove)
+        self.TKroot.bind("<ButtonRelease-1>", self._StopMove)
+        self.TKroot.bind("<B1-Motion>", self._OnMotion)
 
     def GrabAnyWhereOff(self):
-        """ """
+        """
+        Turns off Grab Anywhere functionality AFTER a window has been created.  Don't try on a window that's not yet
+        been Finalized or Read.
+        """
         self.TKroot.unbind("<ButtonPress-1>")
         self.TKroot.unbind("<ButtonRelease-1>")
         self.TKroot.unbind("<B1-Motion>")
 
+
     def _callback_main_debugger_window_create_keystroke(self, event):
         """
+        Called when user presses the key that creates the main debugger window
 
-        :param event:
-
+        :param event: (event) not used. Passed in event info
         """
         _Debugger.debugger._build_main_debugger_window()
 
     def _callback_popout_window_create_keystroke(self, event):
         """
+        Called when user presses the key that creates the floating debugger window
 
-        :param event:
-
+        :param event: (event) not used. Passed in event info
         """
         _Debugger.debugger._build_floating_window()
 
     def EnableDebugger(self):
-        """ """
+        """
+        Enables the internal debugger. By default, the debugger IS enabled
+        """
         self.TKroot.bind('<Cancel>', self._callback_main_debugger_window_create_keystroke)
         self.TKroot.bind('<Pause>', self._callback_popout_window_create_keystroke)
         self.DebuggerEnabled = True
 
 
     def DisableDebugger(self):
-        """ """
+        """
+        Disable the internal debugger. By default the debugger is ENABLED
+        """
         self.TKroot.unbind("<Cancel>")
         self.TKroot.unbind("<Pause>")
         self.DebuggerEnabled = False
 
     def __enter__(self):
-        """ """
+        """
+        WAS used with context managers which are no longer needed nor advised.  It is here for legacy support and
+        am afraid of removing right now
+        :return: (window)
+        """
         return self
 
     def __exit__(self, *a):
         """
-
-        :param *a:
-
+        WAS used with context managers which are no longer needed nor advised.  It is here for legacy support and
+        am afraid of removing right now
+        :param *a: (?) Not sure what's passed in.
+        :return: Always returns False which was needed for context manager to work
         """
         self.__del__()
         return False
@@ -5636,7 +5785,8 @@ class Window:
 
 
 FlexForm = Window
-
+Window.CloseNonBlockingForm = Window.Close
+Window.CloseNonBlocking = Window.Close
 
 # ################################################################################
 # ################################################################################
@@ -6349,7 +6499,7 @@ def InitializeResults(form):
     :param form:
 
     """
-    BuildResults(form, True, form)
+    _BuildResults(form, True, form)
     return
 
 
@@ -6382,7 +6532,7 @@ def EncodeRadioRowCol(container, row, col):
 # -------  FUNCTION BuildResults.  Form exiting so build the results to pass back  ------- #
 # format of return values is
 # (Button Pressed, input_values)
-def BuildResults(form, initialize_only, top_level_form):
+def _BuildResults(form, initialize_only, top_level_form):
     """
 
     :param form:
@@ -6399,13 +6549,13 @@ def BuildResults(form, initialize_only, top_level_form):
     form.DictionaryKeyCounter = 0
     form.ReturnValuesDictionary = {}
     form.ReturnValuesList = []
-    BuildResultsForSubform(form, initialize_only, top_level_form)
+    _BuildResultsForSubform(form, initialize_only, top_level_form)
     if not top_level_form.LastButtonClickedWasRealtime:
         top_level_form.LastButtonClicked = None
     return form.ReturnValues
 
 
-def BuildResultsForSubform(form, initialize_only, top_level_form):
+def _BuildResultsForSubform(form, initialize_only, top_level_form):
     """
 
     :param form:
@@ -6423,7 +6573,7 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                 element.DictionaryKeyCounter = top_level_form.DictionaryKeyCounter
                 element.ReturnValuesList = []
                 element.ReturnValuesDictionary = {}
-                BuildResultsForSubform(element, initialize_only, top_level_form)
+                _BuildResultsForSubform(element, initialize_only, top_level_form)
                 for item in element.ReturnValuesList:
                     AddToReturnList(top_level_form, item)
                 if element.UseDictionary:
@@ -6435,7 +6585,7 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                 element.DictionaryKeyCounter = top_level_form.DictionaryKeyCounter
                 element.ReturnValuesList = []
                 element.ReturnValuesDictionary = {}
-                BuildResultsForSubform(element, initialize_only, top_level_form)
+                _BuildResultsForSubform(element, initialize_only, top_level_form)
                 for item in element.ReturnValuesList:
                     AddToReturnList(top_level_form, item)
                 if element.UseDictionary:
@@ -6447,7 +6597,7 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                 element.DictionaryKeyCounter = top_level_form.DictionaryKeyCounter
                 element.ReturnValuesList = []
                 element.ReturnValuesDictionary = {}
-                BuildResultsForSubform(element, initialize_only, top_level_form)
+                _BuildResultsForSubform(element, initialize_only, top_level_form)
                 for item in element.ReturnValuesList:
                     AddToReturnList(top_level_form, item)
                 if element.UseDictionary:
@@ -6459,7 +6609,7 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                 element.DictionaryKeyCounter = top_level_form.DictionaryKeyCounter
                 element.ReturnValuesList = []
                 element.ReturnValuesDictionary = {}
-                BuildResultsForSubform(element, initialize_only, top_level_form)
+                _BuildResultsForSubform(element, initialize_only, top_level_form)
                 for item in element.ReturnValuesList:
                     AddToReturnList(top_level_form, item)
                 if element.UseDictionary:
@@ -6471,7 +6621,7 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
                 element.DictionaryKeyCounter = top_level_form.DictionaryKeyCounter
                 element.ReturnValuesList = []
                 element.ReturnValuesDictionary = {}
-                BuildResultsForSubform(element, initialize_only, top_level_form)
+                _BuildResultsForSubform(element, initialize_only, top_level_form)
                 for item in element.ReturnValuesList:
                     AddToReturnList(top_level_form, item)
                 if element.UseDictionary:
@@ -6624,99 +6774,27 @@ def BuildResultsForSubform(form, initialize_only, top_level_form):
     return form.ReturnValues
 
 
-def FillFormWithValues(form, values_dict):
+def FillFormWithValues(window, values_dict):
+    """
+    Fills a window with values provided in a values dictionary { element_key : new_value }
+
+    :param window: (Window) The window object to fill
+    :param values_dict: (Dict[Any:Any]) A dictionary with element keys as key and value is values parm for Update call
     """
 
-    :param form:
-    :param values_dict:
-
-    """
-    FillSubformWithValues(form, values_dict)
-
-
-def FillSubformWithValues(form, values_dict):
-    """
-
-    :param form:
-    :param values_dict:
-
-    """
-    for row_num, row in enumerate(form.Rows):
-        for col_num, element in enumerate(row):
-            value = None
-            if element.Type == ELEM_TYPE_COLUMN:
-                FillSubformWithValues(element, values_dict)
-            if element.Type == ELEM_TYPE_FRAME:
-                FillSubformWithValues(element, values_dict)
-            if element.Type == ELEM_TYPE_TAB_GROUP:
-                FillSubformWithValues(element, values_dict)
-            if element.Type == ELEM_TYPE_TAB:
-                FillSubformWithValues(element, values_dict)
-            try:
-                value = values_dict[element.Key]
-            except:
-                continue
-            if element.Type == ELEM_TYPE_INPUT_TEXT:
-                element.Update(value)
-            elif element.Type == ELEM_TYPE_INPUT_CHECKBOX:
-                element.Update(value)
-            elif element.Type == ELEM_TYPE_INPUT_RADIO:
-                element.Update(value)
-            elif element.Type == ELEM_TYPE_INPUT_COMBO:
-                element.Update(value)
-            elif element.Type == ELEM_TYPE_INPUT_OPTION_MENU:
-                element.Update(value)
-            elif element.Type == ELEM_TYPE_INPUT_LISTBOX:
-                element.SetValue(value)
-            elif element.Type == ELEM_TYPE_INPUT_SLIDER:
-                element.Update(value)
-            elif element.Type == ELEM_TYPE_INPUT_MULTILINE:
-                element.Update(value)
-            elif element.Type == ELEM_TYPE_INPUT_SPIN:
-                element.Update(value)
-            elif element.Type == ELEM_TYPE_BUTTON:
-                element.Update(value)
-
-
-def _FindElementFromKeyInSubForm(form, key):
-    """
-
-    :param form:
-    :param key:  Used with window.FindElement and with return values to uniquely identify this element
-
-    """
-    for row_num, row in enumerate(form.Rows):
-        for col_num, element in enumerate(row):
-            if element.Type == ELEM_TYPE_COLUMN:
-                matching_elem = _FindElementFromKeyInSubForm(element, key)
-                if matching_elem is not None:
-                    return matching_elem
-            if element.Type == ELEM_TYPE_FRAME:
-                matching_elem = _FindElementFromKeyInSubForm(element, key)
-                if matching_elem is not None:
-                    return matching_elem
-            if element.Type == ELEM_TYPE_TAB_GROUP:
-                matching_elem = _FindElementFromKeyInSubForm(element, key)
-                if matching_elem is not None:
-                    return matching_elem
-            if element.Type == ELEM_TYPE_PANE:
-                matching_elem = _FindElementFromKeyInSubForm(element, key)
-                if matching_elem is not None:
-                    return matching_elem
-            if element.Type == ELEM_TYPE_TAB:
-                matching_elem = _FindElementFromKeyInSubForm(element, key)
-                if matching_elem is not None:
-                    return matching_elem
-            if element.Key == key:
-                return element
+    for element_key in values_dict:
+        try:
+            window.AllKeysDict[element_key].Update(values_dict[element_key])
+        except Exception as e:
+            print('Problem filling form. Perhaps bad key?  This is a suspected bad key: {}'.format(element_key))
 
 
 def _FindElementWithFocusInSubForm(form):
-    # type: (...) -> Element or None
     """
     Searches through a "sub-form" (can be a window or container) for the current element with focus
-    :param form: a Window, Column, Frame, or TabGroup (container elements)
 
+    :param form: a Window, Column, Frame, or TabGroup (container elements)
+    :return: Union[Element, None]
     """
     for row_num, row in enumerate(form.Rows):
         for col_num, element in enumerate(row):
@@ -6753,7 +6831,7 @@ def _FindElementWithFocusInSubForm(form):
 if sys.version_info[0] >= 3:
     def AddMenuItem(top_menu, sub_menu_info, element, is_sub_menu=False, skip=False):
         """
-
+        Only to be used internally. Not user callable
         :param top_menu:
         :param sub_menu_info:
         :param element:
@@ -8244,9 +8322,9 @@ def StartupTK(my_flex_form: Window):
     # Make moveable window
     if (my_flex_form.GrabAnywhere is not False and not (
             my_flex_form.NonBlocking and my_flex_form.GrabAnywhere is not True)):
-        root.bind("<ButtonPress-1>", my_flex_form.StartMove)
-        root.bind("<ButtonRelease-1>", my_flex_form.StopMove)
-        root.bind("<B1-Motion>", my_flex_form.OnMotion)
+        root.bind("<ButtonPress-1>", my_flex_form._StartMove)
+        root.bind("<ButtonRelease-1>", my_flex_form._StopMove)
+        root.bind("<B1-Motion>", my_flex_form._OnMotion)
 
     if not my_flex_form.Resizable:
         root.resizable(False, False)
@@ -8286,13 +8364,13 @@ def StartupTK(my_flex_form: Window):
     if my_flex_form.Timeout != None:
         my_flex_form.TKAfterID = root.after(my_flex_form.Timeout, my_flex_form._TimeoutAlarmCallback)
     if my_flex_form.NonBlocking:
-        my_flex_form.TKroot.protocol("WM_DESTROY_WINDOW", my_flex_form.OnClosingCallback)
-        my_flex_form.TKroot.protocol("WM_DELETE_WINDOW", my_flex_form.OnClosingCallback)
+        my_flex_form.TKroot.protocol("WM_DESTROY_WINDOW", my_flex_form._OnClosingCallback)
+        my_flex_form.TKroot.protocol("WM_DELETE_WINDOW", my_flex_form._OnClosingCallback)
     else:  # it's a blocking form
         # print('..... CALLING MainLoop')
         my_flex_form.CurrentlyRunningMainloop = True
-        my_flex_form.TKroot.protocol("WM_DESTROY_WINDOW", my_flex_form.OnClosingCallback)
-        my_flex_form.TKroot.protocol("WM_DELETE_WINDOW", my_flex_form.OnClosingCallback)
+        my_flex_form.TKroot.protocol("WM_DESTROY_WINDOW", my_flex_form._OnClosingCallback)
+        my_flex_form.TKroot.protocol("WM_DELETE_WINDOW", my_flex_form._OnClosingCallback)
         my_flex_form.TKroot.mainloop()
         my_flex_form.CurrentlyRunningMainloop = False
         my_flex_form.TimerCancelled = True
@@ -9834,7 +9912,6 @@ def PopupGetFolder(message, title=None, default_path='', no_window=False, size=(
     :param location:  (Default = (None))
     :param initial_folder:
     :return: Union[str, None] Contents of text field. None if closed using X or cancelled
-                hello world
     """
 
     # global _my_windows
@@ -10691,7 +10768,7 @@ def main():
     frame2 = [
         [Listbox(['Listbox 1', 'Listbox 2', 'Listbox 3'], select_mode=SELECT_MODE_EXTENDED, size=(20, 5))],
         [Combo(['Combo item 1',2,3,4 ], size=(20, 3),readonly=True, text_color='red', background_color='red', key='_COMBO1_')],
-        [Combo(['Combo item 1', 2,3,4], size=(20, 3), readonly=False, text_color='red', background_color='red', key='_COMBO2_')],
+        # [Combo(['Combo item 1', 2,3,4], size=(20, 3), readonly=False, text_color='red', background_color='red', key='_COMBO2_')],
         [Spin([1, 2, 3, 'a','b','c'], size=(4, 3))],
     ]
 
@@ -10722,8 +10799,8 @@ def main():
         [graph_elem],
     ]
 
-    tab1 = Tab('Graph Number 1', frame6, tooltip='tab 1')
-    tab2 = Tab('Graph Number 2', [[]])
+    tab1 = Tab('Graph Number 1', frame6, tooltip='tab 1',  )
+    tab2 = Tab('Graph Number 2', [[]],)
 
     layout1 = [
         [Image(data=DEFAULT_BASE64_ICON)],
@@ -10738,7 +10815,7 @@ def main():
          Frame('Variable Choice Group', frame4, title_color='blue')],
         [Frame('Structured Data Group', frame5, title_color='red'), ],
         # [Frame('Graphing Group', frame6)],
-        [TabGroup([[tab1, tab2]])],
+        [TabGroup([[tab1, tab2]], )],
         [ProgressBar(max_value=800, size=(60, 25), key='+PROGRESS+'), Button('Button'), B('Normal'),
          Button('Exit', tooltip='Exit button')],
     ]
@@ -10751,6 +10828,7 @@ def main():
                     right_click_menu=['&Right', ['Right', '!&Click', '&Menu', 'E&xit', 'Properties']],
                     # transparent_color= '#9FB8AD',
                     resizable=True,
+                    debugger_enabled=False,
                     # icon=r'X:\VMWare Virtual Machines\SHARED FOLDER\kingb.ico'
                     ).Finalize()
     graph_elem.DrawCircle((200, 200), 50, 'blue')

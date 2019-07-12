@@ -27,6 +27,15 @@ additions
 
 "High level calls" are those that start with "Popup".    They are the most basic form of communications with the user.   They are named after the type of window they create, a pop-up window.  These windows are meant to be short lived while, either delivering information or collecting it, and then quickly disappearing.
 
+Think of Popups as your first windows, sorta like your first bicycle. It worked well, but was limited.  It probably wasn't long before you wanted more features and it seemed too limiting for your newly found sense of adventure.
+
+When you've reached the point with Popups that you are thinking of filing a GitHub "Enhancement Issue" to get the Popup call extended to include a new feature that you think would be helpful.... not just to you but others is what you had in mind, right?  For the good of others.
+
+It's at THIS time that you should immediately turn to the section entitled "Custom Window API Calls - Your First Window".  Congratulations, you just graduated and are not an official "GUI Designer".  Oh, nevermind that you only started learning Python 2 weeks ago, you're a real GUI Designer now so buck up and start acting like one.
+
+But, for now, let's stick with these 1-line window calls, the Popups.
+
+
 ## Popup Output
 
 Think of the `Popup` call as the GUI equivalent of a  `print` statement.  It's your way of displaying results to a user in the windowed world.  Each call to Popup will create a new Popup window.
@@ -98,11 +107,19 @@ POPUP_BUTTONS_OK_CANCEL
 POPUP_BUTTONS_OK
 POPUP_BUTTONS_NO_BUTTONS
 ```
-Note that you should not call Popup yourself with different button_types.  Rely on the Popup function named that sets that value for you.  For example PopupYesNo will set the button type to POPUP_BUTTONS_YES_NO for you.
+
+**Note that you should not call Popup yourself with different button_types.**  Rely on the Popup function named that sets that value for you.  For example PopupYesNo will set the button type to POPUP_BUTTONS_YES_NO for you.
+
+
+
 
 
 #### Scrolled Output
 There is a scrolled version of Popups should you have a lot of information to display.
+
+<!-- <+func.PopupScrolled+> -->
+
+
 
 ```python
 PopupScrolled(*args, button_color=None, yes_no=False, auto_close=False, auto_close_duration=None, size=(None, None), location=(None, None), title=None, non_blocking=False)
@@ -129,6 +146,10 @@ If `non_blocking` parameter is set, then  the call will not blocking waiting for
 
 
 ### PopupNoWait
+
+<!-- <+func.PopupNoWait+> -->
+
+
 The Popup call PopupNoWait or PopupNonBlocking will create a popup window and then immediately return control back to you.  All other popup functions will block, waiting for the user to close the popup window. 
 
 This function is very handy for when you're **debugging** and want to display something as output but don't want to change the programs's overall timing by blocking.  Think of it like a `print` statement. There are no return values on one of these Popups. 
@@ -860,128 +881,137 @@ The first step is to create the window object using the desired window customiza
 <!-- <+Window.__init__+> -->
 
 ## Methods
-<!-- <+Window.AddRow+> -->
+
+<!-- <+Window.doc+> -->
+<!-- <+Window.__init__+> -->
+
+#### AddRows (Don't use)
+
 <!-- <+Window.AddRows+> -->
-<!-- <~~~~~~~~~~~~~~~~this will not render, that's good~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+Window.AlphaChannel+> -->
+
+#### BringToFront
+
 <!-- <+Window.BringToFront+> -->
-<!-- <+Window.BuildKeyDict+> -->
+
+#### Close
+
 <!-- <+Window.Close+> -->
-<!-- <+Window.CloseNonBlocking+> -->
-<!-- <+Window.CloseNonBlockingForm+> -->
+
+#### CurrentLocation
+
 <!-- <+Window.CurrentLocation+> -->
-<!-- <+Window.DecrementOpenCount+> -->
+
+#### Disable
+
 <!-- <+Window.Disable+> -->
+
+#### DisableDebugger
+
 <!-- <+Window.DisableDebugger+> -->
+
+#### Disappear
+
 <!-- <+Window.Disappear+> -->
-<!-- <+Window.Element+> -->
+
+#### Enable
+
 <!-- <+Window.Enable+> -->
+
+#### EnableDebugger
+
 <!-- <+Window.EnableDebugger+> -->
+
+#### Fill
+
 <!-- <+Window.Fill+> -->
+
+#### Finalize
+
 <!-- <+Window.Finalize+> -->
-<!-- <+Window.Find+> -->
+
+#### FindElement == Element == Find
+
 <!-- <+Window.FindElement+> -->
+
+#### FindElementWithFocus
+
 <!-- <+Window.FindElementWithFocus+> -->
-<!-- <+Window.GetAContainerNumber+> -->
+
+#### GetScreenDimensions
+
 <!-- <+Window.GetScreenDimensions+> -->
+
+#### GrabAnyWhereOff
+
 <!-- <+Window.GrabAnyWhereOff+> -->
+
+#### GrabAnyWhereOn
+
 <!-- <+Window.GrabAnyWhereOn+> -->
+
+#### Hide
+
 <!-- <+Window.Hide+> -->
-<!-- <+Window.IncrementOpenCount+> -->
+
+#### Layout
+
 <!-- <+Window.Layout+> -->
-<!-- <+Window.LayoutAndRead+> -->
-<!-- <+Window.LayoutAndShow+> -->
+
+#### LoadFromDisk
+
 <!-- <+Window.LoadFromDisk+> -->
+
+#### Maximize
+
 <!-- <+Window.Maximize+> -->
+
+#### Minimize
+
 <!-- <+Window.Minimize+> -->
+
+#### Move
+
 <!-- <+Window.Move+> -->
+
+#### Normal
+
 <!-- <+Window.Normal+> -->
-<!-- <~~~~~~~~~~~~~~~~~~~~this will not render, that's good~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+Window.NumOpenWindows+> -->
-<!-- <+Window.OnClosingCallback+> -->
-<!-- <+Window.OnMotion+> -->
+
+#### Read
+
 <!-- <+Window.Read+> -->
-<!-- <+Window.ReadNonBlocking+> -->
+
+#### Reappear
+
 <!-- <+Window.Reappear+> -->
+
+#### Refresh
+
 <!-- <+Window.Refresh+> -->
+
+#### SaveToDisk
+
 <!-- <+Window.SaveToDisk+> -->
+
+#### SetAlpha
+
 <!-- <+Window.SetAlpha+> -->
+
+#### SetIcon
+
 <!-- <+Window.SetIcon+> -->
+
+#### SetTransparentColor
+
 <!-- <+Window.SetTransparentColor+> -->
-<!-- <+Window.Show+> -->
-<!-- <~~~~~~~~~~~~~~~~~~~this will not render, that's good~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~+Window.Size+> -->
-<!-- <+Window.StartMove+> -->
-<!-- <+Window.StopMove+> -->
+
+#### UnHide
+
 <!-- <+Window.UnHide+> -->
-<!-- <+Window.VisibilityChanged+> -->
 
 
 
 
-OLD OLD OLD
-
-This is the definition of the Window object:
-
-```python
-Window( title,
-	default_element_size=DEFAULT_ELEMENT_SIZE,
-	default_button_element_size=(None,None),
-	auto_size_text=None,
-	auto_size_buttons=None,
-	location=(None,None),
-	size=(None,None),
-	element_padding=None,
-	button_color=None,
-	font=None,
-	progress_bar_color=(None,None),
-	background_color=None,
-	border_depth=None,
-	auto_close=False,
-	auto_close_duration=DEFAULT_AUTOCLOSE_TIME,
-	icon=DEFAULT_WINDOW_ICON,
-	force_toplevel=False,
-	alpha_channel=1,
-	return_keyboard_events=False,
-	use_default_focus=True,
-	text_justification=None,
-	no_titlebar=False,
-	grab_anywhere=False,
-	keep_on_top=False,
-	resizable=False,
-	disable_close=False,
-	disable_minimize=False,
-	right_click_menu=None):
-```
-
-Parameter Descriptions.  You will find these same parameters specified for each `Element` and some of them in `Row` specifications.  The `Element` specified value will take precedence over the `Row` and `window` values.
-
-|Name|Meaning|
-| ----- | ---- |
-| default_element_size | Size of elements in window in characters (width, height)      |
-| default_button_element_size | Size of buttons on this window      |
-| auto_size_text | Bool. True if elements should size themselves according to contents. Defaults to True      |
-| auto_size_buttons | Bool. True if button elements should size themselves according to their text label      |
-| location | (x,y) Location to place window in pixels  |
-| size | (w,h) forces a window to be a paricular size|
-| element_padding | (w,h) default padding amount for elements|
-| font | Font name and size for elements of the window      |
-| button_color | Default color for buttons (foreground, background). Can be text or hex      |
-| progress_bar_color | Foreground and background colors for progress bars      |
-| background_color | Color of the window background      |
-| border_depth | Amount of 'bezel' to put on input boxes, buttons, etc.      |
-| auto_close | Bool.  If True window will autoclose      |
-| auto_close_duration | Duration in seconds before window closes      |
-| icon | .ICO file that will appear on the Task Bar and end of Title Bar      |
-| force_top_level | Bool. If set causes a tk.Tk window to be used as primary window rather than tk.TopLevel. Used to get around Matplotlib problem    |
-| alpha_channel | Float 0 to 1. 0 is invisible, 1 is fully visible, Anything between will be semi-transparent |
-| return_keyboard_events | if True key presses are returned as buttons      |
-| use_default_focus | if True and no focus set, then automatically set a focus      |
-| text_justification | Justification to use for Text Elements in this window      |
-| no_titlebar | Create window without a titlebar      |
-| grab_anywhere | Grab any location on the window to move the window      |
-| keep_on_top | if True then window will always stop on top of other windows on the screen.  Great for floating toolbars.     |
-| resizable | if True | user can manually changge the wize of the window.  Defaults to False|
-| disable_close | if True user will not be able to close using the X. |
-| disable_minimize | if True user will not be able to minimize the window|
-| right_click_menu | menu definition that will be used on wall elements that support right click. If a  definition is specified on an element then it will be used instead.|
 
 
 ### Window Location
@@ -1040,32 +1070,6 @@ To keep a window on top of all other windows on the screen, set keep_on_top = Tr
 PySimpleGUI will set a default focus location for you.  This generally means the first input field.  You can set the focus to a particular element.  If you are going to set the focus yourself, then you should turn off the automatic focus by setting `use_default_focus=False` in your Window call.
 
 
-### Window Methods (things you can do with a Window object)
-
-There are a few methods (functions) that you will see in this document that act on Windows.  The ones you will primarily be calling are:
-
-	window.Layout(layout) - Recommend moving away from this nethod and using layout parameter instead. Turns your definition of the Window into Window
-	window.Finalize() - creates the tkinter objects for the Window. Normally you do not call this
-	window.Read() - Read the Windows values and get the button / key that caused the Read to return. Can have an optional timeout
-	window.ReadNonBlocking() - NO LONGER USED!
-	window.Refresh() - Use if updating elements and want to show the updates prior to the nex Read
-	window.Fill(values_dict) - Fill each Element with entry from the dictionary passed in
-	window.SaveToDisk(filename) - Save the Window's values to disk
-	window.LoadFromDisk(filename) - Load the Window's values from disk
-	window.Close() - To close your window, if a button hasn't already closed it
-	window.Disable() - Use to disable the window inputwhen opening another window on top of the primnary  Window
-	window.Enable() - Re-enable a Disabled window
-	window.FindElement(key, silent_on_error=False) - Returns the element that has a matching key value
-	window.Element(key, silent_on_error=False) - EXACTLY the same as calling FindElement
-	window.Move(x,y) - Moves window to location x,y on screen'
-	window.SetAlpha(alpha) - Changes window transparency
-	window.BringToFront() - Brings the window to the top of other windows on the screen
-	window.Disappear(), Reappear() - Uses alpha channel to make window disappear
-	window.Hide(), UnHide() - Hides a window
-	window.CurrentLocation() - Returns current window location
-	window.Size = w,h - Forces a window to be a particular size. Note this is a property not a method
-	window.Size - Tuple (w,h)The size of the current window. Note this is a property
-	window.Minimize() - Minimizes window to taskbar
 
 ## Window Methods
 
@@ -1098,33 +1102,7 @@ If you set the timeout = 0, then the Read will immediately return rather than wa
 
 While this call will technically still work, it is being removed.  If you want to get the same result, call Read with timeout = 0.
 
-Read the Window's input values and button clicks but without blocking.  It will immediately return.    **Consider using Read with non-zero timeout instead!**
-
-Will consume 100% of your CPU if you do not have other blocking calls in your event loop.
-
-|Name|Meaning|
-|-----|-----|
-| `Refresh() ` | Cause changes to the window to be displayed on the screen.  Normally not needed unless the changes are immediately required or if it's going to be a while before another call to Read.    |
-| `SetIcon(icon, pngbase64) ` | Sets the window's icon that will be shown on the titlebar.    Can either be a filename or a base64 string.|
-| `Fill(values_dict) ` | Populates the windows fields with the values shown in the dictionary.|
-| `FindElementWithFocus() ` | Returns the Element that currently has the focus.  Returns None if no Elements were found.|
-| `SaveToDisk(filename) ` | Saves the window's values to disk |
-| `LoadFromDisk(filename) ` | Fills in a window's fields based on previously saved file |
-| `GetScreenDimensions() ` | Returns the size (w,h) of the screen in pixels |
-| `CurrentLocation() ` | Returns current screen position (x,y)  |
-| `Move(x, y) ` | Move window to (x,y) position on the screen |
-| `Minimize() ` | Sends the window to the taskbar |
-| `Close() ` | Closes a window, blocking or non-blocking|
-| `Disable() ` | Stops a window from  responding until Enable is called|
-| `Enable() ` | Re-enables a previously disabled window|
-| `Hide() ` | Completely hides a window, including removing from the taskbar|
-| `UnHide() ` | Restores a window hidden using Hide|
-| `Disappear() ` | Makes a window disappear while leaving the icon on the taskbar|
-| `Reappear() ` | Makes a window reappear that was previously made to disappear using Disappear()|
-| `SetAlpha(alpha)` |  Sets the window's transparency.  0 is completely transparent.  1 is fully visible, normal .  Can also use the property Window.AlphaChannel instead of method function call|
-| CloseNonBlocking()<br>(NO LONGER USED.<br> use Close instead) | Closes a non-blocking window |
-| FindElement(key, silent_on_error=False) (shorthand version <br> Element) | Returns the Element that has a matching key.  If the key is not found, an Error Element is returned so that the program will not crash should the user try to perform an "update".  A Popup message will be shown |
-|||
+The only time you will see this call is in OLD CODE.  Please file an Issue if you see this call in any code or in any documentation.  It must go away never to be seen again.
 
 
 # Elements
@@ -1262,11 +1240,18 @@ layout = [
 ```
 ![simple text](https://user-images.githubusercontent.com/13696193/44959877-e9d97b00-aec3-11e8-9d24-b4405ee4a148.jpg)
 
+
 <!-- <+Text.__init__+> -->
 
 ### Methods
 
+#### Update
+
 <!-- <+Text.Update+> -->
+
+#### SetToolTip
+
+<!-- <+Text.SetTooltip+> -->
 
 ---
 
@@ -1309,7 +1294,23 @@ layout = [[sg.Multiline('This is what a Multi-line Text Element looks like', siz
 
 ### Methods
 
+#### Update
+
 <!-- <+Multiline.Update+> -->
+
+#### Get
+
+<!-- <+Multiline.Get+> -->
+
+#### SetFocus
+
+<!-- <+Multiline.SetFocus+> -->
+
+#### SetTooltip
+
+<!-- <+Multiline.SetTooltip+> -->
+
+
 
 <!-- %!% -->
 ## Text Input Element  | `InputText == Input == In`
@@ -1326,21 +1327,31 @@ layout = [[sg.InputText('Default text')]]
 
 ### Methods
 
+#### Update
+
 <!-- <+InputText.Update+> -->
+
+#### Get
 
 <!-- <+InputText.Get+> -->
 
+#### SetFocus
+
 <!-- <+InputText.SetFocus+> -->
+
+#### SetToolTip
+
+<!-- <+InputText.SetTooltip+> -->
 
 ---
 
-#### do_not_clear Parameter
+#### Note about the `do_not_clear` parameter
 
-
-**Important** - This trips a lot of people up.  If you do not set the `do_not_clear` parameter then the input field will clear when an event takes place.   The behavior is a "forms" style window development.  The assumption is that you want the field to clear.  If you are writing a chat program then you're thankful.  The rest of you, I'm sorry.
+This used to really trip people up, but don't think so anymore.  The `do_not_clear` parameter is initialized when creating the InputText Element.  If set to False, then the input field's contents will be erased after every `Window.Read()` call.  Use this setting for when your window is an "Input Form" type of window where you want all of the fields to be erased and start over again every time.
 
 
 <!-- %!% -->
+
 ## Combo Element | `Combo == InputCombo == DropDown == Drop`
 Also known as a drop-down list.  Only required parameter is the list of choices.  The return value is a string matching what's visible on the GUI.
 
@@ -1356,7 +1367,18 @@ layout = [[sg.Combo(['choice 1', 'choice 2'])]]
 
 ### Methods
 
+#### Update
+
 <!-- <+Combo.Update+> -->
+
+#### GetSelectedItemsIndexes 
+
+<!-- <+Combo.GetSelectedItemsIndexes+> -->
+
+#### SetToolTip
+
+<!-- <+Combo.SetTooltip+> -->
+
 
 <!-- %!% -->
 ## Listbox Element
@@ -1374,11 +1396,26 @@ layout = [[sg.Listbox(values=['Listbox 1', 'Listbox 2', 'Listbox 3'], size=(30, 
 
 ### Methods
 
+#### Update
+
 <!-- <+Listbox.Update+> -->
+
+#### SetValue
 
 <!-- <+Listbox.SetValue+> -->
 
+#### GetListValues
+
 <!-- <+Listbox.GetListValues+> -->
+
+#### SetFocus
+
+<!-- <+Listbox.SetFocus+> -->
+
+#### SetToolTip
+<!-- <+Listbox.SetTooltip+> -->
+
+
 
 ---
 
@@ -1416,7 +1453,9 @@ There is an important difference between Qt and tkinter sliders.  On Qt, the sli
 
 <!-- %!% -->
 ## Radio Element
+
 Creates one radio button that is assigned to a group of radio buttons.  Only 1 of the buttons in the group can be selected at any one time.
+
 <!-- <+Radio.doc+> -->
 
 ```python
@@ -1432,7 +1471,22 @@ layout =  [
 
 ###  Methods
 
+#### Update
+
 <!-- <+Radio.Update+> -->
+
+#### Get
+
+<!-- <+Radio.Get+> -->
+
+#### ResetGroup
+
+<!-- <+Radio.ResetGroup+> -->
+
+#### SetTooltip
+
+<!-- <+Radio.SetTooltip+> -->
+
 
 <!-- %!% -->
 ## Checkbox Element | `CBox == CB == Check`
@@ -1449,9 +1503,19 @@ layout =  [[sg.Checkbox('My first Checkbox!', default=True), sg.Checkbox('My sec
 
 ### Methods
 
+#### Update
+
 <!-- <+Checkbox.Update+> -->
 
+#### Get
+
 <!-- <+Checkbox.Get+> -->
+
+#### SetTooltip
+
+<!-- <+Checkbox.SetTooltip+> -->
+
+
 
 <!-- %!% -->
 ## Spin Element
@@ -1475,9 +1539,18 @@ On Qt values is a tuple representing a range.  On plain PySimpleGUI this value i
 
 ### Methods
 
+#### Update
+
 <!-- <+Spin.Update+> -->
 
+#### Get
+
 <!-- <+Spin.Get+> -->
+
+#### SetTooltip
+
+<!-- <+Spin.SetTooltip+> -->
+
 
 <!-- %!% -->
 ## Image Element
