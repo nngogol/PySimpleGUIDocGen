@@ -164,7 +164,7 @@ def special_cases(function_name, sig, doc_string, line_break=None):
         ```
 
         """
-        return special_case(ok=True, just_text=f'\n\n{doca}\n\n`python\n{function_name}()\n`\n\n', sig='', table='')
+        return special_case(ok=True, just_text=f'\n\n{doca}\n\n```python\n{function_name}()\n```\n\n', sig='', table='')
 
     # +return -param
     elif 'self' in params_names and len(params_names) == 1 and doca and ':param' not in doca and ':return:' in doca:
