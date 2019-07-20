@@ -1636,7 +1636,8 @@ class Text(Element):
 
         :param text: (str) The text to display. Can include /n to achieve multiple lines
         :param size: (int, int) (width, height) width = characters-wide, height = rows-high
-        :param auto_size_text: (bool) if True size of the Text Element will be sized to fit the string provided in 'text' parm
+        :param auto_size_text: (bool) if True size of the Text Element
+                                  will be sized to fit the string provided in 'text' parm
         :param click_submits: (bool) DO NOT USE. Only listed for backwards compat - Use enable_events instead
         :param enable_events: (bool) Turns on the element specific events. Text events happen when the text is clicked
         :param relief:  (str/enum) relief style around the text. Values are same as progress meter relief values. Should be a constant that is defined at starting with "RELIEF_" - `RELIEF_RAISED, RELIEF_SUNKEN, RELIEF_FLAT, RELIEF_RIDGE, RELIEF_GROOVE, RELIEF_SOLID`

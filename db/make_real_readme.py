@@ -106,7 +106,7 @@ def get_params_part(code: str) -> dict:
 
     # making dict
     param_lines = only_params.split(':param ')
-    param_lines = [i.strip()
+    param_lines = [re.sub(r'[ ]{2,}', ' ', i.strip(' ').strip('\t').replace('\n', '  '), flags=re.MULTILINE)
                    for i in param_lines if i.strip()]  # filter empty lines
 
     args_kwargs_pairs = {}
