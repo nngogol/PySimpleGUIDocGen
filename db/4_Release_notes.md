@@ -639,14 +639,14 @@ A combination of user requests, and needs of new `imwatchingyou` debugger
 # 4.0.0 PySimpleGUI & 2.0.0 PySimpleGUI27   19-June-2019
 
 * DOC STRINGS DOCS STRINGS DOC STRINGS!
-	* Your IDE is about to become very happy
-	* All Elements have actual documentation in the call signature
-	* The Readme and ReadTheDocs will be generated going forward using the CODE
-	* HUGE Thanks for @nngogol for both copying & adding all those strings, but also for making an entire document creation system.
+  * Your IDE is about to become very happy
+  * All Elements have actual documentation in the call signature
+  * The Readme and ReadTheDocs will be generated going forward using the CODE
+  * HUGE Thanks for @nngogol for both copying & adding all those strings, but also for making an entire document creation system.
 * New __version__ string for PySimpleGUI.py
-* New parameter to ALL `SetFocus` calls. 	
-	* def SetFocus(self, force=False)
-	* If force is True, then a call to `focus_force` is made instead of `focus_set`
+* New parameter to ALL `SetFocus` calls.  
+  * def SetFocus(self, force=False)
+  * If force is True, then a call to `focus_force` is made instead of `focus_set`
 * Get - New Radio Button Method.  Returns True is the Radio Button is set
 * Rename of Debugger class to _Debugger so IDEs don't get confused
 * User read access to last Button Color set now available via property `Button.ButtonColor`
@@ -655,6 +655,85 @@ A combination of user requests, and needs of new `imwatchingyou` debugger
 * Listbox.Update - New parameter - scroll_to_index - scroll view so that index is shown at the top
 * First PyPI release to use new documentation!
 
+
+## PySimpleGUI 4.1 Anniversary Release!  4-Aug-2019
+
+NEVER has there been this long of a lag, sorry to all users!
+Long time coming.  Docstrings continue to be a focus.
+
+* Version can be found using PySimpleGUI.version
+* New bit of licensing info at the top of the file
+* Types used in the doc strings. Also type hints in some comments. Because also running on 2.7 can't use full typing
+* Added using of Warnings. Just getting started using this mechanism. May be great, maybe not. We'll see with this change
+* Added TOOLTIP_BACKGROUND_COLOR which can be changed (it's tkinter only setting however so undertand this!)
+* Graph.DrawText.  Ability to set `text_location` when drawing text onto a Graph Element.  Determines what part of the text will be located at the point you provide when you draw the text.   Choices are:
+  * TEXT_LOCATION_TOP
+  * TEXT_LOCATION_BOTTOM
+  * TEXT_LOCATION_LEFT
+  * TEXT_LOCATION_RIGHT
+  * TEXT_LOCATION_TOP_LEFT
+  * TEXT_LOCATION_TOP_RIGHT
+  * TEXT_LOCATION_BOTTOM_LEFT
+  * TEXT_LOCATION_BOTTOM_RIGT
+  * TEXT_LOCATION_CENTER
+* Flag ENABLE_TK_WINDOWS = False.  If True, all windows will be made using only tk.Tk()
+* SetFocus available for all elements now due to it being added to base class. May NOT work on all elements however
+* Added Combo.GetSElectedItemsIndexes() - returns a list of all currently selected items
+* Fixed Listbox.Update - set_to_index changed to be an int, list or tuple
+* Added parent parameter to call to tkinter's askopenfilename, directory, filenames.  Not sure why the root wasn't passed in before
+* Button.Update - also sets the activebackground to the button's background color
+* Graph - New parameter when creating. `float_values`.  If True, then you're indicating that your coordinate system is float not int based
+* Graph.Update - made background color optional parm so that visible only can be set
+* Frame.Layout returns self now for chaining
+* TabGroup.Layout returns self now for chaining
+* Column.Layout returns self now for chaining
+* Menu.Update menu_definition is now optional to allow for changing visibility only
+* Added inivisiblity support for menu bars
+* Table.Update supports setting alternating row color and row_colors (list of rows and the color to set)
+* Set window.TimeoutKey to TIMEOUT_KEY initially
+* Window - check for types for title (should be string) and layout (should be list) and warns user if not correct
+* Window - renamed some methods by adding _ in front (like Show) as they are NOT user callable
+* Another shortcut! Elem = Element = FindElement
+* SaveToDisk - will not write buttons to file.  Fixed problems due to buttons having keys
+* Remapped Windowl.CloseNonBlockingForm, Window.CloseNonBlocking to be Window.CloseNonBlocking
+* Fix for returning values from a combo list. Wasn't handling current value not in list of provided values
+* Spin - Returns an actual value from list provided when Spin was created or updated
+* Chaneged FillFormWithValues to use the new internal AllKeysDict dictionary
+* Added try when creating combo. Problem happens when window is created twice.  Prior window had already created the style
+* Added list of table (tree) ids to the Table element
+* Enabled autoclose to use fractions of a second
+* Added a try around one of the destroys because it could fail if user aborted
+* Popup - Icon is no longer set to default by default
+* Fix for debugger trying to execute a REPL comand.  The exec is only avilable in Python 3
+* main() will display the version number in big letters when program is running
+
+### 4.2 PySimpleGUI  2.2 for PySimpleGUI27  8 - Aug 2019
+
+The cool lookup release!  No more need for FindElement. You can continue to use FindElement.
+However, your code will look weird and ancient.  ;-)  (i.e. readable)
+MORE Docstring and main doc updates!
+
+* Finally 2.7 gets an upgrade and with it doc strings.  It however doesn't get a full-version bump like main PySimpleGUI as this may be its last release.
+* New window[key] == window.FindElement(key)
+* New Update calling method. Can directly call an Element and it will call its Update method
+  * window[key](value=new_value)    ==     window.FindElement(key).Update(value=new_value)
+* Made Tearoff part of element so anything can be a menu in theory
+* Removed a bunch of __del__ calls. Hoping it doesn't bite me in memory leaks
+* Combo.Get method added
+* Combo.GetSelectedItemsIndexes removed
+* New Graph methods SendFigureToBack, BringFigureToFront
+* Butten release changed for better Graph Dragging
+  * Now returns key+"Up" for the event
+  * Also returns the x,y coords in the values
+* Tab.Select method added
+* TabGroup.Get method added - returns key of currently selected Tab
+* Window finalize parameter added - Will call finalize if a layout is also included.  No more need for Finalize!!
+* Quiet, steady change to PEP8 user interface started
+  * Now available are Window methods - read, layout, finalize, find_element, element, close
+  * Should provide 100% PEP with these alone for most PySimpleGUI programs
+* Added finding focus across ALL elements by using the .Widget member variable
+* Fixed sizing Columns!  NOW they will finally be the size specified
+* Fixed not using the initialdir paramter in PopupGetFile if the no_window option is set
 
 
 ### Upcoming
@@ -700,9 +779,13 @@ tkinter is the "official" GUI that Python supports.  It runs on Windows, Linux, 
 From the start of the PSG project, tkinter was not meant to be the only underlying GUI framework for PySimpleGUI.  It is merely a starting point.  All journeys begin with one step forward and choosing tkinter was the first of many steps for PySimpleGUI.  Now there are 4 ports up and running - tkinter, WxPython, Qt and Remi (web support)
 
 
-## Author
-Mike - who wrote PySimpleGUI is not important. It's the software that's important
+## Author & Owner
 
+The PySimpleGUI Organization
+
+This documentation as well as all PySimpleGUI code is Copyright 2018, 2019 by PySimpleGUI.org
+
+PySimpleGUI@PySimpleGUI.org
 
 ## License
 
@@ -710,4 +793,6 @@ GNU Lesser General Public License (LGPL 3) +
 
 ## Acknowledgments
 
-#### SORRY!! Will add these back.  Lost due to file length limitation
+There are a number of people that have been key contributors to this project both directly and indirectly.  Paid professional help has been deployed a number of critical times in the project's history.  This happens in the life of software development from time to time.
+
+If you've helped, I sure hope that you feel like you've been properly thanked.  That you have been recognized.  If not, then say something.... drop an email to comments@PySimpleGUI.org. 

@@ -6,32 +6,37 @@ import PySimpleGUIlib
     Will output to STDOUT all of the different tags for classes, members and functions for a given PySimpleGUIlib.py
     file.  Functions that begin with _ are filtered out from the list.
     Displays the results in a PySimpleGUI window which can be used to copy and paste into other places.
-
 """
 
+SHOW_UNDERSCORE_METHODS = not False
+
 layout = [[PySimpleGUIlib.Output(size=(80,20))]]
-window = PySimpleGUIlib.Window('Dump of tags', layout).Finalize()
+window = PySimpleGUIlib.Window('Dump of tags', layout, resizable=True).Finalize()
 
 psg_members = inspect.getmembers(PySimpleGUIlib)
-
-psg_funcs    = [o for o in psg_members if inspect.isfunction(o[1])]
+psg_funcs    = [o[0] for o in psg_members if inspect.isfunction(o[1])]
 psg_classes  = [o for o in psg_members if inspect.isclass(o[1])]
 # I don't know how this magic filtering works, I just know it works. "Private" stuff (begins with _) are somehow
 # excluded from the list with the following 2 lines of code.  Very nicely done Kol-ee-ya!
-psg_classes_ = list(set([i[1] for i in psg_classes])) # filtering of anything that starts with _ (methods, classes, etc)
-psg_classes  = list(zip([i.__name__ for i in psg_classes_], psg_classes_))
+psg_classes = sorted(list(set([i[1] for i in psg_classes])), key=lambda x : x.__name__) # filtering of anything that starts with _ (methods, classes, etc)
 
-for i in psg_classes:
-    if 'Tk' in i[0] or 'TK' in i[0] or 'Element' == i[0]: # or 'Window' == i[0]:
+for aclass in psg_classes:
+    class_name = aclass.__name__
+    if 'Tk' in class_name or 'TK' in class_name or 'Element' == class_name: # or 'Window' == class_name:
         continue
-    print('')
-    print(f'<!-- <+{i[0]}.doc+> -->')
-    print(f'<!-- <+{i[0]}.__init__+> -->')
-    print('\n'.join([f"<!-- <+{i[0]}.{j[0]}+> -->" for j in inspect.getmembers(i[1]) if '_' not in j[0]  ]))
+    print(f'### {class_name} Element ')
+    print(f'<!-- <+{class_name}.doc+> -->')
+    print(f'<!-- <+{class_name}.__init__+> -->\n')
+    print('\n'.join([f"#### {name}\n<!-- <+{class_name}.{name}+> -->\n" for name, obj in inspect.getmembers(aclass) if '_' not in name  ]))
 
 print('\n------------------------- Functions start here -------------------------\n')
 
-for f in psg_funcs:
-    print(f"<!-- <+func.{f[0]}+> -->")
+if SHOW_UNDERSCORE_METHODS:
+    for i in psg_funcs:
+        if '_' in i:
+            print( f"<!-- <+func.{i}+> -->" )
+else:
+    for i in psg_funcs:
+        print( f"<!-- <+func.{i}+> -->" )
 
 window.Read()

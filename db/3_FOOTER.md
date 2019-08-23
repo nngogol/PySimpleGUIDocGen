@@ -1,8 +1,14 @@
+
+
+---
+
+
+
 # "Demo Programs" Applications
 
 There are too many to list!!
 
-There are over 130 sample programs to give you a jump start.
+There are over 170 sample programs to give you a jump start.
 
 
 You will find Demo Programs located in a subfolder named "Demo Programs" under each of the PySimpleGUI ports on GitHub.
@@ -21,15 +27,6 @@ https://github.com/PySimpleGUI/PySimpleGUI/tree/master/PySimpleGUIWeb/Demo%20Pro
 
 
 There are not many programs under each of the port's folders because the main Demo Programs should run on all of the other platforms with minimal changes (often only the import statement changes).
-
-## Start Here
-
-When you are just beginning to build your application, or to design it, look through the Demo Programs first to see if there is a program written that does what you're looking for.  If so, then this program could be a good starting point.  Copy it and modify it to your liking.
-
-Even if no program perfectly matches your situation, there are still a good number of example uses of Elements or techniques that are demonstrated.  
-
-Maybe you're going to write a program that uses the Graph Element.  In addition to reading the documentaion about the Graph Element, check to see if there's a Demo Program that uses it.   At the moment there are 7 Demo programs that match "Demo_Graph_*.py"
-
 
 
 ## Packages Used In Demos
@@ -90,11 +87,8 @@ Run this command on your Mac
 This info was located on Reddit with the source traced back to:
 https://github.com/pyinstaller/pyinstaller/issues/1350
 
+# Debug Output
 
-## Fun Stuff
-Here are some things to try if you're bored or want to further customize
-
-**Debug Output**
 Be sure and check out the EasyPrint (Print) function described in the high-level API section.  Leave your code the way it is, route your stdout and stderror to a scrolling window.
 
 For a fun time, add these lines to the top of your script
@@ -105,7 +99,9 @@ For a fun time, add these lines to the top of your script
 ```
 This will turn all of your print statements into prints that display in a window on your screen rather than to the terminal.
 
-**Look and Feel**
+# Look and Feel (`ChangleLookAndFeel`)
+
+While you can define colors for each individual element and you can even define some on a windows wide basis, but it requires setting a lot of different settings.
 Dial in the look and feel that you like with the `SetOptions` function.  You can change all of the defaults in one function call.  One line of code to customize the entire GUI.
 Or beginning in version 2.9 you can choose from a look and feel using pre-defined color schemes.   Call ChangeLookAndFeel with a description string.
 
@@ -128,6 +124,32 @@ Valid values for the  description string are:
       Kayak
       SandyBeach
       TealMono
+
+The way this call actually works is that it calls `SetOptions` with a LOT of color settings.  Here is the actual call that's made.  As you can see lots of stuff is defined for you.
+
+```python
+SetOptions(background_color=colors['BACKGROUND'],
+            text_element_background_color=colors['BACKGROUND'],
+            element_background_color=colors['BACKGROUND'],
+            text_color=colors['TEXT'],
+            input_elements_background_color=colors['INPUT'],
+            button_color=colors['BUTTON'],
+            progress_meter_color=colors['PROGRESS'],
+            border_width=colors['BORDER'],
+            slider_border_width=colors['SLIDER_DEPTH'],
+            progress_meter_border_depth=colors['PROGRESS_DEPTH'],
+            scrollbar_color=(colors['SCROLL']),
+            element_text_color=colors['TEXT'],
+            input_text_color=colors['TEXT_INPUT'])
+```
+
+
+<!-- <+func.ListOfLookAndFeelValues+> -->
+
+
+
+<!-- <+func.ChangeLookAndFeel+> -->
+
 
 To see the latest list of color choices, take a look at the bottom of the `PySimpleGUI.py` file where you'll find the `ChangLookAndFeel` function.
 
@@ -169,5 +191,4 @@ While not an "issue" this is a ***stern warning***
 
 ## Contributing
 
-A MikeTheWatchGuy production... entirely responsible for this code.... unless it causes you trouble in which case I'm not at all responsible.
-
+Core code pull requests are not being accepted at this time.
