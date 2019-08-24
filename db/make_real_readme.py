@@ -118,7 +118,8 @@ def get_params_part(code: str, versbose=True) -> dict:
     try:
         only_params = code[code.index(':param'):]  # get_only_params_string(code)
     except Exception as e:
-        if versbose: print(f'SORRY, fail at parsing that stuff in "{code}"')
+        if versbose:
+            print(f'SORRY, fail at parsing that stuff in "{code}"')
         return {}
 
     # making dict
@@ -147,6 +148,7 @@ def get_return_part(code: str, line_break=None) -> str:
 
     if ':return:' not in code:
         return ''
+
     return code[code.index(':return:')+len(':return:'):].strip().replace('\n', line_break)
 
 
@@ -427,12 +429,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
     # 888888888888888888888888888888888888888888
     # ===========  1 loading files =========== #
     # 888888888888888888888888888888888888888888
-    HEADER_top_part = readfile('1_HEADER_top_part.md')  # 1
-    readme          = readfile('2_readme.md')           # 2
-    FOOTER          = readfile('3_FOOTER.md')           # 3
-    Release_notes   = readfile('4_Release_notes.md')    # 4
-
-
+    readme  = readfile('2_readme.md')
     # 8888888888888888888888888888888888888888888888888888888888888888888888888
     # ===========  2 GET classes, funcions, varialbe a.k.a. memes =========== #
     # 8888888888888888888888888888888888888888888888888888888888888888888888888
@@ -443,35 +440,44 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
     psg_classes_ = list(set([i[1] for i in psg_classes]))    # boildown B,Btn,Butt -into-> Button
     psg_classes = list(zip([i.__name__ for i in psg_classes_], psg_classes_))
 
-    
-    # IlilIlilIlilIlilIlilIlilIlilIlilIlilIlIlIl
-    # ilIli-                       | |    -ilIli
-    # ilIli-   _ __ ___   ___  __ _| |_   -ilIli
-    # ilIli-  | '_ ` _ \ / _ \/ _` | __|  -ilIli
-    # ilIli-  | | | | | |  __/ (_| | |_   -ilIli
-    # ilIli-  |_| |_| |_|\___|\__,_|\__|  -ilIli
-
     # 8888888888888888888888888888888888888888888888888888888
     # ===========  3 find all tags in 2_readme  =========== #
     # 8888888888888888888888888888888888888888888888888888888
+    # PLAN:
+    # (1) REMOVE HEADER
 
-    # REMOVE HEADER
+    # (2) find good tags e.g.   <!-- <+func.PopupScrolled+> -->
+
+    # (3) (optional) find '_' tags e.g.
+    #     '_' tag - is a tag, that has '_' after '.'
+    #                                               
+    #     Example:  <!-- <+func._PopupScrolled+> -->
+    #                          /\                   
+    #                          |---that's sign of a bad tags
+
+    # (4) (optional) log repeated tags.
+    #      like <!-- <+class.B+> -->
+    #                  and
+    #           <!-- <+class.Button+> -->
+    # 8888888888888888888888888888888888888888888888888888888
+
+    # >1 REMOVE HEADER
     started_mark = '<!-- Start from here -->'
     if started_mark in readme:
         readme = readme[readme.index(started_mark)+len(started_mark):]
 
-    # find TAGS via regexp
+    # 2> find good tags
     re_tags     = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([a-zA-Z_]+[\d\w_]*)\+> -->')
     mark_points = [i for i in readme.split('\n') if re_tags.match(i)]
     
-    # SKIP tags like <X._y>
+    # 3> find '_' tags OPTION
     if skip_dunder_method:
         re_bad_tags = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([_]+[\d\w_]*)\+> -->')
         for i in readme.split('\n'):
             if re_bad_tags.match(i.strip()):
                 readme = readme.replace(i, '\n')
 
-    # if there are REPEATED tags -> show them.
+    # 4> log repeated tags
     if output_repeated_tags:
         if not allow_multiple_tags and len(list(set(mark_points))) != len(mark_points):
             mark_points_copy = mark_points[:]
@@ -493,9 +499,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
     for tag in func_tags:
 
         try:
-            __, function_name = tag.split('.')
-            function_name = function_name.split('+')[0]
-            part2 = function_name
+            function_name = part2 = tag.split('.')[1].split('+')[0]
 
             # {{{{{{{{{ filter number }}}}}}}}}
             number = ''
@@ -506,10 +510,12 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
             founded_function = [func for func_name,
                                 func in psg_funcs if func_name == function_name]
             if not founded_function:
-                if logger: logger.error(f'function "{function_name}" not found in PySimpleGUI')
+                if logger:
+                    logger.error(f'function "{function_name}" not found in PySimpleGUI')
                 continue
             if len(founded_function) > 1:
-                if logger: logger.error(f'more than 1 function named "{function_name}" found in PySimpleGUI')
+                if logger:
+                    logger.error(f'more than 1 function named "{function_name}" found in PySimpleGUI')
                 continue
 
             # {{{{{{{{{ collect }}}}}}}}}
@@ -523,7 +529,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
             })
         except Exception as e:
             if logger:
-                logger.error(f'               {str(e)}')
+                logger.error(f' General error in parsing function tag: tag = "{tag}"; error="{str(e)}"')
             continue
 
     # 0===0 classes 0===0
@@ -560,7 +566,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
                 continue
             except Exception as e:
                 if logger:
-                    logger.error(str(e))
+                    logger.error(f'Error in finding the METHOD: {str(e)}')
                 continue
 
             # {{{{{{{{{ collect }}}}}}}}}
@@ -574,72 +580,86 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
             })
         except Exception as e:
             if logger:
-                logger.error(f'```````````````````````{str(e)}')
+                logger.error(f' General error in parsing class_method tag: tag = "{tag}"; error="{str(e)}"')
             continue
 
     # 888888888888888888888888888888888888888
     # ===========  5 injecting  =========== #
     # 888888888888888888888888888888888888888
+    # PLAN:
+    # (1) replace tags in 2_readme
+    #      with properly formateed text
+    # (2) log some data
+    # 8888888888888888888888888888888888888888888888888888888
 
+
+    # 1> log some data
     success_tags = []
     bad_tags = []
     for injection in injection_points:
         
-        if injection['part2'] == 'doc':  # "doc" SPECIAL SNOWFLAKE 
+        # SPECIAL CASE: X.doc tag
+        if injection['part2'] == 'doc':
             readme = readme.replace(injection['tag'], injection['parent_class'].__doc__)
         
         else:
-            tag = injection['tag']
-            # if 'TKCan' in tag: # hit propery
-            #     print(1)
-            content = render(injection, logger=logger, line_break=line_break, insert_md_section_for__class_methods=insert_md_section_for__class_methods,)
+            content = render(injection, logger=logger, line_break=line_break,
+                insert_md_section_for__class_methods=insert_md_section_for__class_methods,)
         
+            tag = injection["tag"]
             if content:
                 success_tags.append(f'{tag} - COMPLETE')
             else:
                 bad_tags.append(f'{tag} - FAIL')
-        
-            readme = readme.replace(injection['tag'], content)
+
+            readme = readme.replace(tag, content)
+
+    # 2> log some data
     if logger:
         success_tags_str    = '\n'.join(success_tags).strip()
         bad_tags_str        = '\n'.join(bad_tags).strip()
+        
+        # good message
         good_message        = f'DONE {len(success_tags)} TAGS:\n' + '\n'.join(success_tags) if success_tags_str else 'All tags are wrong//'
+        # bad  message
         bad_message         = f'FAIL WITH {len(bad_tags)} TAGS:\n' + '\n'.join(bad_tags) if bad_tags_str else 'No bad tags, YES!'
+
         logger.info(good_message)
         logger.info(bad_message)
+
+
     # 8888888888888888888888888888888888
     # ===========  6 join  =========== #
     # 8888888888888888888888888888888888
 
     files = []
-    if 0 in files_to_include: files.append(HEADER_top_part)
+    if 0 in files_to_include: files.append(readfile('1_HEADER_top_part.md'))
     if 1 in files_to_include: files.append(readme)
-    if 2 in files_to_include: files.append(FOOTER)
-    if 3 in files_to_include: files.append(Release_notes)
+    if 2 in files_to_include: files.append(readfile('3_FOOTER.md'))
+    if 3 in files_to_include: files.append(readfile('4_Release_notes.md'))
 
     Joined_MARKDOWN = '\n\n'.join(files) if do_full_readme or files else readme
 
     if output_name:
         with open(output_name, 'w', encoding='utf-8') as ff:
-            curr_dt = datetime.today().strftime('<!-- CREATED: %Y-%m-%d %H.%M.%S -->\n')
-            content = curr_dt + Joined_MARKDOWN
+            CURR_DT = datetime.today().strftime('<!-- CREATED: %Y-%m-%d %H.%M.%S -->\n')
+            content = CURR_DT + Joined_MARKDOWN
 
             # {{{{{{{{{ html removing }}}}}}}}}
             if delete_html_comments:
-                if logger: logger.info('Deleting html comments')
+                if logger:
+                    logger.info('Deleting html comments')
 
                 # remove html comments
-                filt_readme = re.sub(
-                    r'<!--([\s\S]*?)-->', '\n', content, flags=re.MULTILINE)
+                filt_readme = re.sub(r'<!--([\s\S]*?)-->', '\n', content, flags=re.MULTILINE)
 
                 for i in range(5):
                     filt_readme = filt_readme.replace('\n\n\n', '\n\n')
 
                 # add staked_edit
                 if '<!--stackedit_data:' in content:
-                    stackedit_data = content[content.index(
-                        '<!--stackedit_data:'):]
-                    filt_readme += stackedit_data
+                    stackedit_text = content[content.index('<!--stackedit_data:'):]
+                    filt_readme += stackedit_text
 
                 content = filt_readme
 
@@ -649,12 +669,10 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
                 # removing spaces
                 content = re.sub(r'^[ ]+$', '', content, flags=re.MULTILINE)
                 # removing \n
-                content = re.sub(r'\n{3,}', '\n\n',
-                                 content, flags=re.MULTILINE)
+                content = re.sub(r'\n{3,}', '\n\n', content, flags=re.MULTILINE)
 
             # {{{{{{{{{ remove repeated sections classmethods }}}}}}}}}
             if remove_repeated_sections_classmethods:
-
                 rega = re.compile(r'((\#+\s\w+)\n\s){2}', flags=re.MULTILINE)
                 for index, i in enumerate(re.finditer(rega, content)):
                     print(f'{index} - > {i.group(0)}')
@@ -663,14 +681,16 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
                 # re
                 # content = re.sub(rega, r'\1', content, flags=re.MULTILINE)
 
-            # FINISH
-            content = content.strip()
-            ff.write(content)
+            # Write into a file
+            ff.write(content.strip())
 
-        if logger: logger.info(f'ending. writing to a file///////////////')
+        if logger:
+            logger.info(f'ending. writing to a file///////////////')
+
         return content
 
-    if logger: logger.error(f'Error in main')
+    if logger:
+        logger.error(f'Error in main')
 
 
 @click.command()
@@ -729,8 +749,14 @@ if __name__ == '__main__':
              output_name='OUTPUT.txt',
              delete_html_comments=True)
     elif my_mode == 'debug-mode2':
-        import logging; logger = logging.getLogger(__name__); logger.setLevel(logging.DEBUG)
-        my_file = logging.FileHandler('usage.log.txt', mode='w'); my_file.setLevel(logging.DEBUG)
+        log_file_name = 'usage.log.txt'
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.setLevel(logging.DEBUG)
+
+        my_file = logging.FileHandler(log_file_name, mode='w')
+        my_file.setLevel(logging.DEBUG)
+
         formatter = logging.Formatter('%(asctime)s>%(levelname)s: %(message)s')
         my_file.setFormatter(formatter); logger.addHandler(my_file)
 
