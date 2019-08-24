@@ -252,23 +252,22 @@ def special_cases(function_name, function_obj, sig, doc_string, line_break=None)
     return special_case(ok=False, just_text='', sig='', table='')
 
 
-def get_doc_desc(doc_string, original_obj):
+def get_doc_desc(doc, original_obj):
 
-    return_in = ':return' in doc_string
-    param_in = ':param' in doc_string
+    return_in = ':return' in doc
+    param_in = ':param' in doc
     
-    if return_in and param_in and doc_string.index(':return') < doc_string.index(':param'):
+    if return_in and param_in and doc.index(':return') < doc.index(':param'):
         logging.error(f'BS. You need to FIX IT. PROBLEM ":return:" BEFORE ":param:" in "{original_obj.__name__}"')
 
-    if param_in:  doc_string = doc_string[:doc_string.index(':param')]
-    if return_in: doc_string = doc_string[:doc_string.index(':return:')]
-    if param_in:  doc_string = doc_string[:doc_string.index(':param')]
-    if return_in: doc_string = doc_string[:doc_string.index(':return:')]
+    if ':param'  in doc: doc = doc[:doc.index(':param')]
+    if ':return' in doc: doc = doc[:doc.index(':return:')]
+    if ':param'  in doc: doc = doc[:doc.index(':param')]
+    if ':return' in doc: doc = doc[:doc.index(':return:')]
 
-    desc = doc_string.strip().replace('    ', '')
+    desc = doc.strip().replace('    ', '')
 
     return f'\n{desc}' if desc else ''
-
 
 def is_propery(func):
     return isdatadescriptor(func) and not isfunction(func)
