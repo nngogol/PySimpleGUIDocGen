@@ -311,7 +311,8 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
 
     if is_method:
         if insert_md_section_for__class_methods:
-            sign = "#### {1}\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string, function_obj), function_name, sig_content)
+            # sign = "#### {1}\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string, function_obj), function_name, sig_content)
+            sign = "\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string, function_obj), function_name, sig_content)
         else:
             sign = "{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string, function_obj), function_name, sig_content)
     # --------------
@@ -470,12 +471,14 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
     re_tags     = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([a-zA-Z_]+[\d\w_]*)\+> -->')
     mark_points = [i for i in readme.split('\n') if re_tags.match(i)]
     
+    special_dunder_methods = ['init', 'repr', 'str', 'next']
     # 3> find '_' tags OPTION
     if skip_dunder_method:
         re_bad_tags = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([_]+[\d\w_]*)\+> -->')
         for i in readme.split('\n'):
             if re_bad_tags.match(i.strip()):
-                readme = readme.replace(i, '\n')
+                if not [s_tag for s_tag in special_dunder_methods if s_tag in i.strip()]:
+                    readme = readme.replace(i, '\n')
 
     # 4> log repeated tags
     if output_repeated_tags:
