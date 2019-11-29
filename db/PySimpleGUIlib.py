@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-version = __version__ = "4.3.0.1 Unreleased PEP8 SDK Version"
+
+version = __version__ = "4.6.0 Released 11-Nov-2019"
 
 
 #  888888ba           .d88888b  oo                     dP           .88888.  dP     dP dP
@@ -57,7 +58,7 @@ This notice, these first 100 lines of code shall remain unchanged
 88888888 "Y8888P88 888        88888888 "Y8888P"          
       
 
-And just what the fuck is that?  Well, it's LPGL3+ and these FOUR simple stipulations.
+And just what is that?  Well, it's LPGL3+ and these FOUR simple stipulations.
 1. These and all comments are to remain in this document
 2. You will not post this software in a repository or a location for others to download from:
    A. Unless you have made 10 lines of changes
@@ -120,7 +121,7 @@ import pickle
 import calendar
 import textwrap
 import inspect
-from typing import List, Any, Union, Tuple, Dict    # because this code has to run on 2.7 can't use real type hints.  Must do typing only in comments
+# from typing import List, Any, Union, Tuple, Dict    # because this code has to run on 2.7 can't use real type hints.  Must do typing only in comments
 from random import randint
 import warnings
 
@@ -217,7 +218,7 @@ if sys.platform == 'darwin':
     OFFICIAL_PYSIMPLEGUI_BUTTON_COLOR = COLOR_SYSTEM_DEFAULT  # Colors should never be this long
 else:
     DEFAULT_BUTTON_COLOR = ('white', BLUES[0])  # Foreground, Background (None, None) == System Default
-    OFFICIAL_PYSIMPLEGUI_BUTTON_COLOR = ('white', BLUES[0])  # Colors should never be this long
+OFFICIAL_PYSIMPLEGUI_BUTTON_COLOR = ('white', BLUES[0])  # Colors should never be this long
 
 DEFAULT_ERROR_BUTTON_COLOR = ("#FFFFFF", "#FF0000")
 DEFAULT_BACKGROUND_COLOR = None
@@ -501,7 +502,7 @@ class Element():
     The base class for all Elements.
     Holds the basic description of an Element like size and colors
     """
-    def __init__(self, type, size=(None, None), auto_size_text=None, font=None, background_color=None, text_color=None, key=None, pad=None, tooltip=None, visible=True):
+    def __init__(self, type, size=(None, None), auto_size_text=None, font=None, background_color=None, text_color=None, key=None, pad=None, tooltip=None, visible=True, metadata=None):
         """
         Element base class. Only used internally.  User will not create an Element object by itself
 
@@ -515,6 +516,7 @@ class Element():
         :param pad: (int, int) or ((int,int),(int,int))  Amount of padding to put around element in pixels (left/right, top/bottom)
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param visible: (bool) set visibility state of the element (Default = True)
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
         self.Size = size
         self.Type = type
@@ -541,6 +543,8 @@ class Element():
         self.TKRightClickMenu = None
         self.Widget = None  # Set when creating window. Has the main tkinter widget for element
         self.Tearoff = False
+        self.ParentRowFrame = None          # type tk.Frame
+        self.metadata = metadata                # type: Any
 
     def _RightClickMenuCallback(self, event):
         """
@@ -728,6 +732,21 @@ class Element():
         if self.ParentForm.CurrentlyRunningMainloop:
             self.ParentForm.TKroot.quit()
 
+    def ButtonReboundCallback(self, event):
+        """
+        Used in combination with tkinter's widget.bind function.  If you wish to have a double-click for a button to call back the button's normal
+        callback routine, then you should target your call to tkinter's bind method to point to this function which will in turn call the button
+        callback function that is normally called.
+
+        :param event: (unknown) Not used in this function.
+        """
+        # print(f'Button callback event = {obj_to_string_single_obj(event)}')
+        try:
+            self.ButtonCallBack()
+        except:
+            print('** ButtonReboundCallback - warning your element does not have a ButtonCallBack method **')
+
+
     def SetTooltip(self, tooltip_text):
         """
         Called by application to change the tooltip text for an Element.  Normally invoked using the Element Object such as: window.Element('key').SetToolTip('New tip').
@@ -752,6 +771,81 @@ class Element():
             print('Was unable to set focus.  The Widget passed in was perhaps not present in this element?  Check your elements .Widget property')
 
 
+    def set_size(self, size=(None, None)):
+        """
+        Changes the size of an element to a specific size.
+        It's possible to specify None for one of sizes so that only 1 of the element's dimensions are changed.
+
+        :param size: Tuple[int, int] The size in characters, rows typically. In some cases they are pixels
+        """
+        try:
+            if size[0] != None:
+                self.Widget.config(width=size[0])
+        except:
+            print('Warning, error setting width on element with key=', self.Key)
+        try:
+            if size[1] != None:
+                self.Widget.config(height=size[1])
+        except:
+            print('Warning, error setting height on element with key=', self.Key)
+
+
+    def get_size(self):
+        """
+        Return the size of an element in Pixels.  Care must be taken as some elements use characters to specify their size but will return pixels when calling this get_size method.
+        :return: Tuple[int, int] - Width, Height of the element
+        """
+        try:
+            w = self.Widget.winfo_width()
+            h = self.Widget.winfo_height()
+        except:
+            print('Warning, error getting size of element', self.Key)
+            w = h = None
+        return w,h
+
+
+    def hide_row(self):
+        """
+        Hide the entire row an Element is located on.
+        Use this if you must have all space removed when you are hiding an element, including the row container
+        """
+        try:
+            self.ParentRowFrame.pack_forget()
+        except:
+            print('Warning, error hiding element row for key =', self.Key)
+
+
+    def unhide_row(self):
+        """
+        Unhides (makes visible again) the row container that the Element is located on.
+        Note that it will re-appear at the bottom of the window / container, most likely.
+        """
+        try:
+            self.ParentRowFrame.pack()
+        except:
+            print('Warning, error hiding element row for key =', self.Key)
+
+    def expand(self, expand_x=False, expand_y=False):
+        """
+        Causes the Element to expand to fill available space in the X and Y directions.  Can specify which or both directions
+
+        :param expand_x: (Bool) If True Element will expand in the Horizontal directions
+        :param expand_y:  (Bool) If True Element will expand in the Vertical directions
+        """
+
+        if expand_x and expand_y:
+            fill = tk.BOTH
+        elif expand_x:
+            fill = tk.X
+        elif expand_y:
+            fill = tk.Y
+        else:
+            return
+
+        self.Widget.pack(expand=True, fill=fill)
+        self.ParentRowFrame.pack(expand=True, fill=fill)
+
+
     def __call__(self, *args, **kwargs):
         """
         Makes it possible to "call" an already existing element.  When you do make the "call", it actually calls
@@ -767,6 +861,10 @@ class Element():
         """
         return self.Update(*args, **kwargs)
 
+    button_rebound_callback = ButtonReboundCallback
+    set_tooltip = SetTooltip
+    set_focus = SetFocus
+
 
 # ---------------------------------------------------------------------- #
 #                           Input Class                                  #
@@ -778,7 +876,7 @@ class InputText(Element):
     def __init__(self, default_text='', size=(None, None), disabled=False, password_char='',
                  justification=None, background_color=None,   text_color=None, font=None, tooltip=None,
                  change_submits=False, enable_events=False, do_not_clear=True, key=None, focus=False, pad=None,
-                 right_click_menu=None, visible=True):
+                 right_click_menu=None, visible=True, metadata=None):
         """
 
         :param default_text: (str) Text initially shown in the input box as a default value(Default value = '')
@@ -798,6 +896,7 @@ class InputText(Element):
         :param pad:  (int, int) or ((int, int), (int, int)) Tuple(s). Amount of padding to put around element. Normally (horizontal pixels, vertical pixels) but can be split apart further into ((horizontal left, horizontal right), (vertical above, vertical below))
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element (Default = True)
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
         self.DefaultText = default_text
         self.PasswordCharacter = password_char
@@ -811,9 +910,9 @@ class InputText(Element):
         self.RightClickMenu = right_click_menu
         self.TKEntry = self.Widget = None          # type: tk.Entry
         super().__init__(ELEM_TYPE_INPUT_TEXT, size=size, background_color=bg, text_color=fg, key=key, pad=pad,
-                         font=font, tooltip=tooltip, visible=visible)
+                         font=font, tooltip=tooltip, visible=visible, metadata=metadata)
 
-    def Update(self, value=None, disabled=None, select=None, visible=None):
+    def Update(self, value=None, disabled=None, select=None, visible=None,text_color=None, background_color=None, move_cursor_to='end'):
         """
         Changes some of the settings for the Input Element. Must call `Window.Read` or `Window.Finalize` prior
 
@@ -821,18 +920,31 @@ class InputText(Element):
         :param disabled: (bool) disable or enable state of the element (sets Entry Widget to readonly or normal)
         :param select: (bool) if True, then the text will be selected
         :param visible: (bool) change visibility of element
+        :param text_color: (str) change color of text being typed
+        :param background_color: (str) change color of the background
+        :param move_cursor_to: Union[int, str] Moves the cursor to a particular offset. Defaults to 'end'
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if disabled is True:
             self.TKEntry['state'] = 'readonly'
         elif disabled is False:
             self.TKEntry['state'] = 'normal'
+        if background_color is not None:
+            self.TKEntry.configure(background=background_color)
+        if text_color is not None:
+            self.TKEntry.configure(fg=text_color)
         if value is not None:
             try:
                 self.TKStringVar.set(value)
             except:
                 pass
             self.DefaultText = value
+            if move_cursor_to == 'end':
+                self.TKEntry.icursor(tk.END)
+            elif move_cursor_to is not None:
+                self.TKEntry.icursor(move_cursor_to)
         if select:
             self.TKEntry.select_range(0, 'end')
         if visible is False:
@@ -874,7 +986,7 @@ class Combo(Element):
     """
     def __init__(self, values, default_value=None, size=(None, None), auto_size_text=None, background_color=None,
                  text_color=None, change_submits=False, enable_events=False, disabled=False, key=None, pad=None,
-                 tooltip=None, readonly=False, font=None, visible=True):
+                 tooltip=None, readonly=False, font=None, visible=True, metadata=None):
         """
         :param values: List[Any]  values to choose. While displayed as text, the items returned are what the caller supplied, not text
         :param default_value: (Any) Choice to be displayed as initial value. Must match one of values variable contents
@@ -891,6 +1003,7 @@ class Combo(Element):
         :param readonly: (bool) make element readonly (user can't change). True means user cannot change
         :param font: Union[str, Tuple[str, int]] specifies the font family, size, etc
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
         self.Values = values
         self.DefaultValue = default_value
@@ -902,7 +1015,7 @@ class Combo(Element):
         fg = text_color if text_color is not None else DEFAULT_INPUT_TEXT_COLOR
 
         super().__init__(ELEM_TYPE_INPUT_COMBO, size=size, auto_size_text=auto_size_text, background_color=bg,
-                         text_color=fg, key=key, pad=pad, tooltip=tooltip, font=font or DEFAULT_FONT, visible=visible)
+                         text_color=fg, key=key, pad=pad, tooltip=tooltip, font=font or DEFAULT_FONT, visible=visible, metadata=metadata)
 
     def Update(self, value=None, values=None, set_to_index=None, disabled=None, readonly=None, font=None, visible=None):
         """
@@ -916,6 +1029,10 @@ class Combo(Element):
         :param font: Union[str, Tuple[str, int]] specifies the font family, size, etc
         :param visible: (bool) control visibility of element
         """
+
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if values is not None:
             try:
                 self.TKCombo['values'] = values
@@ -978,7 +1095,7 @@ class Combo(Element):
 InputCombo = Combo
 DropDown = InputCombo
 Drop = InputCombo
-
+DD = Combo
 
 # ---------------------------------------------------------------------- #
 #                           Option Menu                                  #
@@ -991,7 +1108,7 @@ class OptionMenu(Element):
     it looks like a Combo Box that you scroll to select a choice.
     """
     def __init__(self, values, default_value=None, size=(None, None), disabled=False, auto_size_text=None,
-                 background_color=None, text_color=None, key=None, pad=None, tooltip=None, visible=True):
+                 background_color=None, text_color=None, key=None, pad=None, tooltip=None, visible=True, metadata=None):
         """
         :param values: List[Any] Values to be displayed
         :param default_value: (Any) the value to choose by default
@@ -1004,6 +1121,7 @@ class OptionMenu(Element):
         :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
         :param tooltip: (str) text that will appear when mouse hovers over this element
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
         self.Values = values
         self.DefaultValue = default_value
@@ -1013,7 +1131,7 @@ class OptionMenu(Element):
         fg = text_color if text_color is not None else DEFAULT_INPUT_TEXT_COLOR
 
         super().__init__(ELEM_TYPE_INPUT_OPTION_MENU, size=size, auto_size_text=auto_size_text, background_color=bg,
-                         text_color=fg, key=key, pad=pad, tooltip=tooltip, visible=visible)
+                         text_color=fg, key=key, pad=pad, tooltip=tooltip, visible=visible, metadata=metadata)
 
     def Update(self, value=None, values=None, disabled=None, visible=None):
         """
@@ -1024,6 +1142,10 @@ class OptionMenu(Element):
         :param disabled: (bool) disable or enable state of the element
         :param visible: (bool) control visibility of element
         """
+
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if values is not None:
             self.Values = values
             self.TKOptionMenu['menu'].delete(0, 'end')
@@ -1059,7 +1181,6 @@ class OptionMenu(Element):
 # -------------------------  OPTION MENU Element lazy functions  ------------------------- #
 InputOptionMenu = OptionMenu
 
-
 # ---------------------------------------------------------------------- #
 #                           Listbox                                      #
 # ---------------------------------------------------------------------- #
@@ -1069,9 +1190,9 @@ class Listbox(Element):
     when a window.Read() is executed.
     """
     def __init__(self, values, default_values=None, select_mode=None, change_submits=False, enable_events=False,
-                 bind_return_key=False, size=(None, None), disabled=False, auto_size_text=None, font=None,
+                 bind_return_key=False, size=(None, None), disabled=False, auto_size_text=None, font=None, no_scrollbar=False,
                  background_color=None, text_color=None, key=None, pad=None, tooltip=None, right_click_menu=None,
-                 visible=True):
+                 visible=True, metadata=None):
         """
         :param values: List[Any] list of values to display. Can be any type including mixed types as long as they have __str__ method
         :param default_values: List[Any] which values should be initially selected
@@ -1094,6 +1215,7 @@ class Listbox(Element):
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
         self.Values = values
         self.DefaultValues = default_values
@@ -1116,8 +1238,9 @@ class Listbox(Element):
         self.RightClickMenu = right_click_menu
         self.vsb = None  # type: tk.Scrollbar
         self.TKListbox = self.Widget = None         # type: tk.Listbox
+        self.NoScrollbar = no_scrollbar
         super().__init__(ELEM_TYPE_INPUT_LISTBOX, size=size, auto_size_text=auto_size_text, font=font,
-                         background_color=bg, text_color=fg, key=key, pad=pad, tooltip=tooltip, visible=visible)
+                         background_color=bg, text_color=fg, key=key, pad=pad, tooltip=tooltip, visible=visible, metadata=metadata)
 
 
     def Update(self, values=None, disabled=None, set_to_index=None, scroll_to_index=None, visible=None):
@@ -1131,6 +1254,9 @@ class Listbox(Element):
         :param visible: (bool) control visibility of element
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if disabled == True:
             self.TKListbox.configure(state='disabled')
         elif disabled == False:
@@ -1156,10 +1282,12 @@ class Listbox(Element):
                     warnings.warn('* Listbox Update selection_set failed with index {}*'.format(set_to_index))
         if visible is False:
             self.TKListbox.pack_forget()
-            self.vsb.pack_forget()
+            if not self.NoScrollbar:
+                self.vsb.pack_forget()
         elif visible is True:
             self.TKListbox.pack()
-            self.vsb.pack()
+            if not self.NoScrollbar:
+                self.vsb.pack()
         if scroll_to_index is not None and len(self.Values):
             self.TKListbox.yview_moveto(scroll_to_index/len(self.Values))
 
@@ -1191,12 +1319,26 @@ class Listbox(Element):
         """
         return self.Values
 
+
+    def GetIndexes(self):
+        """
+        Returns the items currently selected as a list of indexes
+
+        :return: List[int] A list of offsets into values that is currently selected
+        """
+        return self.TKListbox.curselection()
+
+
+    get_indexes = GetIndexes
     get_list_values = GetListValues
     set_focus = Element.SetFocus
     set_tooltip = Element.SetTooltip
     set_value = SetValue
     update = Update
 
+
+LBox = Listbox
+LB = Listbox
 
 # ---------------------------------------------------------------------- #
 #                           Radio                                        #
@@ -1208,7 +1350,7 @@ class Radio(Element):
     """
     def __init__(self, text, group_id, default=False, disabled=False, size=(None, None), auto_size_text=None,
                  background_color=None, text_color=None, font=None, key=None, pad=None, tooltip=None,
-                 change_submits=False, enable_events=False, visible=True):
+                 change_submits=False, enable_events=False, visible=True, metadata=None):
         """
 
         :param text: (str) Text to display next to button
@@ -1226,6 +1368,7 @@ class Radio(Element):
         :param change_submits: (bool) DO NOT USE. Only listed for backwards compat - Use enable_events instead
         :param enable_events: (bool) Turns on the element specific events. Radio Button events happen when an item is selected
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.InitialState = default
@@ -1239,7 +1382,7 @@ class Radio(Element):
         self.EncodedRadioValue = None
         super().__init__(ELEM_TYPE_INPUT_RADIO, size=size, auto_size_text=auto_size_text, font=font,
                          background_color=background_color, text_color=self.TextColor, key=key, pad=pad,
-                         tooltip=tooltip, visible=visible)
+                         tooltip=tooltip, visible=visible, metadata=metadata)
 
     def Update(self, value=None, disabled=None, visible=None):
         """
@@ -1250,9 +1393,13 @@ class Radio(Element):
         :param visible: (bool) control visibility of element
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if value is not None:
             try:
-                self.TKIntVar.set(self.EncodedRadioValue)
+                if value:
+                    self.TKIntVar.set(self.EncodedRadioValue)
             except:
                 pass
             self.InitialState = value
@@ -1286,6 +1433,10 @@ class Radio(Element):
     set_tooltip = Element.SetTooltip
     update = Update
 
+R = Radio
+Rad = Radio
+
+
 
 # ---------------------------------------------------------------------- #
 #                           Checkbox                                     #
@@ -1296,9 +1447,8 @@ class Checkbox(Element):
     """
     def __init__(self, text, default=False, size=(None, None), auto_size_text=None, font=None, background_color=None,
                  text_color=None, change_submits=False, enable_events=False, disabled=False, key=None, pad=None,
-                 tooltip=None, visible=True):
+                 tooltip=None, visible=True, metadata=None):
         """
-
         :param text: (str) Text to display next to checkbox
         :param default: (bool). Set to True if you want this checkbox initially checked
         :param size: Tuple[int, int] (width, height) width = characters-wide, height = rows-high
@@ -1313,6 +1463,7 @@ class Checkbox(Element):
         :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.Text = text
@@ -1325,7 +1476,7 @@ class Checkbox(Element):
 
         super().__init__(ELEM_TYPE_INPUT_CHECKBOX, size=size, auto_size_text=auto_size_text, font=font,
                          background_color=background_color, text_color=self.TextColor, key=key, pad=pad,
-                         tooltip=tooltip, visible=visible)
+                         tooltip=tooltip, visible=visible, metadata=metadata)
 
     def Get(self):
         # type: (Checkbox) -> bool
@@ -1346,6 +1497,9 @@ class Checkbox(Element):
         :param visible: (bool) control visibility of element
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if value is not None:
             try:
                 self.TKIntVar.set(value)
@@ -1384,7 +1538,7 @@ class Spin(Element):
 
     def __init__(self, values, initial_value=None, disabled=False, change_submits=False, enable_events=False,
                  size=(None, None), auto_size_text=None, font=None, background_color=None, text_color=None, key=None,
-                 pad=None, tooltip=None, visible=True):
+                 pad=None, tooltip=None, visible=True, metadata=None):
         """
 
         :param values: List[Any] List of valid values
@@ -1401,6 +1555,7 @@ class Spin(Element):
         :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.Values = values
@@ -1412,7 +1567,7 @@ class Spin(Element):
         fg = text_color if text_color is not None else DEFAULT_INPUT_TEXT_COLOR
 
         super().__init__(ELEM_TYPE_INPUT_SPIN, size, auto_size_text, font=font, background_color=bg, text_color=fg,
-                         key=key, pad=pad, tooltip=tooltip, visible=visible)
+                         key=key, pad=pad, tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def Update(self, value=None, values=None, disabled=None, visible=None):
@@ -1425,6 +1580,9 @@ class Spin(Element):
         :param visible: (bool) control visibility of element
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if values != None:
             old_value = self.TKStringVar.get()
             self.Values = values
@@ -1436,14 +1594,17 @@ class Spin(Element):
             except:
                 pass
         self.DefaultValue = value
-        if disabled == True:
-            self.TKSpinBox.configure(state='disabled')
-        elif disabled == False:
-            self.TKSpinBox.configure(state='normal')
+        if disabled is not None:
+            self.TKSpinBox.configure(state='disabled' if disabled else 'normal')
+        # if disabled == True:
+        #     self.TKSpinBox.configure(state='disabled')
+        # elif disabled == False:
+        #     self.TKSpinBox.configure(state='normal')
         if visible is False:
             self.TKSpinBox.pack_forget()
         elif visible is True:
             self.TKSpinBox.pack()
+
 
     def _SpinChangedHandler(self, event):
         """
@@ -1475,6 +1636,8 @@ class Spin(Element):
     set_tooltip = Element.SetTooltip
     update = Update
 
+
+
 # ---------------------------------------------------------------------- #
 #                           Multiline                                    #
 # ---------------------------------------------------------------------- #
@@ -1488,7 +1651,7 @@ class Multiline(Element):
     def __init__(self, default_text='', enter_submits=False, disabled=False, autoscroll=False, border_width=None,
                  size=(None, None), auto_size_text=None, background_color=None, text_color=None, change_submits=False,
                  enable_events=False, do_not_clear=True, key=None, focus=False, font=None, pad=None, tooltip=None,
-                 right_click_menu=None, visible=True):
+                 right_click_menu=None, visible=True, metadata=None):
         """
 
         :param default_text: (str) Initial text to show
@@ -1510,6 +1673,7 @@ class Multiline(Element):
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.DefaultText = default_text
@@ -1525,7 +1689,7 @@ class Multiline(Element):
         self.BorderWidth = border_width if border_width is not None else DEFAULT_BORDER_WIDTH
         self.TKText = self.Widget = None            # type: tkst.ScrolledText
         super().__init__(ELEM_TYPE_INPUT_MULTILINE, size=size, auto_size_text=auto_size_text, background_color=bg,
-                         text_color=fg, key=key, pad=pad, tooltip=tooltip, font=font or DEFAULT_FONT, visible=visible)
+                         text_color=fg, key=key, pad=pad, tooltip=tooltip, font=font or DEFAULT_FONT, visible=visible, metadata=metadata)
         return
 
     def Update(self, value=None, disabled=None, append=False, font=None, text_color=None, background_color=None,
@@ -1543,6 +1707,9 @@ class Multiline(Element):
         :param autoscroll: (bool) if True then contents of element are scrolled down when new text is added to the end
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if autoscroll is not None:
             self.Autoscroll = autoscroll
         if value is not None:
@@ -1590,6 +1757,10 @@ class Multiline(Element):
     update = Update
 
 
+ML = Multiline
+MLine = Multiline
+
+
 # ---------------------------------------------------------------------- #
 #                                       Text                             #
 # ---------------------------------------------------------------------- #
@@ -1597,10 +1768,8 @@ class Text(Element):
     """
     Text - Display some text in the window.  Usually this means a single line of text.  However, the text can also be multiple lines.  If multi-lined there are no scroll bars.
     """
-
-    def __init__(self, text, size=(None, None), auto_size_text=None, click_submits=False, enable_events=False,
-                 relief=None, font=None, text_color=None, background_color=None, justification=None, pad=None, key=None,
-                 right_click_menu=None, tooltip=None, visible=True):
+    def __init__(self, text='', size=(None, None), auto_size_text=None, click_submits=False, enable_events=False,
+                 relief=None, font=None, text_color=None, background_color=None, border_width=None, justification=None, pad=None, key=None, right_click_menu=None, tooltip=None, visible=True, metadata=None):
         """
         :param text: (str) The text to display. Can include /n to achieve multiple lines
         :param size: Tuple[int, int] (width, height) width = characters-wide, height = rows-high
@@ -1611,12 +1780,14 @@ class Text(Element):
         :param font: Union[str, Tuple[str, int]] specifies the font family, size, etc
         :param text_color: (str) color of the text
         :param background_color: (str) color of background
+        :param border_width: (int) number of pixels for the border (if using a relief)
         :param justification: (str) how string should be aligned within space provided by size. Valid choices = `left`, `right`, `center`
         :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
         :param key: (Any) Used with window.FindElement and with return values to uniquely identify this element to uniquely identify this element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.DisplayText = str(text)
@@ -1630,9 +1801,10 @@ class Text(Element):
             bg = background_color
         self.RightClickMenu = right_click_menu
         self.TKRightClickMenu = None
+        self.BorderWidth = border_width
 
         super().__init__(ELEM_TYPE_TEXT, size, auto_size_text, background_color=bg, font=font if font else DEFAULT_FONT,
-                         text_color=self.TextColor, pad=pad, key=key, tooltip=tooltip, visible=visible)
+                         text_color=self.TextColor, pad=pad, key=key, tooltip=tooltip, visible=visible, metadata=metadata)
 
 
     def Update(self, value=None, background_color=None, text_color=None, font=None, visible=None):
@@ -1646,6 +1818,9 @@ class Text(Element):
         :param visible: (bool) set visibility state of the element
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if value is not None:
             self.DisplayText = value
             stringvar = self.TKStringVar
@@ -1668,8 +1843,9 @@ class Text(Element):
 
 
 # -------------------------  Text Element lazy functions  ------------------------- #
-Txt = Text
-T = Text
+
+Txt = Text  # type: Text
+T = Text    # type: Text
 
 
 # ---------------------------------------------------------------------- #
@@ -1681,7 +1857,7 @@ class StatusBar(Element):
     """
     def __init__(self, text, size=(None, None), auto_size_text=None, click_submits=None, enable_events=False,
                  relief=RELIEF_SUNKEN, font=None, text_color=None, background_color=None, justification=None, pad=None,
-                 key=None, tooltip=None, visible=True):
+                 key=None, tooltip=None, visible=True, metadata=None):
         """
 
         :param text: (str) Text that is to be displayed in the widget
@@ -1698,6 +1874,7 @@ class StatusBar(Element):
         :param key: (Any) Used with window.FindElement and with return values to uniquely identify this element to uniquely identify this element
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.DisplayText = text
@@ -1712,7 +1889,7 @@ class StatusBar(Element):
         self.TKText = self.Widget = None        # type: tk.Label
         super().__init__(ELEM_TYPE_STATUSBAR, size=size, auto_size_text=auto_size_text, background_color=bg,
                          font=font or DEFAULT_FONT, text_color=self.TextColor, pad=pad, key=key, tooltip=tooltip,
-                         visible=visible)
+                         visible=visible, metadata=metadata)
         return
 
 
@@ -1726,6 +1903,9 @@ class StatusBar(Element):
         :param visible: (bool) set visibility state of the element
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if value is not None:
             self.DisplayText = value
             stringvar = self.TKStringVar
@@ -1744,6 +1924,8 @@ class StatusBar(Element):
     set_focus = Element.SetFocus
     set_tooltip = Element.SetTooltip
     update = Update
+
+
 
 # ---------------------------------------------------------------------- #
 #                       TKProgressBar                                    #
@@ -1910,7 +2092,7 @@ class Output(Element):
     Output Element - a multi-lined text area where stdout and stderr are re-routed to.
     """
     def __init__(self, size=(None, None), background_color=None, text_color=None, pad=None, font=None, tooltip=None,
-                 key=None, right_click_menu=None, visible=True):
+                 key=None, right_click_menu=None, visible=True, metadata=None):
         """
         :param size: Tuple[int, int]  (w,h) w=characters-wide, h=rows-high
         :param background_color: (str) color of background
@@ -1921,6 +2103,7 @@ class Output(Element):
         :param key: (Any) Used with window.FindElement and with return values to uniquely identify this element to uniquely identify this element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self._TKOut = self.Widget = None        # type: TKOutput
@@ -1929,7 +2112,7 @@ class Output(Element):
         self.RightClickMenu = right_click_menu
 
         super().__init__(ELEM_TYPE_OUTPUT, size=size, background_color=bg, text_color=fg, pad=pad, font=font,
-                         tooltip=tooltip, key=key, visible=visible)
+                         tooltip=tooltip, key=key, visible=visible, metadata=metadata)
 
     @property
     def TKOut(self):
@@ -1946,7 +2129,9 @@ class Output(Element):
         :param value: (str) string that will replace current contents of the output area
         :param visible: (bool) control visibility of element
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if value is not None:
             self._TKOut.output.delete('1.0', tk.END)
             self._TKOut.output.insert(tk.END, value)
@@ -1955,10 +2140,42 @@ class Output(Element):
         elif visible is True:
             self._TKOut.frame.pack()
 
+    def Get(self):
+        """
+        Returns the current contents of the output.  Similar to Get method other Elements
+        :return: (str) the current value of the output
+        """
+        return self._TKOut.output.get(1.0, tk.END)
+
+
+    def expand(self, expand_x=False, expand_y=False):
+        """
+        Causes the Element to expand to fill available space in the X and Y directions.  Can specify which or both directions
+
+        :param expand_x: (Bool) If True Element will expand in the Horizontal directions
+        :param expand_y:  (Bool) If True Element will expand in the Vertical directions
+        """
+
+        if expand_x and expand_y:
+            fill = tk.BOTH
+        elif expand_x:
+            fill = tk.X
+        elif expand_y:
+            fill = tk.Y
+        else:
+            return
+
+        self._TKOut.output.pack(expand=True, fill=fill)
+        self._TKOut.frame.pack(expand=True, fill=fill)
+        self.ParentRowFrame.pack(expand=True, fill=fill)
+
+
+
     set_focus = Element.SetFocus
     set_tooltip = Element.SetTooltip
     tk_out = TKOut
     update = Update
+
 
 # ---------------------------------------------------------------------- #
 #                           Button Class                                 #
@@ -1967,12 +2184,11 @@ class Button(Element):
     """
     Button Element - Defines all possible buttons. The shortcuts such as Submit, FileBrowse, ... each create a Button
     """
-
     def __init__(self, button_text='', button_type=BUTTON_TYPE_READ_FORM, target=(None, None), tooltip=None,
                  file_types=(("ALL Files", "*.*"),), initial_folder=None, disabled=False, change_submits=False,
                  enable_events=False, image_filename=None, image_data=None, image_size=(None, None),
                  image_subsample=None, border_width=None, size=(None, None), auto_size_button=None, button_color=None,
-                 font=None, bind_return_key=False, focus=False, pad=None, key=None, visible=True):
+                 font=None, bind_return_key=False, focus=False, pad=None, key=None, visible=True, metadata=None):
         """
         :param button_text: (str) Text to be displayed on the button
         :param button_type: (int) You  should NOT be setting this directly. ONLY the shortcut functions set this
@@ -1997,17 +2213,20 @@ class Button(Element):
         :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
         :param key: (Any) Used with window.FindElement and with return values to uniquely identify this element to uniquely identify this element
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.AutoSizeButton = auto_size_button
         self.BType = button_type
         self.FileTypes = file_types
-        self.TKButton = None  # type: tk.Button
+        self.Widget = self.TKButton = None  # type: tk.Button
         self.Target = target
         self.ButtonText = str(button_text)
         if sys.platform == 'darwin' and button_color is not None:
             print('Button *** WARNING - Button colors are not supported on the Mac ***')
-        self.ButtonColor = button_color if button_color else DEFAULT_BUTTON_COLOR
+            self.ButtonColor = DEFAULT_BUTTON_COLOR
+        else:
+            self.ButtonColor = button_color if button_color else DEFAULT_BUTTON_COLOR
         self.ImageFilename = image_filename
         self.ImageData = image_data
         self.ImageSize = image_size
@@ -2022,7 +2241,7 @@ class Button(Element):
         self.InitialFolder = initial_folder
         self.Disabled = disabled
         self.ChangeSubmits = change_submits or enable_events
-        super().__init__(ELEM_TYPE_BUTTON, size=size, font=font, pad=pad, key=key, tooltip=tooltip, visible=visible)
+        super().__init__(ELEM_TYPE_BUTTON, size=size, font=font, pad=pad, key=key, tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     # Realtime button release callback
@@ -2209,6 +2428,9 @@ class Button(Element):
         :param image_size: Tuple[int, int] Size of the image in pixels (width, height)
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         try:
             if text is not None:
                 self.TKButton.configure(text=text)
@@ -2280,7 +2502,6 @@ class Button(Element):
 # -------------------------  Button lazy functions  ------------------------- #
 B = Button
 Btn = Button
-Butt = Button
 
 
 # ---------------------------------------------------------------------- #
@@ -2294,7 +2515,7 @@ class ButtonMenu(Element):
     def __init__(self, button_text, menu_def, tooltip=None, disabled=False,
                  image_filename=None, image_data=None, image_size=(None, None), image_subsample=None, border_width=None,
                  size=(None, None), auto_size_button=None, button_color=None, font=None, pad=None, key=None,
-                 tearoff=False, visible=True):
+                 tearoff=False, visible=True, metadata=None):
         """
         :param button_text: (str) Text to be displayed on the button
         :param menu_def: List[List[str]] A list of lists of Menu items to show when this element is clicked. See docs for format as they are the same for all menu types
@@ -2313,6 +2534,7 @@ class ButtonMenu(Element):
         :param key: (Any) Used with window.FindElement and with return values to uniquely identify this element to uniquely identify this element
         :param tearoff: (bool) Determines if menus should allow them to be torn off
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.MenuDefinition = menu_def
@@ -2330,12 +2552,12 @@ class ButtonMenu(Element):
         self.IsButtonMenu = True
         self.MenuItemChosen = None
         self.Tearoff = tearoff
-        self.TKButtonMenu = None
-        self.TKMenu = None
+        self.TKButtonMenu = None        # type: tk.Menubutton
+        self.TKMenu = None              # type: tk.Menu
         # self.temp_size = size if size != (NONE, NONE) else
 
         super().__init__(ELEM_TYPE_BUTTONMENU, size=size, font=font, pad=pad, key=key, tooltip=tooltip,
-                         text_color=self.TextColor, background_color=self.BackgroundColor, visible=visible)
+                         text_color=self.TextColor, background_color=self.BackgroundColor, visible=visible, metadata=metadata)
         return
 
     def _MenuItemChosenCallback(self, item_chosen):  # ButtonMenu Menu Item Chosen Callback
@@ -2360,6 +2582,9 @@ class ButtonMenu(Element):
         :param visible: (bool) control visibility of element
         """
 
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         self.MenuDefinition = menu_definition
         if menu_definition is not None:
             self.TKMenu = tk.Menu(self.TKButtonMenu, tearoff=self.Tearoff)  # create the menubar
@@ -2370,10 +2595,22 @@ class ButtonMenu(Element):
         elif visible is True:
             self.TKButtonMenu.pack()
 
+    def Click(self):
+        """
+        Generates a click of the button as if the user clicked the button
+        Calls the tkinter invoke method for the button
+        """
+        try:
+            self.TKMenu.invoke(1)
+        except:
+            print('Exception clicking button')
+
+
     set_focus = Element.SetFocus
     set_tooltip = Element.SetTooltip
     update = Update
 
+BMenu = ButtonMenu
 
 
 # ---------------------------------------------------------------------- #
@@ -2384,7 +2621,7 @@ class ProgressBar(Element):
     Progress Bar Element - Displays a colored bar that is shaded as progress of some operation is made
     """
     def __init__(self, max_value, orientation=None, size=(None, None), auto_size_text=None, bar_color=(None, None),
-                 style=None, border_width=None, relief=None, key=None, pad=None, visible=True):
+                 style=None, border_width=None, relief=None, key=None, pad=None, visible=True, metadata=None):
         """
         :param max_value: (int) max value of progressbar
         :param orientation: (str) 'horizontal' or 'vertical'
@@ -2397,6 +2634,7 @@ class ProgressBar(Element):
         :param key: (Any) Used with window.FindElement and with return values to uniquely identify this element to uniquely identify this element
         :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
         :param visible: (bool)  set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.MaxValue = max_value
@@ -2410,7 +2648,7 @@ class ProgressBar(Element):
         self.Relief = relief if relief else DEFAULT_PROGRESS_BAR_RELIEF
         self.BarExpired = False
         super().__init__(ELEM_TYPE_PROGRESS_BAR, size=size, auto_size_text=auto_size_text, key=key, pad=pad,
-                         visible=visible)
+                         visible=visible, metadata=metadata)
 
     # returns False if update failed
     def UpdateBar(self, current_count, max=None):
@@ -2439,7 +2677,9 @@ class ProgressBar(Element):
 
         :param visible: (bool) control visibility of element
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if visible is False:
             self.TKProgressBar.TKProgressBarForReal.pack_forget()
         elif visible is True:
@@ -2449,6 +2689,10 @@ class ProgressBar(Element):
     set_tooltip = Element.SetTooltip
     update = Update
     update_bar = UpdateBar
+
+PBar = ProgressBar
+Prog = ProgressBar
+
 
 
 # ---------------------------------------------------------------------- #
@@ -2460,7 +2704,7 @@ class Image(Element):
     """
 
     def __init__(self, filename=None, data=None, background_color=None, size=(None, None), pad=None, key=None,
-                 tooltip=None, right_click_menu=None, visible=True, enable_events=False):
+                 tooltip=None, right_click_menu=None, visible=True, enable_events=False, metadata=None):
         """
         :param filename:  (str) image filename if there is a button image. GIFs and PNGs only.
         :param data:  Union[bytes, str] Raw or Base64 representation of the image to put on button. Choose either filename or data
@@ -2472,6 +2716,7 @@ class Image(Element):
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
         :param enable_events: (bool) Turns on the element specific events. For an Image element, the event is "image clicked"
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.Filename = filename
@@ -2489,7 +2734,7 @@ class Image(Element):
         self.Source = filename if filename is not None else data
 
         super().__init__(ELEM_TYPE_IMAGE, size=size, background_color=background_color, pad=pad, key=key,
-                         tooltip=tooltip, visible=visible)
+                         tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def Update(self, filename=None, data=None, size=(None, None), visible=None):
@@ -2497,27 +2742,33 @@ class Image(Element):
         Changes some of the settings for the Image Element. Must call `Window.Read` or `Window.Finalize` prior
 
         :param filename: (str) filename to the new image to display.
-        :param data: (str) Base64 encoded string
+        :param data: Union[str, tkPhotoImage] Base64 encoded string OR a tk.PhotoImage object
         :param size: Tuple[int,int] size of a image (w,h) w=characters-wide, h=rows-high
         :param visible: (bool) control visibility of element
         """
 
+        image = None
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if filename is not None:
             image = tk.PhotoImage(file=filename)
         elif data is not None:
             # if type(data) is bytes:
             try:
                 image = tk.PhotoImage(data=data)
-            except:
-                return  # an error likely means the window has closed so exit
+            except Exception as e:
+                image = data
+                # return  # an error likely means the window has closed so exit
         else:
             return
-        width, height = size[0] or image.width(), size[1] or image.height()
-        try:  # sometimes crashes if user closed with X
-            self.tktext_label.configure(image=image, width=width, height=height)
-        except:
-            pass
-        self.tktext_label.image = image
+        if image is not None:
+            width, height = size[0] or image.width(), size[1] or image.height()
+            try:  # sometimes crashes if user closed with X
+                self.tktext_label.configure(image=image, width=width, height=height)
+            except:
+                pass
+            self.tktext_label.image = image
         if visible is False:
             self.tktext_label.pack_forget()
         elif visible is True:
@@ -2584,7 +2835,7 @@ class Canvas(Element):
     """ """
 
     def __init__(self, canvas=None, background_color=None, size=(None, None), pad=None, key=None, tooltip=None,
-                 right_click_menu=None, visible=True):
+                 right_click_menu=None, visible=True, metadata=None):
         """
 
         :param canvas: (tk.Canvas) Your own tk.Canvas if you already created it. Leave blank to create a Canvas
@@ -2595,6 +2846,7 @@ class Canvas(Element):
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.BackgroundColor = background_color if background_color is not None else DEFAULT_BACKGROUND_COLOR
@@ -2602,7 +2854,7 @@ class Canvas(Element):
         self.RightClickMenu = right_click_menu
 
         super().__init__(ELEM_TYPE_CANVAS, background_color=background_color, size=size, pad=pad, key=key,
-                         tooltip=tooltip, visible=visible)
+                         tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     @property
@@ -2610,7 +2862,7 @@ class Canvas(Element):
         """ """
         if self._TKCanvas is None:
             print('*** Did you forget to call Finalize()? Your code should look something like: ***')
-            print('*** form = sg.Window("My Form").Layout(layout).Finalize() ***')
+            print('*** window = sg.Window("My Form", layout, finalize=True) ***')
         return self._TKCanvas
 
     set_focus = Element.SetFocus
@@ -2636,7 +2888,7 @@ class Graph(Element):
 
     def __init__(self, canvas_size, graph_bottom_left, graph_top_right, background_color=None, pad=None,
                  change_submits=False, drag_submits=False, enable_events=False, key=None, tooltip=None,
-                 right_click_menu=None, visible=True, float_values=False):
+                 right_click_menu=None, visible=True, float_values=False, metadata=None):
         """
         :param canvas_size: Tuple[int, int] (width, height) size of the canvas area in pixels
         :param graph_bottom_left: Tuple[int, int] (x,y) The bottoms left corner of your coordinate system
@@ -2651,6 +2903,7 @@ class Graph(Element):
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element (Default = True)
         :param float_values: (bool) If True x,y coordinates are returned as floats, not ints
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.CanvasSize = canvas_size
@@ -2667,7 +2920,7 @@ class Graph(Element):
         self.FloatValues = float_values
 
         super().__init__(ELEM_TYPE_GRAPH, background_color=background_color, size=canvas_size, pad=pad, key=key,
-                         tooltip=tooltip, visible=visible)
+                         tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def _convert_xy_to_canvas_xy(self, x_in, y_in):
@@ -2832,7 +3085,7 @@ class Graph(Element):
             id = None
         return id
 
-    def DrawRectangle(self, top_left, bottom_right, fill_color=None, line_color=None):
+    def DrawRectangle(self, top_left, bottom_right, fill_color=None, line_color=None, line_width=None):
         """
         Draw a rectangle given 2 points. Can control the line and fill colors
 
@@ -2849,10 +3102,12 @@ class Graph(Element):
             print('*** WARNING - The Graph element has not been finalized and cannot be drawn upon ***')
             print('Call Window.Finalize() prior to this operation')
             return None
+        if line_width is None:
+            line_width = 1
         try:  # in case closed with X
             id = self._TKCanvas2.create_rectangle(converted_top_left[0], converted_top_left[1],
                                                   converted_bottom_right[0],
-                                                  converted_bottom_right[1], fill=fill_color, outline=line_color)
+                                                  converted_bottom_right[1], fill=fill_color, outline=line_color, width=line_width)
         except:
             id = None
         return id
@@ -3141,7 +3396,7 @@ class Frame(Element):
 
     def __init__(self, title, layout, title_color=None, background_color=None, title_location=None,
                  relief=DEFAULT_FRAME_RELIEF, size=(None, None), font=None, pad=None, border_width=None, key=None,
-                 tooltip=None, right_click_menu=None, visible=True):
+                 tooltip=None, right_click_menu=None, visible=True, element_justification='left', metadata=None):
         """
         :param title: (str) text that is displayed as the Frame's "label" or title
         :param layout: List[List[Elements]] The layout to put inside the Frame
@@ -3158,6 +3413,8 @@ class Frame(Element):
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
+        :param element_justification: (str) All elements inside the Frame will have this justification 'left', 'right', 'center' are valid values
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.UseDictionary = False
@@ -3176,11 +3433,11 @@ class Frame(Element):
         self.BackgroundColor = background_color if background_color is not None else DEFAULT_BACKGROUND_COLOR
         self.RightClickMenu = right_click_menu
         self.ContainerElemementNumber = Window.GetAContainerNumber()
-
+        self.ElementJustification = element_justification
         self.Layout(layout)
 
         super().__init__(ELEM_TYPE_FRAME, background_color=background_color, text_color=title_color, size=size,
-                         font=font, pad=pad, key=key, tooltip=tooltip, visible=visible)
+                         font=font, pad=pad, key=key, tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def AddRow(self, *args):
@@ -3227,17 +3484,23 @@ class Frame(Element):
         element = row[col_num]
         return element
 
-    def Update(self, visible=None):
+    def Update(self, value=None, visible=None):
         """
         Changes some of the settings for the Frame Element. Must call `Window.Read` or `Window.Finalize` prior
 
+        :param value: (Any) New text value to show on frame
         :param visible: (bool) control visibility of element
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if visible is False:
             self.TKFrame.pack_forget()
         elif visible is True:
             self.TKFrame.pack()
+        if value is not None:
+            self.TKFrame.config(text=str(value))
+
 
     add_row = AddRow
     layout = Layout
@@ -3280,7 +3543,7 @@ class Tab(Element):
     """
 
     def __init__(self, title, layout, title_color=None, background_color=None, font=None, pad=None, disabled=False,
-                 border_width=None, key=None, tooltip=None, right_click_menu=None, visible=True):
+                 border_width=None, key=None, tooltip=None, right_click_menu=None, visible=True, element_justification='left', metadata=None):
         """
         :param title: (str) text to show on the tab
         :param layout: List[List[Element]] The element layout that will be shown in the tab
@@ -3294,6 +3557,8 @@ class Tab(Element):
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
+        :param element_justification: (str) All elements inside the Tab will have this justification 'left', 'right', 'center' are valid values
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.UseDictionary = False
@@ -3312,11 +3577,12 @@ class Tab(Element):
         self.BackgroundColor = background_color if background_color is not None else DEFAULT_BACKGROUND_COLOR
         self.RightClickMenu = right_click_menu
         self.ContainerElemementNumber = Window.GetAContainerNumber()
+        self.ElementJustification = element_justification
 
         self.Layout(layout)
 
         super().__init__(ELEM_TYPE_TAB, background_color=background_color, text_color=title_color, font=font, pad=pad,
-                         key=key, tooltip=tooltip, visible=visible)
+                         key=key, tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def AddRow(self, *args):
@@ -3357,7 +3623,9 @@ class Tab(Element):
         :param disabled: (bool) disable or enable state of the element
         :param visible: (bool) control visibility of element
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if disabled is None:
             return
         self.Disabled = disabled
@@ -3411,7 +3679,7 @@ class TabGroup(Element):
 
     def __init__(self, layout, tab_location=None, title_color=None, selected_title_color=None, background_color=None,
                  font=None, change_submits=False, enable_events=False, pad=None, border_width=None, theme=None,
-                 key=None, tooltip=None, visible=True):
+                 key=None, tooltip=None, visible=True, metadata=None):
         """
         :param layout: List[List[Tab]] Layout of Tabs. Different than normal layouts. ALL Tabs should be on first row
         :param tab_location: (str) location that tabs will be displayed. Choices are left, right, top, bottom, lefttop, leftbottom, righttop, rightbottom, bottomleft, bottomright, topleft, topright
@@ -3427,6 +3695,7 @@ class TabGroup(Element):
         :param key:  (any)  Value that uniquely identifies this element from all other elements. Used when Finding an element or in return values. Must be unique to the window
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.UseDictionary = False
@@ -3445,11 +3714,12 @@ class TabGroup(Element):
         self.BackgroundColor = background_color if background_color is not None else DEFAULT_BACKGROUND_COLOR
         self.ChangeSubmits = change_submits or enable_events
         self.TabLocation = tab_location
+        self.ElementJustification = 'left'
 
         self.Layout(layout)
 
         super().__init__(ELEM_TYPE_TAB_GROUP, background_color=background_color, text_color=title_color, font=font,
-                         pad=pad, key=key, tooltip=tooltip, visible=visible)
+                         pad=pad, key=key, tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def AddRow(self, *args):
@@ -3549,7 +3819,7 @@ class Slider(Element):
     def __init__(self, range=(None, None), default_value=None, resolution=None, tick_interval=None, orientation=None,
                  disable_number_display=False, border_width=None, relief=None, change_submits=False,
                  enable_events=False, disabled=False, size=(None, None), font=None, background_color=None,
-                 text_color=None, key=None, pad=None, tooltip=None, visible=True):
+                 text_color=None, key=None, pad=None, tooltip=None, visible=True, metadata=None):
         """
 
         :param range: Union[Tuple[int, int], Tuple[float, float]] slider's range (min value, max value)
@@ -3577,6 +3847,7 @@ class Slider(Element):
         :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.TKScale = self.Widget = None  # type: tk.Scale
@@ -3590,12 +3861,13 @@ class Slider(Element):
         self.Disabled = disabled
         self.TickInterval = tick_interval
         self.DisableNumericDisplay = disable_number_display
+        self.TroughColor = DEFAULT_SCROLLBAR_COLOR
         temp_size = size
         if temp_size == (None, None):
             temp_size = (20, 20) if self.Orientation.startswith('h') else (8, 20)
 
         super().__init__(ELEM_TYPE_INPUT_SLIDER, size=temp_size, font=font, background_color=background_color,
-                         text_color=text_color, key=key, pad=pad, tooltip=tooltip, visible=visible)
+                         text_color=text_color, key=key, pad=pad, tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def Update(self, value=None, range=(None, None), disabled=None, visible=None):
@@ -3608,12 +3880,12 @@ class Slider(Element):
         :param visible: (bool) control visibility of element
 
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if value is not None:
             try:
                 self.TKIntVar.set(value)
-                if range != (None, None):
-                    self.TKScale.config(from_=range[0], to_=range[1])
             except:
                 pass
             self.DefaultValue = value
@@ -3625,6 +3897,10 @@ class Slider(Element):
             self.TKScale.pack_forget()
         elif visible is True:
             self.TKScale.pack()
+        if range != (None, None):
+            self.TKScale.config(from_=range[0], to_=range[1])
+
+
 
     def _SliderChangedHandler(self, event):
         """
@@ -3727,10 +4003,21 @@ class TkScrollableFrame(tk.Frame):
 
         self.bind('<Configure>', self.set_scrollregion)
 
-        self.bind_mouse_scroll(self.canvas, self.yscroll)
-        if not vertical_only:
-            self.bind_mouse_scroll(self.hscrollbar, self.xscroll)
-        self.bind_mouse_scroll(self.vscrollbar, self.yscroll)
+        self.canvas.bind("<MouseWheel>", self.yscroll)     # THIS IS IT! The line of code that enables the column to be scrolled with the mouse!
+        self.canvas.bind("<Shift-MouseWheel>", self.xscroll)     # THIS IS IT! The line of code that enables the column to be scrolled with the mouse!
+
+
+
+        # def _on_mousewheel(self, event):
+        #     self.canv.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+
+            # self.bind_mouse_scroll(self.canvas, self.yscroll)
+        # if not vertical_only:
+        #     self.bind_mouse_scroll(self.hscrollbar, self.xscroll)
+        # self.bind_mouse_scroll(self.vscrollbar, self.yscroll)
+        # self.bind_mouse_scroll(self.TKFrame, self.yscroll)
+        # self.bind_mouse_scroll(self, self.yscroll)
 
     def resize_frame(self, e):
         """
@@ -3793,7 +4080,7 @@ class Column(Element):
     """
 
     def __init__(self, layout, background_color=None, size=(None, None), pad=None, scrollable=False,
-                 vertical_scroll_only=False, right_click_menu=None, key=None, visible=True):
+                 vertical_scroll_only=False, right_click_menu=None, key=None, visible=True, justification='left', element_justification='left', metadata=None):
         """
         :param layout: List[List[Element]] Layout that will be shown in the Column container
         :param background_color: (str) color of background of entire Column
@@ -3805,6 +4092,9 @@ class Column(Element):
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param key:  (any)  Value that uniquely identifies this element from all other elements. Used when Finding an element or in return values. Must be unique to the window
         :param visible: (bool) set visibility state of the element
+        :param justification: (str) set justification for the Column itself. Note entire row containing the Column will be affected
+        :param element_justification: (str) All elements inside the Column will have this justification 'left', 'right', 'center' are valid values
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.UseDictionary = False
@@ -3822,10 +4112,11 @@ class Column(Element):
         self.RightClickMenu = right_click_menu
         bg = background_color if background_color is not None else DEFAULT_BACKGROUND_COLOR
         self.ContainerElemementNumber = Window.GetAContainerNumber()
-
+        self.ElementJustification = element_justification
+        self.Justification = justification
         self.Layout(layout)
 
-        super().__init__(ELEM_TYPE_COLUMN, background_color=bg, size=size, pad=pad, key=key, visible=visible)
+        super().__init__(ELEM_TYPE_COLUMN, background_color=bg, size=size, pad=pad, key=key, visible=visible, metadata=metadata)
         return
 
     def AddRow(self, *args):
@@ -3881,7 +4172,9 @@ class Column(Element):
 
         :param visible: (bool) control visibility of element
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if visible is False:
             if self.TKColFrame:
                 self.TKColFrame.pack_forget()
@@ -3899,6 +4192,7 @@ class Column(Element):
     set_tooltip = Element.SetTooltip
     update = Update
 
+Col = Column
 
 # ---------------------------------------------------------------------- #
 #                           Pane                                         #
@@ -3909,7 +4203,7 @@ class Pane(Element):
     """
 
     def __init__(self, pane_list, background_color=None, size=(None, None), pad=None, orientation='vertical',
-                 show_handle=True, relief=RELIEF_RAISED, handle_size=None, border_width=None, key=None, visible=True):
+                 show_handle=True, relief=RELIEF_RAISED, handle_size=None, border_width=None, key=None, visible=True, metadata=None):
         """
         :param pane_list: List[Column] Must be a list of Column Elements. Each Column supplied becomes one pane that's shown
         :param background_color: (str) color of background
@@ -3928,6 +4222,7 @@ class Pane(Element):
         :param border_width: (int)  width of border around element in pixels
         :param key:  (any)  Value that uniquely identifies this element from all other elements. Used when Finding an element or in return values. Must be unique to the window
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.UseDictionary = False
@@ -3949,7 +4244,7 @@ class Pane(Element):
 
         self.Rows = [pane_list]
 
-        super().__init__(ELEM_TYPE_PANE, background_color=bg, size=size, pad=pad, key=key, visible=visible)
+        super().__init__(ELEM_TYPE_PANE, background_color=bg, size=size, pad=pad, key=key, visible=visible, metadata=metadata)
         return
 
     def Update(self, visible=None):
@@ -3958,7 +4253,9 @@ class Pane(Element):
 
         :param visible: (bool) control visibility of element
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if visible is False:
             self.PanedWindow.pack_forget()
         elif visible is True:
@@ -4262,7 +4559,7 @@ class Menu(Element):
     """
 
     def __init__(self, menu_definition, background_color=None, size=(None, None), tearoff=False, pad=None, key=None,
-                 visible=True):
+                 visible=True, metadata=None):
         """
         :param menu_definition: List[List[Tuple[str, List[str]]]
         :param background_color: (str) color of the background
@@ -4271,6 +4568,7 @@ class Menu(Element):
         :param pad: (int, int) or ((int, int),(int,int)) Amount of padding to put around element (left/right, top/bottom) or ((left, right), (top, bottom))
         :param key:  (any)  Value that uniquely identifies this element from all other elements. Used when Finding an element or in return values. Must be unique to the window
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.BackgroundColor = background_color if background_color is not None else DEFAULT_BACKGROUND_COLOR
@@ -4280,7 +4578,7 @@ class Menu(Element):
         self.MenuItemChosen = None
 
         super().__init__(ELEM_TYPE_MENUBAR, background_color=background_color, size=size, pad=pad, key=key,
-                         visible=visible)
+                         visible=visible, metadata=metadata)
         return
 
     def _MenuItemChosenCallback(self, item_chosen):  # Menu Menu Item Chosen Callback
@@ -4303,7 +4601,9 @@ class Menu(Element):
         :param menu_definition: List[List[Tuple[str, List[str]]]
         :param visible: (bool) control visibility of element
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if menu_definition is not None:
             self.MenuDefinition = menu_definition
             self.TKMenu = tk.Menu(self.ParentForm.TKroot, tearoff=self.Tearoff)  # create the menubar
@@ -4349,7 +4649,7 @@ class Table(Element):
                  row_height=None, font=None, justification='right', text_color=None, background_color=None,
                  alternating_row_color=None, row_colors=None, vertical_scroll_only=True, hide_vertical_scroll=False,
                  size=(None, None), change_submits=False, enable_events=False, bind_return_key=False, pad=None,
-                 key=None, tooltip=None, right_click_menu=None, visible=True):
+                 key=None, tooltip=None, right_click_menu=None, visible=True, metadata=None):
         """
         :param values: List[List[Union[str, int, float]]]
         :param headings: List[str] The headings to show on the top line
@@ -4382,6 +4682,7 @@ class Table(Element):
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.Values = values
@@ -4412,7 +4713,7 @@ class Table(Element):
         self.RowColors = row_colors
         self.tree_ids = []          # ids returned when inserting items into table - will use to delete colors
         super().__init__(ELEM_TYPE_TABLE, text_color=text_color, background_color=background_color, font=font,
-                         size=size, pad=pad, key=key, tooltip=tooltip, visible=visible)
+                         size=size, pad=pad, key=key, tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def Update(self, values=None, num_rows=None, visible=None, select_rows=None, alternating_row_color=None, row_colors=None):
@@ -4426,7 +4727,9 @@ class Table(Element):
         :param alternating_row_color: (str) the color to make every other row
         :param row_colors: List[Union[Tuple[int, str], Tuple[Int, str, str]] list of tuples of (row, background color) OR (row, foreground color, background color). Changes the colors of listed rows to the color(s) provided (note the optional foreground color)
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if values is not None:
             for id in self.tree_ids:
                 self.TKTreeview.item(id, tags=())
@@ -4517,10 +4820,22 @@ class Table(Element):
             if self.ParentForm.CurrentlyRunningMainloop:
                 self.ParentForm.TKroot.quit()
 
+    def Get(self):
+        """
+        Dummy function for tkinter port.  In the Qt port you can read back the values in the table in case they were
+        edited.  Don't know yet how to enable editing of a Tree in tkinter so just returning the values provided by
+        user when Table was created or Updated.
+
+        :return: List[List[Any]] the current table values (for now what was originally provided up updated)
+        """
+        return self.Values
+
+
+
     set_focus = Element.SetFocus
     set_tooltip = Element.SetTooltip
     update = Update
-
+    get = Get
 
 # ---------------------------------------------------------------------- #
 #                           Tree                                         #
@@ -4535,7 +4850,7 @@ class Tree(Element):
                  def_col_width=10, auto_size_columns=True, max_col_width=20, select_mode=None, show_expanded=False,
                  change_submits=False, enable_events=False, font=None, justification='right', text_color=None,
                  background_color=None, num_rows=None, row_height=None, pad=None, key=None, tooltip=None,
-                 right_click_menu=None, visible=True):
+                 right_click_menu=None, visible=True, metadata=None):
         """
 
         :param data: (TreeData) The data represented using a PySimpleGUI provided TreeData class
@@ -4564,6 +4879,7 @@ class Tree(Element):
         :param tooltip: (str) text, that will appear when mouse hovers over the element
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param visible: (bool) set visibility state of the element
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.TreeData = data
@@ -4587,9 +4903,11 @@ class Tree(Element):
         self.RightClickMenu = right_click_menu
         self.RowHeight = row_height
         self.IconList = {}
+        self.IdToKey = {'':''}
+        self.KeyToID = {'':''}
 
         super().__init__(ELEM_TYPE_TREE, text_color=text_color, background_color=background_color, font=font, pad=pad,
-                         key=key, tooltip=tooltip, visible=visible)
+                         key=key, tooltip=tooltip, visible=visible, metadata=metadata)
         return
 
     def treeview_selected(self, event):
@@ -4601,7 +4919,8 @@ class Tree(Element):
         """
 
         selections = self.TKTreeview.selection()
-        self.SelectedRows = [x for x in selections]
+        # self.SelectedRows = [x for x in selections]
+        self.SelectedRows = [self.IdToKey[x] for x in selections]
         if self.ChangeSubmits:
             MyForm = self.ParentForm
             if self.Key is not None:
@@ -4619,7 +4938,6 @@ class Tree(Element):
 
         :param node: (TreeData) The node to insert.  Will insert all nodes from starting point downward, recursively
         """
-        # print(f'Inserting {node.key} under parent {node.parent}')
         if node.key != '':
             if node.icon:
                 try:
@@ -4628,16 +4946,21 @@ class Tree(Element):
                     else:
                         photo = tk.PhotoImage(file=node.icon)
                     node.photo = photo
-                    self.TKTreeview.insert(node.parent, 'end', node.key, text=node.text, values=node.values,
-                                           open=self.ShowExpanded, image=node.photo)
+                    id = self.TKTreeview.insert(self.KeyToID[node.parent], 'end', iid=None, text=node.text,
+                                         values=node.values, open=self.ShowExpanded, image=node.photo)
+                    self.IdToKey[id] = node.key
+                    self.KeyToID[node.key] = id
                 except:
                     self.photo = None
             else:
-                self.TKTreeview.insert(node.parent, 'end', node.key, text=node.text, values=node.values,
-                                       open=self.ShowExpanded)
+                id = self.TKTreeview.insert(self.KeyToID[node.parent], 'end', iid=None, text=node.text,
+                                            values=node.values, open=self.ShowExpanded)
+                self.IdToKey[id] = node.key
+                self.KeyToID[node.key] = id
 
         for node in node.children:
             self.add_treeview_data(node)
+
 
     def Update(self, values=None, key=None, value=None, text=None, icon=None, visible=None):
         """
@@ -4650,7 +4973,9 @@ class Tree(Element):
         :param icon: Union[bytes, str] can be either a base64 icon or a filename for the icon
         :param visible: (bool) control visibility of element
         """
-
+        if self.Widget is None:
+            warnings.warn('You cannot Update element with key = {} until the window has been Read or Finalized'.format(self.Key), UserWarning)
+            return
         if values is not None:
             children = self.TKTreeview.get_children()
             for i in children:
@@ -4658,35 +4983,46 @@ class Tree(Element):
                 self.TKTreeview.delete(i)
             children = self.TKTreeview.get_children()
             self.TreeData = values
+            self.IdToKey = {'': ''}
+            self.KeyToID = {'': ''}
             self.add_treeview_data(self.TreeData.root_node)
             self.SelectedRows = []
         if key is not None:
-            item = self.TKTreeview.item(key)
+            for id in self.IdToKey.keys():
+                if key == self.IdToKey[id]:
+                    break
+            else:
+                id = None
+                print('** Key not found **')
+        else:
+            id = None
+        if id:
+            # item = self.TKTreeview.item(id)
             if value is not None:
-                self.TKTreeview.item(key, values=value)
+                self.TKTreeview.item(id, values=value)
             if text is not None:
-                self.TKTreeview.item(key, text=text)
+                self.TKTreeview.item(id, text=text)
             if icon is not None:
                 try:
                     if type(icon) is bytes:
                         photo = tk.PhotoImage(data=icon)
                     else:
                         photo = tk.PhotoImage(file=icon)
-                    self.TKTreeview.item(key, image=photo)
+                    self.TKTreeview.item(id, image=photo)
                     self.IconList[key] = photo  # save so that it's not deleted (save reference)
                 except:
                     pass
-            item = self.TKTreeview.item(key)
+            # item = self.TKTreeview.item(id)
         if visible is False:
             self.TKTreeview.pack_forget()
         elif visible is True:
             self.TKTreeview.pack()
         return self
 
+
     set_focus = Element.SetFocus
     set_tooltip = Element.SetTooltip
     update = Update
-
 
 class TreeData(object):
     """
@@ -4785,13 +5121,13 @@ class ErrorElement(Element):
     """
     A "dummy Element" that is returned when there are error conditions, like trying to find an element that's invalid
     """
-    def __init__(self, key=None):
+    def __init__(self, key=None, metadata=None):
         """
         :param key:  Used with window.FindElement and with return values to uniquely identify this element
         """
         self.Key = key
 
-        super().__init__(ELEM_TYPE_ERROR, key=key)
+        super().__init__(ELEM_TYPE_ERROR, key=key, metadata=metadata)
 
 
     def Update(self, silent_on_error=True, *args, **kwargs):
@@ -4839,7 +5175,6 @@ class Window:
     """
     Represents a single Window
     """
-
     NumOpenWindows = 0
     user_defined_icon = None
     hidden_master_root = None
@@ -4855,7 +5190,8 @@ class Window:
                  auto_close_duration=DEFAULT_AUTOCLOSE_TIME, icon=None, force_toplevel=False,
                  alpha_channel=1, return_keyboard_events=False, use_default_focus=True, text_justification=None,
                  no_titlebar=False, grab_anywhere=False, keep_on_top=False, resizable=False, disable_close=False,
-                 disable_minimize=False, right_click_menu=None, transparent_color=None, debugger_enabled=True, finalize=False):
+                 disable_minimize=False, right_click_menu=None, transparent_color=None, debugger_enabled=True,
+                 finalize=False, element_justification='left', metadata=None):
         """
         :param title: (str) The title that will be displayed in the Titlebar and on the Taskbar
         :param layout: List[List[Elements]] The layout for the window. Can also be specified in the Layout method
@@ -4888,13 +5224,15 @@ class Window:
         :param disable_minimize:  (bool) if True the user won't be able to minimize window.  Good for taking over entire screen and staying that way.
         :param right_click_menu: List[List[Union[List[str],str]]] A list of lists of Menu items to show when this element is right clicked. See user docs for exact format.
         :param transparent_color:  (str) Any portion of the window that has this color will be completely transparent. You can even click through these spots to the window under this window.
-        :param finalize:  (bool) If True then the Finalize method will be called. Use this rather than chaining .Finalize for cleaner code
         :param debugger_enabled: (bool) If True then the internal debugger will be enabled
+        :param finalize:  (bool) If True then the Finalize method will be called. Use this rather than chaining .Finalize for cleaner code
+        :param element_justification: (str) All elements in the Window itself will have this justification 'left', 'right', 'center' are valid values
+        :param metadata: (Any) User metadata that can be set to ANYTHING
         """
 
         self.AutoSizeText = auto_size_text if auto_size_text is not None else DEFAULT_AUTOSIZE_TEXT
         self.AutoSizeButtons = auto_size_buttons if auto_size_buttons is not None else DEFAULT_AUTOSIZE_BUTTONS
-        self.Title = title
+        self.Title = str(title)
         self.Rows = []  # a list of ELEMENTS for this row
         self.DefaultElementSize = default_element_size
         self.DefaultButtonElementSize = default_button_element_size if default_button_element_size != (
@@ -4906,7 +5244,12 @@ class Window:
         self.Font = font if font else DEFAULT_FONT
         self.RadioDict = {}
         self.BorderDepth = border_depth
-        self.WindowIcon = Window.user_defined_icon if Window.user_defined_icon is not None else icon if icon is not None else DEFAULT_WINDOW_ICON
+        if icon:
+            self.WindowIcon = icon
+        elif Window.user_defined_icon is not None:
+            self.WindowIcon = Window.user_defined_icon
+        else:
+            self.WindowIcon = DEFAULT_WINDOW_ICON
         self.AutoClose = auto_close
         self.NonBlocking = False
         self.TKroot = None
@@ -4952,8 +5295,9 @@ class Window:
         self.UniqueKeyCounter = 0
         self.DebuggerEnabled = debugger_enabled
         self.WasClosed = False
-        if type(title) != str:
-            warnings.warn('Your title is not a string.  Are you passing in the right parameters?', UserWarning)
+        self.ElementJustification = element_justification
+        self.FocusSet = False
+        self.metadata = metadata
         if layout is not None and type(layout) not in  (list, tuple):
             warnings.warn('Your layout is not a list or tuple... this is not good!')
 
@@ -4961,6 +5305,7 @@ class Window:
             self.Layout(layout)
             if finalize:
                 self.Finalize()
+
 
     @classmethod
     def GetAContainerNumber(cls):
@@ -4987,6 +5332,19 @@ class Window:
         """
         self.NumOpenWindows -= 1 * (self.NumOpenWindows != 0)  # decrement if not 0
         # print('----- DECREMENTING Num Open Windows = {} ---'.format(Window.NumOpenWindows))
+
+    @classmethod
+    def get_screen_size(self):
+        """
+        Returns the size of the "screen" as determined by tkinter.  This can vary depending on your operating system and the number of monitors installed on your system.  For Windows, the primary monitor's size is returns. On some multi-monitored Linux systems, the monitors are combined and the total size is reported as if one screen.
+
+        :return: Tuple[int, int] - Size of the screen in pixels as determined by tkinter
+        """
+        root = tk.Tk()
+        screen_width = root.winfo_screenwidth()  # get window info to move to middle of screen
+        screen_height = root.winfo_screenheight()
+        root.destroy()
+        return screen_width, screen_height
 
     # ------------------------- Add ONE Row to Form ------------------------- #
     def AddRow(self, *args):
@@ -5017,10 +5375,18 @@ class Window:
                       'This means you are missing () from your layout',
                       'The offensive list is:',
                       element,
-                      'This item will be stripped from your layout'
-                      )
+                      'This item will be stripped from your layout')
                 continue
-
+            if element.ParentContainer is not None:
+                warnings.warn('*** YOU ARE ATTEMPTING TO RESUSE A LAYOUT! You must not attempt this kind of re-use ***', UserWarning)
+                PopupError('Error creating layout',
+                      'The layout specified has already been used',
+                      'You MUST start witha "clean", unused layout every time you create a window',
+                      'The offensive Element = ',
+                      element,
+                      'and has a key = ', element.Key,
+                      'This item will be stripped from your layout')
+                continue
             element.Position = (CurrentRowNumber, i)
             element.ParentContainer = self
             CurrentRow.append(element)
@@ -5072,7 +5438,6 @@ class Window:
         """
         Deprecated - do not use any longer.  Layout your window and then call Read.  Or can add a Finalize call before the Read
         :param rows:
-
         """
         raise DeprecationWarning('LayoutAndShow is no longer supported... ')
 
@@ -5122,34 +5487,43 @@ class Window:
     def SetIcon(self, icon=None, pngbase64=None):
         """
         Sets the icon that is shown on the title bar and on the task bar.  Can pass in:
-        * a filename which must be a .ICO icon file.
+        * a filename which must be a .ICO icon file for windows
         * a bytes object
         * a BASE64 encoded file held in a variable
 
         :param icon: (str) Filename or bytes object
         :param pngbase64: (str) Base64 encoded GIF or PNG file
         """
-        if type(icon) is bytes:
-            wicon = tkinter.PhotoImage(data=icon)
+        if type(icon) is bytes or pngbase64 is not None:
+            wicon = tkinter.PhotoImage(data=icon if icon is not None else pngbase64)
             try:
                 self.TKroot.tk.call('wm', 'iconphoto', self.TKroot._w, wicon)
             except:
-                pass
-        elif pngbase64 != None:
-            wicon = tkinter.PhotoImage(data=pngbase64)
-            try:
-                self.TKroot.tk.call('wm', 'iconphoto', self.TKroot._w, wicon)
-            except:
-                pass
-        else:
-            wicon = icon
+                wicon = tkinter.PhotoImage(data=DEFAULT_BASE64_ICON)
+                try:
+                    self.TKroot.tk.call('wm', 'iconphoto', self.TKroot._w, wicon)
+                except:
+                    pass
+            self.WindowIcon = wicon
+            return
 
-        self.WindowIcon = wicon
         try:
-            # print(f'icon bitmap = {wicon}')
-            self.TKroot.iconbitmap(wicon)
+            self.TKroot.iconbitmap(icon)
+            wicon = icon
         except:
-            pass
+            try:
+                wicon = tkinter.PhotoImage(file=icon)
+                self.TKroot.tk.call('wm', 'iconphoto', self.TKroot._w, wicon)
+            except:
+                try:
+                    wicon = tkinter.PhotoImage(data=DEFAULT_BASE64_ICON)
+                    try:
+                        self.TKroot.tk.call('wm', 'iconphoto', self.TKroot._w, wicon)
+                    except:
+                        pass
+                except:
+                    pass
+        self.WindowIcon = wicon
 
 
     def _GetElementAtLocation(self, location):
@@ -5292,6 +5666,7 @@ class Window:
             #     print(f'Window {self.Title} Last button clicked = {self.LastButtonClicked}')
             try:
                 self.TKroot.after_cancel(self.TKAfterID)
+                del self.TKAfterID
             except:
                 pass
                 # print('** tkafter cancel failed **')
@@ -5320,8 +5695,7 @@ class Window:
             if not self.XFound and self.Timeout != 0 and self.Timeout is not None and self.ReturnValues[
                 0] is None:  # Special Qt case because returning for no reason so fake timeout
                 self.ReturnValues = self.TimeoutKey, self.ReturnValues[1]  # fake a timeout
-            elif not self.XFound and self.ReturnValues[
-                0] is None:  # TODO HIGHLY EXPERIMENTAL... added due to tray icon interaction
+            elif not self.XFound and self.ReturnValues[0] is None:  # TODO HIGHLY EXPERIMENTAL... added due to tray icon interaction
                 # print("*** Faking timeout ***")
                 self.ReturnValues = self.TimeoutKey, self.ReturnValues[1]  # fake a timeout
             return self.ReturnValues
@@ -5374,6 +5748,9 @@ class Window:
 
         if self.TKrootDestroyed:
             return self
+        self.Read(timeout=1)
+        return self
+        # OLD CODE FOLLOWS
         if not self.Shown:
             self._Show(non_blocking=True)
         try:
@@ -5381,6 +5758,7 @@ class Window:
         except:
             self.TKrootDestroyed = True
             Window.DecrementOpenCount()
+            print('** Finalize failed **')
             # _my_windows.Decrement()
             # return None, None
         return self
@@ -5450,8 +5828,8 @@ class Window:
         except KeyError:
             element = None
             if not silent_on_error:
-                print(
-                    '*** WARNING = FindElement did not find the key. Please check your key\'s spelling key = %s ***' % key)
+                warnings.warn(
+                    '*** WARNING = FindElement did not find the key. Please check your key\'s spelling key = %s ***' % key, UserWarning)
                 PopupError('Keyword error in FindElement Call',
                            'Bad key = {}'.format(key),
                            'Your bad line of code may resemble this:',
@@ -5518,7 +5896,7 @@ class Window:
                     if element.Key in key_dict.keys():
                         print('*** Duplicate key found in your layout {} ***'.format(
                             element.Key)) if element.Type != ELEM_TYPE_BUTTON else None
-                        element.Key = element.Key + str(self.UniqueKeyCounter)
+                        element.Key = str(element.Key) + str(self.UniqueKeyCounter)
                         self.UniqueKeyCounter += 1
                         print('*** Replaced new key with {} ***'.format(
                             element.Key)) if element.Type != ELEM_TYPE_BUTTON else None
@@ -5565,7 +5943,7 @@ class Window:
         :return: Union[Tuple[None, None], Tuple[width, height]] Tuple containing width and height of screen in pixels
         """
         if self.TKrootDestroyed:
-            return None, None
+            return Window.get_screen_size()
         screen_width = self.TKroot.winfo_screenwidth()  # get window info to move to middle of screen
         screen_height = self.TKroot.winfo_screenheight()
         return screen_width, screen_height
@@ -5604,10 +5982,13 @@ class Window:
         """
         Restore a window to a non-maximized state.  Does different things depending on platform.  See Maximize for more.
         """
-        if sys.platform != 'linux':
-            self.TKroot.state('normal')
+        if self.TKroot.state() == 'iconic':
+            self.TKroot.deiconify()
         else:
-            self.TKroot.attributes('-fullscreen', False)
+            if sys.platform != 'linux':
+                self.TKroot.state('normal')
+            else:
+                self.TKroot.attributes('-fullscreen', False)
 
     def _StartMove(self, event):
         """
@@ -5720,6 +6101,10 @@ class Window:
                 Window.NumOpenWindows = 0  # if no hidden window, then this won't execute
             except:
                 pass
+        self.TKrootDestroyed = True
+        del self.TKroot
+        del self.Rows
+        del self
 
 
     # IT FINALLY WORKED! 29-Oct-2018 was the first time this damned thing got called
@@ -5837,7 +6222,6 @@ class Window:
         return int(self.TKroot.winfo_x()), int(self.TKroot.winfo_y())
 
 
-
     @property
     def Size(self):
         """
@@ -5935,6 +6319,17 @@ class Window:
         self.TKroot.unbind("<Pause>")
         self.DebuggerEnabled = False
 
+
+    def VisibilityChanged(self):
+        """
+        This is a completely dummy method that does nothing. It is here so that PySimpleGUIQt programs can make this
+        call and then have that same source run on plain PySimpleGUI.
+        :return:
+        """
+        return
+
+
+
     # def __enter__(self):
     #     """
     #     WAS used with context managers which are no longer needed nor advised.  It is here for legacy support and
@@ -5953,10 +6348,24 @@ class Window:
         :return: Union[Element, None] The element found or None if no element was found
         """
         try:
-            return self.Element(key)
+            return self.FindElement(key)
         except Exception as e:
             warnings.warn('The key you passed in is no good. Key = {}*'.format(key))
             return None
+
+
+    def __call__(self, *args, **kwargs):
+        """
+        Call window.Read but without having to type it out.
+        window() == window.Read()
+        window(timeout=50) == window.Read(timeout=50)
+
+        :param args:
+        :param kwargs:
+        :return: Tuple[Any, Dict[Any:Any]] The famous event, values that Read returns.
+        """
+        return self.Read(*args, **kwargs)
+
 
     add_row = AddRow
     add_rows = AddRows
@@ -6032,11 +6441,22 @@ Window.CloseNonBlocking = Window.Close
 # Button Lazy Functions so the caller doesn't have to define a bunch of stuff #
 # =========================================================================== #
 
+# ------------------------- A fake Element... the Pad Element ------------------------- #
+def Sizer(h_pixels=0, v_pixels=0):
+    """
+    "Pushes" out the size of whatever it is placed inside of.  This includes Columns, Frames, Tabs and Windows
+
+    :param h_pixels: (int) number of horizontal pixels
+    :param v_pixels: (int) number of vertical pixels
+    :return: (Column) A column element that has a pad setting set according to parameters
+    """
+
+    return Column([[]], pad=((h_pixels,0),(v_pixels,0)))
 
 # -------------------------  FOLDER BROWSE Element lazy function  ------------------------- #
 def FolderBrowse(button_text='Browse', target=(ThisRow, -1), initial_folder=None, tooltip=None, size=(None, None),
                  auto_size_button=None, button_color=None, disabled=False, change_submits=False, enable_events=False,
-                 font=None, pad=None, key=None):
+                 font=None, pad=None, key=None, metadata=None):
     """
     :param button_text: text in the button (Default value = 'Browse')
     :param target: key or (row,col) target for the button (Default value = (ThisRow, -1))
@@ -6057,14 +6477,14 @@ def FolderBrowse(button_text='Browse', target=(ThisRow, -1), initial_folder=None
     return Button(button_text=button_text, button_type=BUTTON_TYPE_BROWSE_FOLDER, target=target,
                   initial_folder=initial_folder, tooltip=tooltip, size=size, auto_size_button=auto_size_button,
                   disabled=disabled, button_color=button_color, change_submits=change_submits,
-                  enable_events=enable_events, font=font, pad=pad, key=key)
+                  enable_events=enable_events, font=font, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  FILE BROWSE Element lazy function  ------------------------- #
 def FileBrowse(button_text='Browse', target=(ThisRow, -1), file_types=(("ALL Files", "*.*"),), initial_folder=None,
                tooltip=None, size=(None, None), auto_size_button=None, button_color=None, change_submits=False,
                enable_events=False, font=None, disabled=False,
-               pad=None, key=None):
+               pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Browse')
@@ -6086,14 +6506,14 @@ def FileBrowse(button_text='Browse', target=(ThisRow, -1), file_types=(("ALL Fil
     return Button(button_text=button_text, button_type=BUTTON_TYPE_BROWSE_FILE, target=target, file_types=file_types,
                   initial_folder=initial_folder, tooltip=tooltip, size=size, auto_size_button=auto_size_button,
                   change_submits=change_submits, enable_events=enable_events, disabled=disabled,
-                  button_color=button_color, font=font, pad=pad, key=key)
+                  button_color=button_color, font=font, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  FILES BROWSE Element (Multiple file selection) lazy function  ------------------------- #
 def FilesBrowse(button_text='Browse', target=(ThisRow, -1), file_types=(("ALL Files", "*.*"),), disabled=False,
                 initial_folder=None, tooltip=None, size=(None, None), auto_size_button=None, button_color=None,
                 change_submits=False, enable_events=False,
-                font=None, pad=None, key=None):
+                font=None, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Browse')
@@ -6115,14 +6535,14 @@ def FilesBrowse(button_text='Browse', target=(ThisRow, -1), file_types=(("ALL Fi
     return Button(button_text=button_text, button_type=BUTTON_TYPE_BROWSE_FILES, target=target, file_types=file_types,
                   initial_folder=initial_folder, change_submits=change_submits, enable_events=enable_events,
                   tooltip=tooltip, size=size, auto_size_button=auto_size_button,
-                  disabled=disabled, button_color=button_color, font=font, pad=pad, key=key)
+                  disabled=disabled, button_color=button_color, font=font, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  FILE BROWSE Element lazy function  ------------------------- #
 def FileSaveAs(button_text='Save As...', target=(ThisRow, -1), file_types=(("ALL Files", "*.*"),), initial_folder=None,
                disabled=False, tooltip=None, size=(None, None), auto_size_button=None, button_color=None,
                change_submits=False, enable_events=False, font=None,
-               pad=None, key=None):
+               pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Save As...')
@@ -6144,14 +6564,14 @@ def FileSaveAs(button_text='Save As...', target=(ThisRow, -1), file_types=(("ALL
     return Button(button_text=button_text, button_type=BUTTON_TYPE_SAVEAS_FILE, target=target, file_types=file_types,
                   initial_folder=initial_folder, tooltip=tooltip, size=size, disabled=disabled,
                   auto_size_button=auto_size_button, button_color=button_color, change_submits=change_submits,
-                  enable_events=enable_events, font=font, pad=pad, key=key)
+                  enable_events=enable_events, font=font, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  SAVE AS Element lazy function  ------------------------- #
 def SaveAs(button_text='Save As...', target=(ThisRow, -1), file_types=(("ALL Files", "*.*"),), initial_folder=None,
            disabled=False, tooltip=None, size=(None, None), auto_size_button=None, button_color=None,
            change_submits=False, enable_events=False, font=None,
-           pad=None, key=None):
+           pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Save As...')
@@ -6173,12 +6593,12 @@ def SaveAs(button_text='Save As...', target=(ThisRow, -1), file_types=(("ALL Fil
     return Button(button_text=button_text, button_type=BUTTON_TYPE_SAVEAS_FILE, target=target, file_types=file_types,
                   initial_folder=initial_folder, tooltip=tooltip, size=size, disabled=disabled,
                   auto_size_button=auto_size_button, button_color=button_color, change_submits=change_submits,
-                  enable_events=enable_events, font=font, pad=pad, key=key)
+                  enable_events=enable_events, font=font, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  SAVE BUTTON Element lazy function  ------------------------- #
 def Save(button_text='Save', size=(None, None), auto_size_button=None, button_color=None, bind_return_key=True,
-         disabled=False, tooltip=None, font=None, focus=False, pad=None, key=None):
+         disabled=False, tooltip=None, font=None, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Save')
@@ -6196,12 +6616,12 @@ def Save(button_text='Save', size=(None, None), auto_size_button=None, button_co
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  SUBMIT BUTTON Element lazy function  ------------------------- #
 def Submit(button_text='Submit', size=(None, None), auto_size_button=None, button_color=None, disabled=False,
-           bind_return_key=True, tooltip=None, font=None, focus=False, pad=None, key=None):
+           bind_return_key=True, tooltip=None, font=None, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Submit')
@@ -6219,13 +6639,13 @@ def Submit(button_text='Submit', size=(None, None), auto_size_button=None, butto
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  OPEN BUTTON Element lazy function  ------------------------- #
 # -------------------------  OPEN BUTTON Element lazy function  ------------------------- #
 def Open(button_text='Open', size=(None, None), auto_size_button=None, button_color=None, disabled=False,
-         bind_return_key=True, tooltip=None, font=None, focus=False, pad=None, key=None):
+         bind_return_key=True, tooltip=None, font=None, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Open')
@@ -6243,12 +6663,12 @@ def Open(button_text='Open', size=(None, None), auto_size_button=None, button_co
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  OK BUTTON Element lazy function  ------------------------- #
 def OK(button_text='OK', size=(None, None), auto_size_button=None, button_color=None, disabled=False,
-       bind_return_key=True, tooltip=None, font=None, focus=False, pad=None, key=None):
+       bind_return_key=True, tooltip=None, font=None, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'OK')
@@ -6266,12 +6686,12 @@ def OK(button_text='OK', size=(None, None), auto_size_button=None, button_color=
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  YES BUTTON Element lazy function  ------------------------- #
 def Ok(button_text='Ok', size=(None, None), auto_size_button=None, button_color=None, disabled=False,
-       bind_return_key=True, tooltip=None, font=None, focus=False, pad=None, key=None):
+       bind_return_key=True, tooltip=None, font=None, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Ok')
@@ -6289,12 +6709,12 @@ def Ok(button_text='Ok', size=(None, None), auto_size_button=None, button_color=
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  CANCEL BUTTON Element lazy function  ------------------------- #
 def Cancel(button_text='Cancel', size=(None, None), auto_size_button=None, button_color=None, disabled=False,
-           tooltip=None, font=None, bind_return_key=False, focus=False, pad=None, key=None):
+           tooltip=None, font=None, bind_return_key=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Cancel')
@@ -6312,12 +6732,12 @@ def Cancel(button_text='Cancel', size=(None, None), auto_size_button=None, butto
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  QUIT BUTTON Element lazy function  ------------------------- #
 def Quit(button_text='Quit', size=(None, None), auto_size_button=None, button_color=None, disabled=False, tooltip=None,
-         font=None, bind_return_key=False, focus=False, pad=None, key=None):
+         font=None, bind_return_key=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Quit')
@@ -6335,12 +6755,12 @@ def Quit(button_text='Quit', size=(None, None), auto_size_button=None, button_co
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  Exit BUTTON Element lazy function  ------------------------- #
 def Exit(button_text='Exit', size=(None, None), auto_size_button=None, button_color=None, disabled=False, tooltip=None,
-         font=None, bind_return_key=False, focus=False, pad=None, key=None):
+         font=None, bind_return_key=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Exit')
@@ -6358,12 +6778,12 @@ def Exit(button_text='Exit', size=(None, None), auto_size_button=None, button_co
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  YES BUTTON Element lazy function  ------------------------- #
 def Yes(button_text='Yes', size=(None, None), auto_size_button=None, button_color=None, disabled=False, tooltip=None,
-        font=None, bind_return_key=True, focus=False, pad=None, key=None):
+        font=None, bind_return_key=True, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Yes')
@@ -6381,12 +6801,12 @@ def Yes(button_text='Yes', size=(None, None), auto_size_button=None, button_colo
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  NO BUTTON Element lazy function  ------------------------- #
 def No(button_text='No', size=(None, None), auto_size_button=None, button_color=None, disabled=False, tooltip=None,
-       font=None, bind_return_key=False, focus=False, pad=None, key=None):
+       font=None, bind_return_key=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'No')
@@ -6404,12 +6824,12 @@ def No(button_text='No', size=(None, None), auto_size_button=None, button_color=
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  NO BUTTON Element lazy function  ------------------------- #
 def Help(button_text='Help', size=(None, None), auto_size_button=None, button_color=None, disabled=False, font=None,
-         tooltip=None, bind_return_key=False, focus=False, pad=None, key=None):
+         tooltip=None, bind_return_key=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = 'Help')
@@ -6427,12 +6847,12 @@ def Help(button_text='Help', size=(None, None), auto_size_button=None, button_co
     """
     return Button(button_text=button_text, button_type=BUTTON_TYPE_READ_FORM, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  NO BUTTON Element lazy function  ------------------------- #
 def Debug(button_text='', size=(None, None), auto_size_button=None, button_color=None, disabled=False, font=None,
-          tooltip=None, bind_return_key=False, focus=False, pad=None, key=None):
+          tooltip=None, bind_return_key=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button (Default value = '')
@@ -6451,13 +6871,13 @@ def Debug(button_text='', size=(None, None), auto_size_button=None, button_color
     return Button(button_text=button_text, button_type=BUTTON_TYPE_SHOW_DEBUGGER, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=COLOR_SYSTEM_DEFAULT, font=font, disabled=disabled,
                   bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, image_data=PSG_DEBUGGER_LOGO,
-                  image_subsample=4, border_width=0)
+                  image_subsample=4, border_width=0, metadata=metadata)
 
 
 # -------------------------  GENERIC BUTTON Element lazy function  ------------------------- #
 def SimpleButton(button_text, image_filename=None, image_data=None, image_size=(None, None), image_subsample=None,
                  border_width=None, tooltip=None, size=(None, None), auto_size_button=None, button_color=None,
-                 font=None, bind_return_key=False, disabled=False, focus=False, pad=None, key=None):
+                 font=None, bind_return_key=False, disabled=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button
@@ -6482,13 +6902,13 @@ def SimpleButton(button_text, image_filename=None, image_data=None, image_size=(
                   image_data=image_data, image_size=image_size, image_subsample=image_subsample,
                   border_width=border_width, tooltip=tooltip, disabled=disabled, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  CLOSE BUTTON Element lazy function  ------------------------- #
 def CloseButton(button_text, image_filename=None, image_data=None, image_size=(None, None), image_subsample=None,
                 border_width=None, tooltip=None, size=(None, None), auto_size_button=None, button_color=None, font=None,
-                bind_return_key=False, disabled=False, focus=False, pad=None, key=None):
+                bind_return_key=False, disabled=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button
@@ -6513,7 +6933,7 @@ def CloseButton(button_text, image_filename=None, image_data=None, image_size=(N
                   image_data=image_data, image_size=image_size, image_subsample=image_subsample,
                   border_width=border_width, tooltip=tooltip, disabled=disabled, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 CButton = CloseButton
@@ -6522,7 +6942,7 @@ CButton = CloseButton
 # -------------------------  GENERIC BUTTON Element lazy function  ------------------------- #
 def ReadButton(button_text, image_filename=None, image_data=None, image_size=(None, None), image_subsample=None,
                border_width=None, tooltip=None, size=(None, None), auto_size_button=None, button_color=None, font=None,
-               bind_return_key=False, disabled=False, focus=False, pad=None, key=None):
+               bind_return_key=False, disabled=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button
@@ -6547,7 +6967,7 @@ def ReadButton(button_text, image_filename=None, image_data=None, image_size=(No
                   image_data=image_data, image_size=image_size, image_subsample=image_subsample,
                   border_width=border_width, tooltip=tooltip, size=size, disabled=disabled,
                   auto_size_button=auto_size_button, button_color=button_color, font=font,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 ReadFormButton = ReadButton
@@ -6557,7 +6977,7 @@ RButton = ReadFormButton
 # -------------------------  Realtime BUTTON Element lazy function  ------------------------- #
 def RealtimeButton(button_text, image_filename=None, image_data=None, image_size=(None, None), image_subsample=None,
                    border_width=None, tooltip=None, size=(None, None), auto_size_button=None, button_color=None,
-                   font=None, disabled=False, bind_return_key=False, focus=False, pad=None, key=None):
+                   font=None, disabled=False, bind_return_key=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button
@@ -6582,13 +7002,13 @@ def RealtimeButton(button_text, image_filename=None, image_data=None, image_size
                   image_data=image_data, image_size=image_size, image_subsample=image_subsample,
                   border_width=border_width, tooltip=tooltip, disabled=disabled, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  Dummy BUTTON Element lazy function  ------------------------- #
 def DummyButton(button_text, image_filename=None, image_data=None, image_size=(None, None), image_subsample=None,
                 border_width=None, tooltip=None, size=(None, None), auto_size_button=None, button_color=None, font=None,
-                disabled=False, bind_return_key=False, focus=False, pad=None, key=None):
+                disabled=False, bind_return_key=False, focus=False, pad=None, key=None, metadata=None):
     """
 
     :param button_text: text in the button
@@ -6613,7 +7033,7 @@ def DummyButton(button_text, image_filename=None, image_data=None, image_size=(N
                   image_data=image_data, image_size=image_size, image_subsample=image_subsample,
                   border_width=border_width, tooltip=tooltip, size=size, auto_size_button=auto_size_button,
                   button_color=button_color, font=font, disabled=disabled, bind_return_key=bind_return_key, focus=focus,
-                  pad=pad, key=key)
+                  pad=pad, key=key, metadata=metadata)
 
 
 # -------------------------  Calendar Chooser Button lazy function  ------------------------- #
@@ -6621,7 +7041,7 @@ def CalendarButton(button_text, target=(None, None), close_when_date_chosen=True
                    image_filename=None, image_data=None, image_size=(None, None),
                    image_subsample=None, tooltip=None, border_width=None, size=(None, None), auto_size_button=None,
                    button_color=None, disabled=False, font=None, bind_return_key=False, focus=False, pad=None,
-                   key=None, locale=None, format=None):
+                   key=None, locale=None, format=None, metadata=None):
     """
 
     :param button_text: text in the button
@@ -6652,7 +7072,7 @@ def CalendarButton(button_text, target=(None, None), close_when_date_chosen=True
                     image_filename=image_filename, image_data=image_data, image_size=image_size,
                     image_subsample=image_subsample, border_width=border_width, tooltip=tooltip, size=size,
                     auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                    bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                    bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
     button.CalendarCloseWhenChosen = close_when_date_chosen
     button.DefaultDate_M_D_Y = default_date_m_d_y
     button.CalendarLocale = locale
@@ -6664,7 +7084,7 @@ def CalendarButton(button_text, target=(None, None), close_when_date_chosen=True
 def ColorChooserButton(button_text, target=(None, None), image_filename=None, image_data=None, image_size=(None, None),
                        image_subsample=None, tooltip=None, border_width=None, size=(None, None), auto_size_button=None,
                        button_color=None, disabled=False, font=None, bind_return_key=False, focus=False, pad=None,
-                       key=None):
+                       key=None, metadata=None):
     """
 
     :param button_text: text in the button
@@ -6690,7 +7110,7 @@ def ColorChooserButton(button_text, target=(None, None), image_filename=None, im
                   image_filename=image_filename, image_data=image_data, image_size=image_size,
                   image_subsample=image_subsample, border_width=border_width, tooltip=tooltip, size=size,
                   auto_size_button=auto_size_button, button_color=button_color, font=font, disabled=disabled,
-                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key)
+                  bind_return_key=bind_return_key, focus=focus, pad=pad, key=key, metadata=metadata)
 
 
 #####################################  -----  RESULTS   ------ ##################################################
@@ -7220,12 +7640,12 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
         """ """
         return tkinter.font.Font().measure('A')  # single character width
 
+
     border_depth = toplevel_form.BorderDepth if toplevel_form.BorderDepth is not None else DEFAULT_BORDER_WIDTH
     # --------------------------------------------------------------------------- #
     # ****************  Use FlexForm to build the tkinter window ********** ----- #
     # Building is done row by row.                                                #
     # --------------------------------------------------------------------------- #
-    focus_set = False
     ######################### LOOP THROUGH ROWS #########################
     # *********** -------  Loop through ROWS  ------- ***********#
     for row_num, flex_row in enumerate(form.Rows):
@@ -7234,7 +7654,9 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
         # *********** Make TK Row                             ***********#
         tk_row_frame = tk.Frame(containing_frame)
         row_should_expand = False
+        row_justify = form.ElementJustification
         for col_num, element in enumerate(flex_row):
+            element.ParentRowFrame = tk_row_frame
             element.ParentForm = toplevel_form  # save the button's parent form object
             if toplevel_form.Font and (element.Font == DEFAULT_FONT or not element.Font):
                 font = toplevel_form.Font
@@ -7266,8 +7688,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
             if element_type == ELEM_TYPE_COLUMN:
                 element = element           # type: Column
                 if element.Scrollable:
-                    element.TKColFrame = element.Widget = TkScrollableFrame(tk_row_frame,
-                                                                            element.VerticalScrollOnly)  # do not use yet!  not working
+                    element.TKColFrame = TkScrollableFrame(tk_row_frame, element.VerticalScrollOnly)  # do not use yet!  not working
                     PackFormIntoFrame(element, element.TKColFrame.TKFrame, toplevel_form)
                     element.TKColFrame.TKFrame.update()
                     if element.Size == (None, None):  # if no size specified, use column width x column height/2
@@ -7308,11 +7729,23 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                         if not element.BackgroundColor in (None, COLOR_SYSTEM_DEFAULT):
                             element.TKColFrame.config(background=element.BackgroundColor, borderwidth=0,
                                                   highlightthickness=0)
-
-                element.TKColFrame.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1], expand=True, fill='both')
+                if element.Justification.lower().startswith('c'):
+                    anchor=tk.N
+                    side=tk.TOP
+                elif element.Justification.lower().startswith('r'):
+                    anchor=tk.NE
+                    side = tk.RIGHT
+                else:
+                    anchor=tk.NW
+                    side = tk.LEFT
+                # anchor=tk.NW
+                # side = tk.LEFT
+                row_justify = element.Justification
+                element.Widget = element.TKColFrame
+                element.TKColFrame.pack(side=side, anchor=anchor, padx=elementpad[0], pady=elementpad[1], expand=False, fill=tk.NONE)
+                # element.TKColFrame.pack(side=side, padx=elementpad[0], pady=elementpad[1], expand=True, fill='both')
                 if element.Visible is False:
                     element.TKColFrame.pack_forget()
-
                 # element.TKColFrame = element.TKColFrame
                 # if element.BackgroundColor != COLOR_SYSTEM_DEFAULT and element.BackgroundColor is not None:
                 #     element.TKColFrame.configure(background=element.BackgroundColor,
@@ -7324,6 +7757,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     AddMenuItem(top_menu, menu[1], element)
                     element.TKRightClickMenu = top_menu
                     element.TKColFrame.bind('<Button-3>', element._RightClickMenuCallback)
+                # row_should_expand = True
             # -------------------------  Pane element  ------------------------- #
             if element_type == ELEM_TYPE_PANE:
                 bd = element.BorderDepth if element.BorderDepth is not None else border_depth
@@ -7343,7 +7777,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 if element.BackgroundColor is not None and element.BackgroundColor != COLOR_SYSTEM_DEFAULT:
                     element.PanedWindow.configure(background=element.BackgroundColor)
                 for pane in element.PaneList:
-                    pane.TKColFrame = tk.Frame(element.PanedWindow)
+                    pane.Widget = pane.TKColFrame = tk.Frame(element.PanedWindow)
                     pane.ParentPanedWindow = element.PanedWindow
                     PackFormIntoFrame(pane, pane.TKColFrame, toplevel_form)
                     if pane.Visible:
@@ -7373,6 +7807,8 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                         width = max_line_len
                     height = num_lines
                 # ---===--- LABEL widget create and place --- #
+                element = element           # type: Text
+                bd = element.BorderWidth if element.BorderWidth is not None else border_depth
                 stringvar = tk.StringVar()
                 element.TKStringVar = stringvar
                 stringvar.set(str(display_text))
@@ -7388,7 +7824,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 anchor = tk.NW if justification == 'left' else tk.N if justification == 'center' else tk.NE
 
                 tktext_label = element.Widget = tk.Label(tk_row_frame, textvariable=stringvar, width=width,
-                                                         height=height, justify=justify, bd=border_depth, font=font)
+                                                         height=height, justify=justify, bd=bd, font=font)
                 # Set wrap-length for text (in PIXELS) == PAIN IN THE ASS
                 wraplen = tktext_label.winfo_reqwidth()  # width of widget in Pixels
                 if not auto_size_text and height == 1:   # if just 1 line high, ensure no wrap happens
@@ -7439,22 +7875,26 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     bc = toplevel_form.ButtonColor
                 else:
                     bc = DEFAULT_BUTTON_COLOR
-                border_depth = element.BorderWidth
+                bd = element.BorderWidth
                 if btype != BUTTON_TYPE_REALTIME:
                     tkbutton = element.Widget = tk.Button(tk_row_frame, text=btext, width=width, height=height,
                                                           command=element.ButtonCallBack, justify=tk.LEFT,
-                                                          bd=border_depth, font=font)
+                                                          bd=bd, font=font)
                 else:
                     tkbutton = element.Widget = tk.Button(tk_row_frame, text=btext, width=width, height=height,
                                                           justify=tk.LEFT,
-                                                          bd=border_depth, font=font)
+                                                          bd=bd, font=font)
                     tkbutton.bind('<ButtonRelease-1>', element.ButtonReleaseCallBack)
                     tkbutton.bind('<ButtonPress-1>', element.ButtonPressCallBack)
                 if bc != (None, None) and bc != COLOR_SYSTEM_DEFAULT and bc[1] != COLOR_SYSTEM_DEFAULT:
+                    # if sys.platform.startswith('darwin'):
+                    #     print('*** USING MAC BUTTON COLORS ****', bc)
+                    #     tkbutton.config(foreground=bc[0], highlightbackground=bc[1],background=bc[1], activebackground=bc[1], highlightcolor=bc[1], activeforeground=bc[1], highlightthickness=-10, bd=0, relief='solid')
+                    # else:
                     tkbutton.config(foreground=bc[0], background=bc[1], activebackground=bc[1])
                 elif bc[1] == COLOR_SYSTEM_DEFAULT:
                     tkbutton.config(foreground=bc[0])
-                if border_depth == 0:
+                if bd == 0 and not sys.platform.startswith('darwin'):
                     tkbutton.config(relief=tk.FLAT)
                     tkbutton.config(highlightthickness=0)
                 element.TKButton = tkbutton  # not used yet but save the TK button in case
@@ -7488,8 +7928,8 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     tkbutton.pack_forget()
                 if element.BindReturnKey:
                     element.TKButton.bind('<Return>', element._ReturnKeyHandler)
-                if element.Focus is True or (toplevel_form.UseDefaultFocus and not focus_set):
-                    focus_set = True
+                if element.Focus is True or (toplevel_form.UseDefaultFocus and not toplevel_form.FocusSet):
+                    toplevel_form.FocusSet = True
                     element.TKButton.bind('<Return>', element._ReturnKeyHandler)
                     element.TKButton.focus_set()
                     toplevel_form.TKroot.focus_force()
@@ -7500,6 +7940,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                                                     timeout=DEFAULT_TOOLTIP_TIME)
             # -------------------------  BUTTONMENU element  ------------------------- #
             elif element_type == ELEM_TYPE_BUTTONMENU:
+                element = element                               # type: ButtonMenu
                 element.Location = (row_num, col_num)
                 btext = element.ButtonText
                 if element.AutoSizeButton is not None:
@@ -7517,15 +7958,15 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     bc = toplevel_form.ButtonColor
                 else:
                     bc = DEFAULT_BUTTON_COLOR
-                border_depth = element.BorderWidth
+                bd = element.BorderWidth
                 tkbutton = element.Widget = tk.Menubutton(tk_row_frame, text=btext, width=width, height=height,
-                                                          justify=tk.LEFT, bd=border_depth, font=font)
+                                                          justify=tk.LEFT, bd=bd, font=font)
                 element.TKButtonMenu = tkbutton
                 if bc != (None, None) and bc != COLOR_SYSTEM_DEFAULT and bc[1] != COLOR_SYSTEM_DEFAULT:
                     tkbutton.config(foreground=bc[0], background=bc[1], activebackground=bc[1])
                 elif bc[1] == COLOR_SYSTEM_DEFAULT:
                     tkbutton.config(foreground=bc[0])
-                if border_depth == 0:
+                if bd == 0:
                     tkbutton.config(relief=tk.FLAT)
                     tkbutton.config(highlightthickness=0)
                 element.TKButton = tkbutton  # not used yet but save the TK button in case
@@ -7562,7 +8003,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 AddMenuItem(top_menu, menu_def[1], element)
 
                 tkbutton.configure(menu=top_menu)
-
+                element.TKMenu = top_menu
                 if element.Visible is False:
                     tkbutton.pack_forget()
                 if element.Disabled == True:
@@ -7579,6 +8020,8 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 element.TKStringVar = tk.StringVar()
                 element.TKStringVar.set(default_text)
                 show = element.PasswordCharacter if element.PasswordCharacter else ""
+                # bd = element.BorderDepth if element.BorderDepth is not None else border_depth
+                bd = border_depth
                 if element.Justification is not None:
                     justification = element.Justification
                 else:
@@ -7586,7 +8029,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 justify = tk.LEFT if justification == 'left' else tk.CENTER if justification == 'center' else tk.RIGHT
                 # anchor = tk.NW if justification == 'left' else tk.N if justification == 'center' else tk.NE
                 element.TKEntry = element.Widget = tk.Entry(tk_row_frame, width=element_size[0],
-                                                            textvariable=element.TKStringVar, bd=border_depth,
+                                                            textvariable=element.TKStringVar, bd=bd,
                                                             font=font, show=show, justify=justify)
                 if element.ChangeSubmits:
                     element.TKEntry.bind('<Key>', element._KeyboardHandler)
@@ -7595,11 +8038,11 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     element.TKEntry.configure(background=element.BackgroundColor)
                 if text_color is not None and text_color != COLOR_SYSTEM_DEFAULT:
                     element.TKEntry.configure(fg=text_color)
-                element.TKEntry.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1], expand=True, fill='x')
+                element.TKEntry.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1], expand=False, fill=tk.NONE)
                 if element.Visible is False:
                     element.TKEntry.pack_forget()
-                if element.Focus is True or (toplevel_form.UseDefaultFocus and not focus_set):
-                    focus_set = True
+                if element.Focus is True or (toplevel_form.UseDefaultFocus and not toplevel_form.FocusSet):
+                    toplevel_form.FocusSet = True
                     element.TKEntry.focus_set()
                 if element.Disabled:
                     element.TKEntry['state'] = 'readonly'
@@ -7611,6 +8054,8 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     AddMenuItem(top_menu, menu[1], element)
                     element.TKRightClickMenu = top_menu
                     element.TKEntry.bind('<Button-3>', element._RightClickMenuCallback)
+                # row_should_expand = True
+
             # -------------------------  COMBOBOX element  ------------------------- #
             elif element_type == ELEM_TYPE_INPUT_COMBO:
                 max_line_len = max([len(str(l)) for l in element.Values]) if len(element.Values) else 0
@@ -7630,13 +8075,6 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
 
                     unique_field = str(element.Key) + '.TCombobox.field'
 
-                    # unique_field = str(time.time()).replace('.', '') + str(element.Key) + '.TCombobox.field'
-
-                    # unique_field = str(time.time()).replace('.','') + '.TCombobox.field'
-                    # unique_field = str(datetime.datetime.today().timestamp()).replace('.','') + '.TCombobox.field'
-                    # unique_field = str(randint(1,50000000)) + '.TCombobox.field'
-
-                    # print(unique_field)
                     # Clones over the TCombobox.field element from the "alt" theme.
                     # This is what will allow us to change the background color without altering the whole programs theme
 
@@ -7678,13 +8116,13 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 element.TKCombo.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1])
                 if element.Visible is False:
                     element.TKCombo.pack_forget()
-                if element.DefaultValue:
+                if element.DefaultValue is not None:
                     for i, v in enumerate(element.Values):
                         if v == element.DefaultValue:
                             element.TKCombo.current(i)
                             break
-                elif element.Values:
-                    element.TKCombo.current(0)
+                # elif element.Values:
+                #     element.TKCombo.current(0)
                 if element.ChangeSubmits:
                     element.TKCombo.bind('<<ComboboxSelected>>', element._ComboboxSelectHandler)
                 if element.Readonly:
@@ -7742,11 +8180,12 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     element.TKListbox.configure(fg=text_color)
                 if element.ChangeSubmits:
                     element.TKListbox.bind('<<ListboxSelect>>', element._ListboxSelectHandler)
-                element.vsb = tk.Scrollbar(listbox_frame, orient="vertical", command=element.TKListbox.yview)
-                element.TKListbox.configure(yscrollcommand=element.vsb.set)
-                element.TKListbox.pack(side=tk.LEFT)
-                element.vsb.pack(side=tk.LEFT, fill='y')
+                if not element.NoScrollbar:
+                    element.vsb = tk.Scrollbar(listbox_frame, orient="vertical", command=element.TKListbox.yview)
+                    element.TKListbox.configure(yscrollcommand=element.vsb.set)
+                    element.vsb.pack(side=tk.RIGHT, fill='y')
                 listbox_frame.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1])
+                element.TKListbox.pack(side=tk.LEFT)
                 if element.Visible is False:
                     listbox_frame.pack_forget()
                     element.vsb.pack_forget()
@@ -7769,24 +8208,24 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 element = element  # type: Multiline
                 default_text = element.DefaultText
                 width, height = element_size
-                border_depth = element.BorderWidth
+                bd = element.BorderWidth
                 element.TKText = element.Widget = tk.scrolledtext.ScrolledText(tk_row_frame, width=width, height=height,
-                                                                               wrap='word', bd=border_depth, font=font,
+                                                                               wrap='word', bd=bd, font=font,
                                                                                relief=RELIEF_SUNKEN)
                 element.TKText.insert(1.0, default_text)  # set the default text
                 if element.BackgroundColor is not None and element.BackgroundColor != COLOR_SYSTEM_DEFAULT:
                     element.TKText.configure(background=element.BackgroundColor)
                 if DEFAULT_SCROLLBAR_COLOR not in (None, COLOR_SYSTEM_DEFAULT):
                     element.TKText.vbar.config(troughcolor=DEFAULT_SCROLLBAR_COLOR)
-                element.TKText.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1], expand=True, fill='both')
+                element.TKText.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1])
                 if element.Visible is False:
                     element.TKText.pack_forget()
                 if element.ChangeSubmits:
                     element.TKText.bind('<Key>', element._KeyboardHandler)
                 if element.EnterSubmits:
                     element.TKText.bind('<Return>', element._ReturnKeyHandler)
-                if element.Focus is True or (toplevel_form.UseDefaultFocus and not focus_set):
-                    focus_set = True
+                if element.Focus is True or (toplevel_form.UseDefaultFocus and not toplevel_form.FocusSet):
+                    toplevel_form.FocusSet = True
                     element.TKText.focus_set()
                 if text_color is not None and text_color != COLOR_SYSTEM_DEFAULT:
                     element.TKText.configure(fg=text_color)
@@ -7800,7 +8239,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     AddMenuItem(top_menu, menu[1], element)
                     element.TKRightClickMenu = top_menu
                     element.TKText.bind('<Button-3>', element._RightClickMenuCallback)
-                row_should_expand = True
+                # row_should_expand = True
             # -------------------------  CHECKBOX element  ------------------------- #
             elif element_type == ELEM_TYPE_INPUT_CHECKBOX:
                 width = 0 if auto_size_text else element_size[0]
@@ -7896,6 +8335,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     element.TooltipObject = ToolTip(element.TKRadio, text=element.Tooltip, timeout=DEFAULT_TOOLTIP_TIME)
                 # -------------------------  SPIN element  ------------------------- #
             elif element_type == ELEM_TYPE_INPUT_SPIN:
+                element = element               # type: Spin
                 width, height = element_size
                 width = 0 if auto_size_text else element_size[0]
                 element.TKStringVar = tk.StringVar()
@@ -7926,7 +8366,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                                                            text_color=text_color, font=font,
                                                            pad=elementpad)
                 element._TKOut.output.configure(takefocus=0)  # make it so that Output does not get focus
-                element._TKOut.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+                element._TKOut.pack(side=tk.LEFT, expand=False, fill=tk.NONE)
                 if element.Visible is False:
                     element._TKOut.frame.pack_forget()
                 if element.Tooltip is not None:
@@ -7937,9 +8377,10 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     AddMenuItem(top_menu, menu[1], element)
                     element.TKRightClickMenu = top_menu
                     element._TKOut.bind('<Button-3>', element._RightClickMenuCallback)
-                row_should_expand = True
+                # row_should_expand = True
                 # -------------------------  IMAGE element  ------------------------- #
             elif element_type == ELEM_TYPE_IMAGE:
+                element = element           # type: Image
                 if element.Filename is not None:
                     photo = tk.PhotoImage(file=element.Filename)
                 elif element.Data is not None:
@@ -8064,10 +8505,13 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 toplevel_form.TKroot.configure(menu=element.TKMenu)
             # -------------------------  Frame element  ------------------------- #
             elif element_type == ELEM_TYPE_FRAME:
+                element = element           # type: Frame
                 labeled_frame = element.Widget = tk.LabelFrame(tk_row_frame, text=element.Title, relief=element.Relief)
                 element.TKFrame = labeled_frame
                 PackFormIntoFrame(element, labeled_frame, toplevel_form)
-                labeled_frame.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1])
+                labeled_frame.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1], fill=tk.NONE, expand=False)
+                if element.Size != (None,None):
+                    labeled_frame.config(width=element.Size[0], height=element.Size[1])
                 if not element.Visible:
                     labeled_frame.pack_forget()
                 if element.BackgroundColor != COLOR_SYSTEM_DEFAULT and element.BackgroundColor is not None:
@@ -8090,6 +8534,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     AddMenuItem(top_menu, menu[1], element)
                     element.TKRightClickMenu = top_menu
                     labeled_frame.bind('<Button-3>', element._RightClickMenuCallback)
+                # row_should_expand=True
             # -------------------------  Tab element  ------------------------- #
             elif element_type == ELEM_TYPE_TAB:
                 element = element               # type: Tab
@@ -8099,7 +8544,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     form.TKNotebook.add(element.TKFrame, text=element.Title, state='disabled')
                 else:
                     form.TKNotebook.add(element.TKFrame, text=element.Title)
-                form.TKNotebook.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1])
+                form.TKNotebook.pack(side=tk.LEFT, padx=elementpad[0], pady=elementpad[1], fill=tk.NONE, expand=False)
                 element.ParentNotebook = form.TKNotebook
                 element.TabID = form.TabCount
                 form.TabCount += 1
@@ -8126,6 +8571,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                     AddMenuItem(top_menu, menu[1], element)
                     element.TKRightClickMenu = top_menu
                     element.TKFrame.bind('<Button-3>', element._RightClickMenuCallback)
+                # row_should_expand = True
             # -------------------------  TabGroup element  ------------------------- #
             elif element_type == ELEM_TYPE_TAB_GROUP:
                 element=element     # type: TabGroup
@@ -8171,8 +8617,10 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 if element.Tooltip is not None:
                     element.TooltipObject = ToolTip(element.TKNotebook, text=element.Tooltip,
                                                     timeout=DEFAULT_TOOLTIP_TIME)
+                # row_should_expand = True
                 # -------------------------  SLIDER element  ------------------------- #
             elif element_type == ELEM_TYPE_INPUT_SLIDER:
+                element = element                   # type: Slider
                 slider_length = element_size[0] * CharWidthInPixels()
                 slider_width = element_size[1]
                 element.TKIntVar = tk.IntVar()
@@ -8204,8 +8652,8 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 tkscale.config(highlightthickness=0)
                 if element.BackgroundColor is not None and element.BackgroundColor != COLOR_SYSTEM_DEFAULT:
                     tkscale.configure(background=element.BackgroundColor)
-                    if DEFAULT_SCROLLBAR_COLOR != COLOR_SYSTEM_DEFAULT:
-                        tkscale.config(troughcolor=DEFAULT_SCROLLBAR_COLOR)
+                if element.TroughColor != COLOR_SYSTEM_DEFAULT:
+                    tkscale.config(troughcolor=element.TroughColor)
                 if element.DisableNumericDisplay:
                     tkscale.config(showvalue=0)
                 if text_color is not None and text_color != COLOR_SYSTEM_DEFAULT:
@@ -8222,7 +8670,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
             elif element_type == ELEM_TYPE_TABLE:
                 element = element  # type: Table
                 frame = tk.Frame(tk_row_frame)
-
+                element.table_frame = frame
                 height = element.NumRows
                 if element.Justification == 'left':
                     anchor = tk.W
@@ -8239,17 +8687,25 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                                 column_widths[i] = col_width
                         except:
                             column_widths[i] = col_width
+
                 if element.ColumnsToDisplay is None:
                     displaycolumns = element.ColumnHeadings if element.ColumnHeadings is not None else element.Values[0]
                 else:
                     displaycolumns = []
                     for i, should_display in enumerate(element.ColumnsToDisplay):
                         if should_display:
-                            displaycolumns.append(element.ColumnHeadings[i])
-                column_headings = element.ColumnHeadings
+                            if element.ColumnHeadings is not None:
+                                displaycolumns.append(element.ColumnHeadings[i])
+                            else:
+                                displaycolumns.append(str(i))
+
+                column_headings = element.ColumnHeadings if element.ColumnHeadings is not None else displaycolumns
                 if element.DisplayRowNumbers:  # if display row number, tack on the numbers to front of columns
                     displaycolumns = [element.RowHeaderText, ] + displaycolumns
-                    column_headings = [element.RowHeaderText, ] + element.ColumnHeadings
+                    if column_headings is not None:
+                        column_headings = [element.RowHeaderText, ] + element.ColumnHeadings
+                    else:
+                        column_headings = [element.RowHeaderText, ] + displaycolumns
                 element.TKTreeview = element.Widget = ttk.Treeview(frame, columns=column_headings,
                                                                    displaycolumns=displaycolumns, show='headings',
                                                                    height=height,
@@ -8257,7 +8713,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                 treeview = element.TKTreeview
                 if element.DisplayRowNumbers:
                     treeview.heading(element.RowHeaderText, text=element.RowHeaderText)  # make a dummy heading
-                    treeview.column(element.RowHeaderText, width=50, anchor=anchor)
+                    treeview.column(element.RowHeaderText, width=50, minwidth=10, anchor=anchor, stretch=0)
 
                 headings = element.ColumnHeadings if element.ColumnHeadings is not None else element.Values[0]
                 for i, heading in enumerate(headings):
@@ -8269,7 +8725,7 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                             width = element.ColumnWidths[i]
                         except:
                             width = element.DefaultColumnWidth
-                    treeview.column(heading, width=width * CharWidthInPixels(), anchor=anchor)
+                    treeview.column(heading, width=width * CharWidthInPixels(),minwidth=10, anchor=anchor, stretch=0)
 
                 # Insert values into the tree
                 for i, value in enumerate(element.Values):
@@ -8378,11 +8834,15 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
                             else:
                                 photo = tk.PhotoImage(file=node.icon)
                             node.photo = photo
-                            treeview.insert(node.parent, 'end', node.key, text=node.text, values=node.values,
+                            id = treeview.insert(element.KeyToID[node.parent], 'end', iid=None,  text=node.text, values=node.values,
                                             open=element.ShowExpanded, image=node.photo)
+                            element.IdToKey[id] = node.key
+                            element.KeyToID[node.key] = id
                         else:
-                            treeview.insert(node.parent, 'end', node.key, text=node.text, values=node.values,
+                            id = treeview.insert(element.KeyToID[node.parent], 'end', iid=None,  text=node.text, values=node.values,
                                             open=element.ShowExpanded)
+                            element.IdToKey[id] = node.key
+                            element.KeyToID[node.key] = id
 
                     for node in node.children:
                         add_treeview_data(node)
@@ -8480,7 +8940,29 @@ def PackFormIntoFrame(form, containing_frame, toplevel_form):
         # ............................DONE WITH ROW pack the row of widgets ..........................#
         # done with row, pack the row of widgets
         # tk_row_frame.grid(row=row_num+2, sticky=tk.NW, padx=DEFAULT_MARGINS[0])
-        tk_row_frame.pack(side=tk.TOP, anchor='nw', padx=toplevel_form.Margins[0],
+
+        if row_justify.lower().startswith('c'):
+            anchor='n'
+            side=tk.CENTER
+        elif row_justify.lower().startswith('r'):
+            anchor='ne'
+            side = tk.RIGHT
+        elif row_justify.lower().startswith('l'):
+            anchor='nw'
+            side = tk.LEFT
+        elif toplevel_form.ElementJustification.lower().startswith('c'):
+            anchor = 'n'
+            side = tk.TOP
+        elif toplevel_form.ElementJustification.lower().startswith('r'):
+            anchor = 'ne'
+            side = tk.TOP
+        else:
+            anchor = 'nw'
+            side = tk.TOP
+
+        # row_should_expand = False
+
+        tk_row_frame.pack(side=tk.TOP, anchor=anchor, padx=toplevel_form.Margins[0],
                           expand=row_should_expand, fill=tk.BOTH if row_should_expand else tk.NONE)
         if form.BackgroundColor is not None and form.BackgroundColor != COLOR_SYSTEM_DEFAULT:
             tk_row_frame.configure(background=form.BackgroundColor)
@@ -8964,7 +9446,7 @@ class DebugWin():
     def Close(self):
         """ """
         self.window.Close()
-        self.window.__del__()
+        del self.window
         self.window = None
 
 
@@ -9013,20 +9495,13 @@ def EasyPrintClose():
 # ===================================================#
 def SetGlobalIcon(icon):
     """
+    Sets the icon which will be used any time a window is created if an icon is not provided when the
+    window is created.
 
-    :param icon:
-
+    :param icon: Union[bytes, str] Either a Base64 byte string or a filename
     """
-    # global _my_windows
 
-    try:
-        with open(icon, 'r') as icon_file:
-            pass
-    except:
-        raise FileNotFoundError
-    # _my_windows.user_defined_icon = icon
     Window.user_defined_icon = icon
-    return True
 
 
 # ============================== SetOptions =========#
@@ -9221,313 +9696,889 @@ def SetOptions(icon=None, button_color=None, element_size=(None, None), button_e
 # Predefined settings that will change the colors and styles #
 # of the elements.                                           #
 ##############################################################
-LOOK_AND_FEEL_TABLE = {'SystemDefault':
-                           {'BACKGROUND': COLOR_SYSTEM_DEFAULT,
-                            'TEXT': COLOR_SYSTEM_DEFAULT,
-                            'INPUT': COLOR_SYSTEM_DEFAULT, 'TEXT_INPUT': COLOR_SYSTEM_DEFAULT,
-                            'SCROLL': COLOR_SYSTEM_DEFAULT,
-                            'BUTTON': OFFICIAL_PYSIMPLEGUI_BUTTON_COLOR,
-                            'PROGRESS': COLOR_SYSTEM_DEFAULT,
-                            'BORDER': 1, 'SLIDER_DEPTH': 1,
-                            'PROGRESS_DEPTH': 0},
+LOOK_AND_FEEL_TABLE = { 'SystemDefault':
+     {'BACKGROUND': COLOR_SYSTEM_DEFAULT,
+      'TEXT': COLOR_SYSTEM_DEFAULT,
+      'INPUT': COLOR_SYSTEM_DEFAULT,
+      'TEXT_INPUT': COLOR_SYSTEM_DEFAULT,
+      'SCROLL': COLOR_SYSTEM_DEFAULT,
+      'BUTTON': OFFICIAL_PYSIMPLEGUI_BUTTON_COLOR,
+      'PROGRESS': COLOR_SYSTEM_DEFAULT,
+      'BORDER': 1, 'SLIDER_DEPTH': 1,
+      'PROGRESS_DEPTH': 0},
 
-                       'Reddit': {'BACKGROUND': '#ffffff',
-                                  'TEXT': '#1a1a1b',
-                                  'INPUT': '#dae0e6',
-                                  'TEXT_INPUT': '#222222',
-                                  'SCROLL': '#a5a4a4',
-                                  'BUTTON': ('white', '#0079d3'),
-                                  'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                  'BORDER': 1,
-                                  'SLIDER_DEPTH': 0,
-                                  'PROGRESS_DEPTH': 0,
-                                  'ACCENT1': '#ff5414',
-                                  'ACCENT2': '#33a8ff',
-                                  'ACCENT3': '#dbf0ff'},
+ 'SystemDefaultForReal':
+     {'BACKGROUND': COLOR_SYSTEM_DEFAULT,
+      'TEXT': COLOR_SYSTEM_DEFAULT,
+      'INPUT': COLOR_SYSTEM_DEFAULT,
+      'TEXT_INPUT': COLOR_SYSTEM_DEFAULT,
+      'SCROLL': COLOR_SYSTEM_DEFAULT,
+      'BUTTON': COLOR_SYSTEM_DEFAULT,
+      'PROGRESS': COLOR_SYSTEM_DEFAULT,
+      'BORDER': 1, 'SLIDER_DEPTH': 1,
+      'PROGRESS_DEPTH': 0},
 
-                       'Topanga': {'BACKGROUND': '#282923',
-                                   'TEXT': '#E7DB74',
-                                   'INPUT': '#393a32',
-                                   'TEXT_INPUT': '#E7C855',
-                                   'SCROLL': '#E7C855',
-                                   'BUTTON': ('#E7C855', '#284B5A'),
-                                   'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                   'BORDER': 1, 'SLIDER_DEPTH': 0,
-                                   'PROGRESS_DEPTH': 0,
-                                   'ACCENT1': '#c15226',
-                                   'ACCENT2': '#7a4d5f',
-                                   'ACCENT3': '#889743'},
+ 'Material1': {'BACKGROUND': '#E3F2FD',
+               'TEXT': '#000000',
+               'INPUT': '#86A8FF',
+               'TEXT_INPUT': '#000000',
+               'SCROLL': '#86A8FF',
+               'BUTTON': ('#FFFFFF', '#5079D3'),
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 0, 'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0,
+               'ACCENT1': '#FF0266',
+               'ACCENT2': '#FF5C93',
+               'ACCENT3': '#C5003C'},
 
-                       'GreenTan': {'BACKGROUND': '#9FB8AD',
-                                    'TEXT': COLOR_SYSTEM_DEFAULT,
-                                    'INPUT': '#F7F3EC', 'TEXT_INPUT': 'black',
-                                    'SCROLL': '#F7F3EC',
-                                    'BUTTON': ('white', '#475841'),
-                                    'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                    'BORDER': 1, 'SLIDER_DEPTH': 0,
-                                    'PROGRESS_DEPTH': 0},
+ 'Material2': {'BACKGROUND': '#FAFAFA',
+               'TEXT': '#000000',
+               'INPUT': '#004EA1',
+               'TEXT_INPUT': '#FFFFFF',
+               'SCROLL': '#5EA7FF',
+               'BUTTON': ('#FFFFFF', '#0079D3'),  # based on Reddit color
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 0, 'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0,
+               'ACCENT1': '#FF0266',
+               'ACCENT2': '#FF5C93',
+               'ACCENT3': '#C5003C'},
 
-                       'Dark': {'BACKGROUND': 'gray25',
-                                'TEXT': 'white',
-                                'INPUT': 'gray30',
-                                'TEXT_INPUT': 'white',
-                                'SCROLL': 'gray44',
-                                'BUTTON': ('white', '#004F00'),
-                                'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                'BORDER': 1,
-                                'SLIDER_DEPTH': 0,
-                                'PROGRESS_DEPTH': 0},
+ 'Reddit': {'BACKGROUND': '#ffffff',
+            'TEXT': '#1a1a1b',
+            'INPUT': '#dae0e6',
+            'TEXT_INPUT': '#222222',
+            'SCROLL': '#a5a4a4',
+            'BUTTON': ('white', '#0079d3'),
+            'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+            'BORDER': 1,
+            'SLIDER_DEPTH': 0,
+            'PROGRESS_DEPTH': 0,
+            'ACCENT1': '#ff5414',
+            'ACCENT2': '#33a8ff',
+            'ACCENT3': '#dbf0ff'},
 
-                       'LightGreen': {'BACKGROUND': '#B7CECE',
-                                      'TEXT': 'black',
-                                      'INPUT': '#FDFFF7',
-                                      'TEXT_INPUT': 'black',
-                                      'SCROLL': '#FDFFF7',
-                                      'BUTTON': ('white', '#658268'),
-                                      'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                      'BORDER': 1,
-                                      'SLIDER_DEPTH': 0,
-                                      'ACCENT1': '#76506d',
-                                      'ACCENT2': '#5148f1',
-                                      'ACCENT3': '#0a1c84',
-                                      'PROGRESS_DEPTH': 0},
+ 'Topanga': {'BACKGROUND': '#282923',
+             'TEXT': '#E7DB74',
+             'INPUT': '#393a32',
+             'TEXT_INPUT': '#E7C855',
+             'SCROLL': '#E7C855',
+             'BUTTON': ('#E7C855', '#284B5A'),
+             'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+             'BORDER': 1,
+             'SLIDER_DEPTH': 0,
+             'PROGRESS_DEPTH': 0,
+             'ACCENT1': '#c15226',
+             'ACCENT2': '#7a4d5f',
+             'ACCENT3': '#889743'},
 
-                       'Dark2': {'BACKGROUND': 'gray25',
-                                 'TEXT': 'white',
-                                 'INPUT': 'white',
-                                 'TEXT_INPUT': 'black',
-                                 'SCROLL': 'gray44',
-                                 'BUTTON': ('white', '#004F00'),
-                                 'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                 'BORDER': 1,
-                                 'SLIDER_DEPTH': 0,
-                                 'PROGRESS_DEPTH': 0},
+ 'GreenTan': {'BACKGROUND': '#9FB8AD',
+              'TEXT': COLOR_SYSTEM_DEFAULT,
+              'INPUT': '#F7F3EC', 'TEXT_INPUT': 'black',
+              'SCROLL': '#F7F3EC',
+              'BUTTON': ('white', '#475841'),
+              'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+              'BORDER': 1, 'SLIDER_DEPTH': 0,
+              'PROGRESS_DEPTH': 0},
 
-                       'Black': {'BACKGROUND': 'black',
-                                 'TEXT': 'white',
-                                 'INPUT': 'gray30',
-                                 'TEXT_INPUT': 'white',
-                                 'SCROLL': 'gray44',
-                                 'BUTTON': ('black', 'white'),
-                                 'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                 'BORDER': 1,
-                                 'SLIDER_DEPTH': 0,
-                                 'PROGRESS_DEPTH': 0},
+ 'Dark': {'BACKGROUND': '#404040',
+          'TEXT': 'white',
+          'INPUT': '#4D4D4D',
+          'TEXT_INPUT': 'white',
+          'SCROLL': '#707070',
+          'BUTTON': ('white', '#004F00'),
+          'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+          'BORDER': 1,
+          'SLIDER_DEPTH': 0,
+          'PROGRESS_DEPTH': 0},
 
-                       'Tan': {'BACKGROUND': '#fdf6e3',
-                               'TEXT': '#268bd1',
-                               'INPUT': '#eee8d5',
-                               'TEXT_INPUT': '#6c71c3',
-                               'SCROLL': '#eee8d5',
-                               'BUTTON': ('white', '#063542'),
-                               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                               'BORDER': 1,
-                               'SLIDER_DEPTH': 0,
-                               'PROGRESS_DEPTH': 0},
+ 'LightGreen': {'BACKGROUND': '#B7CECE',
+                'TEXT': 'black',
+                'INPUT': '#FDFFF7',
+                'TEXT_INPUT': 'black',
+                'SCROLL': '#FDFFF7',
+                'BUTTON': ('white', '#658268'),
+                'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                'BORDER': 1,
+                'SLIDER_DEPTH': 0,
+                'ACCENT1': '#76506d',
+                'ACCENT2': '#5148f1',
+                'ACCENT3': '#0a1c84',
+                'PROGRESS_DEPTH': 0},
 
-                       'TanBlue': {'BACKGROUND': '#e5dece',
-                                   'TEXT': '#063289',
-                                   'INPUT': '#f9f8f4',
-                                   'TEXT_INPUT': '#242834',
-                                   'SCROLL': '#eee8d5',
-                                   'BUTTON': ('white', '#063289'),
-                                   'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                   'BORDER': 1,
-                                   'SLIDER_DEPTH': 0,
-                                   'PROGRESS_DEPTH': 0},
+ 'Dark2': {'BACKGROUND': '#404040',
+           'TEXT': 'white',
+           'INPUT': 'white',
+           'TEXT_INPUT': 'black',
+           'SCROLL': '#707070',
+           'BUTTON': ('white', '#004F00'),
+           'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+           'BORDER': 1,
+           'SLIDER_DEPTH': 0,
+           'PROGRESS_DEPTH': 0},
 
-                       'DarkTanBlue': {'BACKGROUND': '#242834',
-                                       'TEXT': '#dfe6f8',
-                                       'INPUT': '#97755c',
-                                       'TEXT_INPUT': 'white',
-                                       'SCROLL': '#a9afbb',
-                                       'BUTTON': ('white', '#063289'),
-                                       'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                       'BORDER': 1,
-                                       'SLIDER_DEPTH': 0,
-                                       'PROGRESS_DEPTH': 0},
+ 'Black': {'BACKGROUND': 'black',
+           'TEXT': 'white',
+           'INPUT': '#4D4D4D',
+           'TEXT_INPUT': 'white',
+           'SCROLL': '#707070',
+           'BUTTON': ('black', 'white'),
+           'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+           'BORDER': 1,
+           'SLIDER_DEPTH': 0,
+           'PROGRESS_DEPTH': 0},
 
-                       'DarkAmber': {'BACKGROUND': '#2c2825',
-                                     'TEXT': '#fdcb52',
-                                     'INPUT': '#705e52',
-                                     'TEXT_INPUT': '#fdcb52',
-                                     'SCROLL': '#705e52',
-                                     'BUTTON': ('black', '#fdcb52'),
-                                     'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                     'BORDER': 1,
-                                     'SLIDER_DEPTH': 0,
-                                     'PROGRESS_DEPTH': 0},
+ 'Tan': {'BACKGROUND': '#fdf6e3',
+         'TEXT': '#268bd1',
+         'INPUT': '#eee8d5',
+         'TEXT_INPUT': '#6c71c3',
+         'SCROLL': '#eee8d5',
+         'BUTTON': ('white', '#063542'),
+         'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+         'BORDER': 1,
+         'SLIDER_DEPTH': 0,
+         'PROGRESS_DEPTH': 0},
 
-                       'DarkBlue': {'BACKGROUND': '#1a2835',
-                                    'TEXT': '#d1ecff',
-                                    'INPUT': '#335267',
-                                    'TEXT_INPUT': '#acc2d0',
-                                    'SCROLL': '#1b6497',
-                                    'BUTTON': ('black', '#fafaf8'),
-                                    'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                    'BORDER': 1, 'SLIDER_DEPTH': 0,
-                                    'PROGRESS_DEPTH': 0},
+ 'TanBlue': {'BACKGROUND': '#e5dece',
+             'TEXT': '#063289',
+             'INPUT': '#f9f8f4',
+             'TEXT_INPUT': '#242834',
+             'SCROLL': '#eee8d5',
+             'BUTTON': ('white', '#063289'),
+             'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+             'BORDER': 1,
+             'SLIDER_DEPTH': 0,
+             'PROGRESS_DEPTH': 0},
 
-                       'Reds': {'BACKGROUND': '#280001',
-                                'TEXT': 'white',
-                                'INPUT': '#d8d584',
-                                'TEXT_INPUT': 'black',
-                                'SCROLL': '#763e00',
-                                'BUTTON': ('black', '#daad28'),
-                                'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                'BORDER': 1,
-                                'SLIDER_DEPTH': 0,
-                                'PROGRESS_DEPTH': 0},
+ 'DarkTanBlue': {'BACKGROUND': '#242834',
+                 'TEXT': '#dfe6f8',
+                 'INPUT': '#97755c',
+                 'TEXT_INPUT': 'white',
+                 'SCROLL': '#a9afbb',
+                 'BUTTON': ('white', '#063289'),
+                 'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                 'BORDER': 1,
+                 'SLIDER_DEPTH': 0,
+                 'PROGRESS_DEPTH': 0},
 
-                       'Green': {'BACKGROUND': '#82a459',
-                                 'TEXT': 'black',
-                                 'INPUT': '#d8d584',
-                                 'TEXT_INPUT': 'black',
-                                 'SCROLL': '#e3ecf3',
-                                 'BUTTON': ('white', '#517239'),
-                                 'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                 'BORDER': 1,
-                                 'SLIDER_DEPTH': 0,
-                                 'PROGRESS_DEPTH': 0},
+ 'DarkAmber': {'BACKGROUND': '#2c2825',
+               'TEXT': '#fdcb52',
+               'INPUT': '#705e52',
+               'TEXT_INPUT': '#fdcb52',
+               'SCROLL': '#705e52',
+               'BUTTON': ('black', '#fdcb52'),
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 1,
+               'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0},
 
-                       'BluePurple': {'BACKGROUND': '#A5CADD',
-                                      'TEXT': '#6E266E',
-                                      'INPUT': '#E0F5FF',
-                                      'TEXT_INPUT': 'black',
-                                      'SCROLL': '#E0F5FF',
-                                      'BUTTON': ('white', '#303952'),
-                                      'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                      'BORDER': 1,
-                                      'SLIDER_DEPTH': 0,
-                                      'PROGRESS_DEPTH': 0},
+ 'DarkBlue': {'BACKGROUND': '#1a2835',
+              'TEXT': '#d1ecff',
+              'INPUT': '#335267',
+              'TEXT_INPUT': '#acc2d0',
+              'SCROLL': '#1b6497',
+              'BUTTON': ('black', '#fafaf8'),
+              'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+              'BORDER': 1, 'SLIDER_DEPTH': 0,
+              'PROGRESS_DEPTH': 0},
 
-                       'Purple': {'BACKGROUND': '#B0AAC2',
-                                  'TEXT': 'black',
-                                  'INPUT': '#F2EFE8',
-                                  'SCROLL': '#F2EFE8',
-                                  'TEXT_INPUT': 'black',
-                                  'BUTTON': ('black', '#C2D4D8'),
-                                  'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                  'BORDER': 1,
-                                  'SLIDER_DEPTH': 0,
-                                  'PROGRESS_DEPTH': 0},
+ 'Reds': {'BACKGROUND': '#280001',
+          'TEXT': 'white',
+          'INPUT': '#d8d584',
+          'TEXT_INPUT': 'black',
+          'SCROLL': '#763e00',
+          'BUTTON': ('black', '#daad28'),
+          'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+          'BORDER': 1,
+          'SLIDER_DEPTH': 0,
+          'PROGRESS_DEPTH': 0},
 
-                       'BlueMono': {'BACKGROUND': '#AAB6D3',
-                                    'TEXT': 'black',
-                                    'INPUT': '#F1F4FC',
-                                    'SCROLL': '#F1F4FC',
-                                    'TEXT_INPUT': 'black',
-                                    'BUTTON': ('white', '#7186C7'),
-                                    'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                    'BORDER': 1,
-                                    'SLIDER_DEPTH': 0,
-                                    'PROGRESS_DEPTH': 0},
+ 'Green': {'BACKGROUND': '#82a459',
+           'TEXT': 'black',
+           'INPUT': '#d8d584',
+           'TEXT_INPUT': 'black',
+           'SCROLL': '#e3ecf3',
+           'BUTTON': ('white', '#517239'),
+           'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+           'BORDER': 1,
+           'SLIDER_DEPTH': 0,
+           'PROGRESS_DEPTH': 0},
 
-                       'GreenMono': {'BACKGROUND': '#A8C1B4',
-                                     'TEXT': 'black',
-                                     'INPUT': '#DDE0DE',
-                                     'SCROLL': '#E3E3E3',
-                                     'TEXT_INPUT': 'black',
-                                     'BUTTON': ('white', '#6D9F85'),
-                                     'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                     'BORDER': 1,
-                                     'SLIDER_DEPTH': 0,
-                                     'PROGRESS_DEPTH': 0},
+ 'BluePurple': {'BACKGROUND': '#A5CADD',
+                'TEXT': '#6E266E',
+                'INPUT': '#E0F5FF',
+                'TEXT_INPUT': 'black',
+                'SCROLL': '#E0F5FF',
+                'BUTTON': ('white', '#303952'),
+                'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                'BORDER': 1,
+                'SLIDER_DEPTH': 0,
+                'PROGRESS_DEPTH': 0},
 
-                       'BrownBlue': {'BACKGROUND': '#64778d',
-                                     'TEXT': 'white',
-                                     'INPUT': '#f0f3f7',
-                                     'SCROLL': '#A6B2BE',
-                                     'TEXT_INPUT': 'black',
-                                     'BUTTON': ('white', '#283b5b'),
-                                     'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                     'BORDER': 1,
-                                     'SLIDER_DEPTH': 0,
-                                     'PROGRESS_DEPTH': 0},
+ 'Purple': {'BACKGROUND': '#B0AAC2',
+            'TEXT': 'black',
+            'INPUT': '#F2EFE8',
+            'SCROLL': '#F2EFE8',
+            'TEXT_INPUT': 'black',
+            'BUTTON': ('black', '#C2D4D8'),
+            'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+            'BORDER': 1,
+            'SLIDER_DEPTH': 0,
+            'PROGRESS_DEPTH': 0},
 
-                       'BrightColors': {'BACKGROUND': '#b4ffb4',
-                                        'TEXT': 'black',
-                                        'INPUT': '#ffff64',
-                                        'SCROLL': '#ffb482',
-                                        'TEXT_INPUT': 'black',
-                                        'BUTTON': ('black', '#ffa0dc'),
-                                        'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                        'BORDER': 1,
-                                        'SLIDER_DEPTH': 0,
-                                        'PROGRESS_DEPTH': 0},
+ 'BlueMono': {'BACKGROUND': '#AAB6D3',
+              'TEXT': 'black',
+              'INPUT': '#F1F4FC',
+              'SCROLL': '#F1F4FC',
+              'TEXT_INPUT': 'black',
+              'BUTTON': ('white', '#7186C7'),
+              'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+              'BORDER': 1,
+              'SLIDER_DEPTH': 0,
+              'PROGRESS_DEPTH': 0},
 
-                       'NeutralBlue': {'BACKGROUND': '#92aa9d',
-                                       'TEXT': 'black',
-                                       'INPUT': '#fcfff6',
-                                       'SCROLL': '#fcfff6',
-                                       'TEXT_INPUT': 'black',
-                                       'BUTTON': ('black', '#d0dbbd'),
-                                       'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                       'BORDER': 1,
-                                       'SLIDER_DEPTH': 0,
-                                       'PROGRESS_DEPTH': 0},
+ 'GreenMono': {'BACKGROUND': '#A8C1B4',
+               'TEXT': 'black',
+               'INPUT': '#DDE0DE',
+               'SCROLL': '#E3E3E3',
+               'TEXT_INPUT': 'black',
+               'BUTTON': ('white', '#6D9F85'),
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 1,
+               'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0},
 
-                       'Kayak': {'BACKGROUND': '#a7ad7f',
-                                 'TEXT': 'black',
-                                 'INPUT': '#e6d3a8',
-                                 'SCROLL': '#e6d3a8',
-                                 'TEXT_INPUT': 'black',
-                                 'BUTTON': ('white', '#5d907d'),
-                                 'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                 'BORDER': 1,
-                                 'SLIDER_DEPTH': 0,
-                                 'PROGRESS_DEPTH': 0},
+ 'BrownBlue': {'BACKGROUND': '#64778d',
+               'TEXT': 'white',
+               'INPUT': '#f0f3f7',
+               'SCROLL': '#A6B2BE',
+               'TEXT_INPUT': 'black',
+               'BUTTON': ('white', '#283b5b'),
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 1,
+               'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0},
 
-                       'SandyBeach': {'BACKGROUND': '#efeccb',
-                                      'TEXT': '#012f2f',
-                                      'INPUT': '#e6d3a8',
-                                      'SCROLL': '#e6d3a8',
-                                      'TEXT_INPUT': '#012f2f',
-                                      'BUTTON': ('white', '#046380'),
-                                      'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                      'BORDER': 1, 'SLIDER_DEPTH': 0,
-                                      'PROGRESS_DEPTH': 0},
+ 'BrightColors': {'BACKGROUND': '#b4ffb4',
+                  'TEXT': 'black',
+                  'INPUT': '#ffff64',
+                  'SCROLL': '#ffb482',
+                  'TEXT_INPUT': 'black',
+                  'BUTTON': ('black', '#ffa0dc'),
+                  'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                  'BORDER': 1,
+                  'SLIDER_DEPTH': 0,
+                  'PROGRESS_DEPTH': 0},
 
-                       'TealMono': {'BACKGROUND': '#a8cfdd',
-                                    'TEXT': 'black',
-                                    'INPUT': '#dfedf2', 'SCROLL': '#dfedf2',
-                                    'TEXT_INPUT': 'black',
-                                    'BUTTON': ('white', '#183440'),
-                                    'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
-                                    'BORDER': 1,
-                                    'SLIDER_DEPTH': 0,
-                                    'PROGRESS_DEPTH': 0}
-                       }
+ 'NeutralBlue': {'BACKGROUND': '#92aa9d',
+                 'TEXT': 'black',
+                 'INPUT': '#fcfff6',
+                 'SCROLL': '#fcfff6',
+                 'TEXT_INPUT': 'black',
+                 'BUTTON': ('black', '#d0dbbd'),
+                 'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                 'BORDER': 1,
+                 'SLIDER_DEPTH': 0,
+                 'PROGRESS_DEPTH': 0},
 
+ 'Kayak': {'BACKGROUND': '#a7ad7f',
+           'TEXT': 'black',
+           'INPUT': '#e6d3a8',
+           'SCROLL': '#e6d3a8',
+           'TEXT_INPUT': 'black',
+           'BUTTON': ('white', '#5d907d'),
+           'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+           'BORDER': 1,
+           'SLIDER_DEPTH': 0,
+           'PROGRESS_DEPTH': 0},
+
+ 'SandyBeach': {'BACKGROUND': '#efeccb',
+                'TEXT': '#012f2f',
+                'INPUT': '#e6d3a8',
+                'SCROLL': '#e6d3a8',
+                'TEXT_INPUT': '#012f2f',
+                'BUTTON': ('white', '#046380'),
+                'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                'BORDER': 1, 'SLIDER_DEPTH': 0,
+                'PROGRESS_DEPTH': 0},
+
+ 'TealMono': {'BACKGROUND': '#a8cfdd',
+              'TEXT': 'black',
+              'INPUT': '#dfedf2',
+              'SCROLL': '#dfedf2',
+              'TEXT_INPUT': 'black',
+              'BUTTON': ('white', '#183440'),
+              'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+              'BORDER': 1,
+              'SLIDER_DEPTH': 0,
+              'PROGRESS_DEPTH': 0},
+################################## Renamed Original Themes ##################################
+'Default':
+     {'BACKGROUND': COLOR_SYSTEM_DEFAULT,
+      'TEXT': COLOR_SYSTEM_DEFAULT,
+      'INPUT': COLOR_SYSTEM_DEFAULT,
+      'TEXT_INPUT': COLOR_SYSTEM_DEFAULT,
+      'SCROLL': COLOR_SYSTEM_DEFAULT,
+      'BUTTON': OFFICIAL_PYSIMPLEGUI_BUTTON_COLOR,
+      'PROGRESS': COLOR_SYSTEM_DEFAULT,
+      'BORDER': 1, 'SLIDER_DEPTH': 1,
+      'PROGRESS_DEPTH': 0},
+
+ 'Default1':
+     {'BACKGROUND': COLOR_SYSTEM_DEFAULT,
+      'TEXT': COLOR_SYSTEM_DEFAULT,
+      'INPUT': COLOR_SYSTEM_DEFAULT,
+      'TEXT_INPUT': COLOR_SYSTEM_DEFAULT,
+      'SCROLL': COLOR_SYSTEM_DEFAULT,
+      'BUTTON': COLOR_SYSTEM_DEFAULT,
+      'PROGRESS': COLOR_SYSTEM_DEFAULT,
+      'BORDER': 1, 'SLIDER_DEPTH': 1,
+      'PROGRESS_DEPTH': 0},
+
+ 'LightBlue': {'BACKGROUND': '#E3F2FD',
+               'TEXT': '#000000',
+               'INPUT': '#86A8FF',
+               'TEXT_INPUT': '#000000',
+               'SCROLL': '#86A8FF',
+               'BUTTON': ('#FFFFFF', '#5079D3'),
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 0, 'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0,
+               'ACCENT1': '#FF0266',
+               'ACCENT2': '#FF5C93',
+               'ACCENT3': '#C5003C'},
+
+ 'LightGrey': {'BACKGROUND': '#FAFAFA',
+               'TEXT': '#000000',
+               'INPUT': '#004EA1',
+               'TEXT_INPUT': '#FFFFFF',
+               'SCROLL': '#5EA7FF',
+               'BUTTON': ('#FFFFFF', '#0079D3'),  # based on Reddit color
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 0, 'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0,
+               'ACCENT1': '#FF0266',
+               'ACCENT2': '#FF5C93',
+               'ACCENT3': '#C5003C'},
+
+ 'LightGrey1': {'BACKGROUND': '#ffffff',
+            'TEXT': '#1a1a1b',
+            'INPUT': '#dae0e6',
+            'TEXT_INPUT': '#222222',
+            'SCROLL': '#a5a4a4',
+            'BUTTON': ('white', '#0079d3'),
+            'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+            'BORDER': 1,
+            'SLIDER_DEPTH': 0,
+            'PROGRESS_DEPTH': 0,
+            'ACCENT1': '#ff5414',
+            'ACCENT2': '#33a8ff',
+            'ACCENT3': '#dbf0ff'},
+
+ 'DarkBrown': {'BACKGROUND': '#282923',
+             'TEXT': '#E7DB74',
+             'INPUT': '#393a32',
+             'TEXT_INPUT': '#E7C855',
+             'SCROLL': '#E7C855',
+             'BUTTON': ('#E7C855', '#284B5A'),
+             'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+             'BORDER': 1,
+             'SLIDER_DEPTH': 0,
+             'PROGRESS_DEPTH': 0,
+             'ACCENT1': '#c15226',
+             'ACCENT2': '#7a4d5f',
+             'ACCENT3': '#889743'},
+
+ 'LightGreen1': {'BACKGROUND': '#9FB8AD',
+              'TEXT': COLOR_SYSTEM_DEFAULT,
+              'INPUT': '#F7F3EC', 'TEXT_INPUT': 'black',
+              'SCROLL': '#F7F3EC',
+              'BUTTON': ('white', '#475841'),
+              'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+              'BORDER': 1, 'SLIDER_DEPTH': 0,
+              'PROGRESS_DEPTH': 0},
+
+ 'DarkGrey': {'BACKGROUND': '#404040',
+          'TEXT': 'white',
+          'INPUT': '#4D4D4D',
+          'TEXT_INPUT': 'white',
+          'SCROLL': '#707070',
+          'BUTTON': ('white', '#004F00'),
+          'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+          'BORDER': 1,
+          'SLIDER_DEPTH': 0,
+          'PROGRESS_DEPTH': 0},
+
+ 'LightGreen2': {'BACKGROUND': '#B7CECE',
+                'TEXT': 'black',
+                'INPUT': '#FDFFF7',
+                'TEXT_INPUT': 'black',
+                'SCROLL': '#FDFFF7',
+                'BUTTON': ('white', '#658268'),
+                'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                'BORDER': 1,
+                'SLIDER_DEPTH': 0,
+                'ACCENT1': '#76506d',
+                'ACCENT2': '#5148f1',
+                'ACCENT3': '#0a1c84',
+                'PROGRESS_DEPTH': 0},
+
+ 'DarkGrey1': {'BACKGROUND': '#404040',
+           'TEXT': 'white',
+           'INPUT': 'white',
+           'TEXT_INPUT': 'black',
+           'SCROLL': '#707070',
+           'BUTTON': ('white', '#004F00'),
+           'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+           'BORDER': 1,
+           'SLIDER_DEPTH': 0,
+           'PROGRESS_DEPTH': 0},
+
+ 'DarkBlack': {'BACKGROUND': 'black',
+           'TEXT': 'white',
+           'INPUT': '#4D4D4D',
+           'TEXT_INPUT': 'white',
+           'SCROLL': '#707070',
+           'BUTTON': ('black', 'white'),
+           'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+           'BORDER': 1,
+           'SLIDER_DEPTH': 0,
+           'PROGRESS_DEPTH': 0},
+
+ 'LightBrown': {'BACKGROUND': '#fdf6e3',
+         'TEXT': '#268bd1',
+         'INPUT': '#eee8d5',
+         'TEXT_INPUT': '#6c71c3',
+         'SCROLL': '#eee8d5',
+         'BUTTON': ('white', '#063542'),
+         'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+         'BORDER': 1,
+         'SLIDER_DEPTH': 0,
+         'PROGRESS_DEPTH': 0},
+
+ 'LightBrown1': {'BACKGROUND': '#e5dece',
+             'TEXT': '#063289',
+             'INPUT': '#f9f8f4',
+             'TEXT_INPUT': '#242834',
+             'SCROLL': '#eee8d5',
+             'BUTTON': ('white', '#063289'),
+             'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+             'BORDER': 1,
+             'SLIDER_DEPTH': 0,
+             'PROGRESS_DEPTH': 0},
+
+ 'DarkBlue1': {'BACKGROUND': '#242834',
+                 'TEXT': '#dfe6f8',
+                 'INPUT': '#97755c',
+                 'TEXT_INPUT': 'white',
+                 'SCROLL': '#a9afbb',
+                 'BUTTON': ('white', '#063289'),
+                 'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                 'BORDER': 1,
+                 'SLIDER_DEPTH': 0,
+                 'PROGRESS_DEPTH': 0},
+
+ 'DarkBrown1': {'BACKGROUND': '#2c2825',
+               'TEXT': '#fdcb52',
+               'INPUT': '#705e52',
+               'TEXT_INPUT': '#fdcb52',
+               'SCROLL': '#705e52',
+               'BUTTON': ('black', '#fdcb52'),
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 1,
+               'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0},
+
+ 'DarkBlue2': {'BACKGROUND': '#1a2835',
+              'TEXT': '#d1ecff',
+              'INPUT': '#335267',
+              'TEXT_INPUT': '#acc2d0',
+              'SCROLL': '#1b6497',
+              'BUTTON': ('black', '#fafaf8'),
+              'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+              'BORDER': 1, 'SLIDER_DEPTH': 0,
+              'PROGRESS_DEPTH': 0},
+
+ 'DarkBrown2': {'BACKGROUND': '#280001',
+          'TEXT': 'white',
+          'INPUT': '#d8d584',
+          'TEXT_INPUT': 'black',
+          'SCROLL': '#763e00',
+          'BUTTON': ('black', '#daad28'),
+          'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+          'BORDER': 1,
+          'SLIDER_DEPTH': 0,
+          'PROGRESS_DEPTH': 0},
+
+ 'DarkGreen': {'BACKGROUND': '#82a459',
+           'TEXT': 'black',
+           'INPUT': '#d8d584',
+           'TEXT_INPUT': 'black',
+           'SCROLL': '#e3ecf3',
+           'BUTTON': ('white', '#517239'),
+           'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+           'BORDER': 1,
+           'SLIDER_DEPTH': 0,
+           'PROGRESS_DEPTH': 0},
+
+ 'LightBlue1': {'BACKGROUND': '#A5CADD',
+                'TEXT': '#6E266E',
+                'INPUT': '#E0F5FF',
+                'TEXT_INPUT': 'black',
+                'SCROLL': '#E0F5FF',
+                'BUTTON': ('white', '#303952'),
+                'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                'BORDER': 1,
+                'SLIDER_DEPTH': 0,
+                'PROGRESS_DEPTH': 0},
+
+ 'LightPurple': {'BACKGROUND': '#B0AAC2',
+            'TEXT': 'black',
+            'INPUT': '#F2EFE8',
+            'SCROLL': '#F2EFE8',
+            'TEXT_INPUT': 'black',
+            'BUTTON': ('black', '#C2D4D8'),
+            'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+            'BORDER': 1,
+            'SLIDER_DEPTH': 0,
+            'PROGRESS_DEPTH': 0},
+
+ 'LightBlue2': {'BACKGROUND': '#AAB6D3',
+              'TEXT': 'black',
+              'INPUT': '#F1F4FC',
+              'SCROLL': '#F1F4FC',
+              'TEXT_INPUT': 'black',
+              'BUTTON': ('white', '#7186C7'),
+              'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+              'BORDER': 1,
+              'SLIDER_DEPTH': 0,
+              'PROGRESS_DEPTH': 0},
+
+ 'LightGreen3': {'BACKGROUND': '#A8C1B4',
+               'TEXT': 'black',
+               'INPUT': '#DDE0DE',
+               'SCROLL': '#E3E3E3',
+               'TEXT_INPUT': 'black',
+               'BUTTON': ('white', '#6D9F85'),
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 1,
+               'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0},
+
+ 'DarkBlue3': {'BACKGROUND': '#64778d',
+               'TEXT': 'white',
+               'INPUT': '#f0f3f7',
+               'SCROLL': '#A6B2BE',
+               'TEXT_INPUT': 'black',
+               'BUTTON': ('white', '#283b5b'),
+               'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+               'BORDER': 1,
+               'SLIDER_DEPTH': 0,
+               'PROGRESS_DEPTH': 0},
+
+ 'LightGreen4': {'BACKGROUND': '#b4ffb4',
+                  'TEXT': 'black',
+                  'INPUT': '#ffff64',
+                  'SCROLL': '#ffb482',
+                  'TEXT_INPUT': 'black',
+                  'BUTTON': ('black', '#ffa0dc'),
+                  'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                  'BORDER': 1,
+                  'SLIDER_DEPTH': 0,
+                  'PROGRESS_DEPTH': 0},
+
+ 'LightGreen5': {'BACKGROUND': '#92aa9d',
+                 'TEXT': 'black',
+                 'INPUT': '#fcfff6',
+                 'SCROLL': '#fcfff6',
+                 'TEXT_INPUT': 'black',
+                 'BUTTON': ('black', '#d0dbbd'),
+                 'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                 'BORDER': 1,
+                 'SLIDER_DEPTH': 0,
+                 'PROGRESS_DEPTH': 0},
+
+ 'LightBrown2': {'BACKGROUND': '#a7ad7f',
+           'TEXT': 'black',
+           'INPUT': '#e6d3a8',
+           'SCROLL': '#e6d3a8',
+           'TEXT_INPUT': 'black',
+           'BUTTON': ('white', '#5d907d'),
+           'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+           'BORDER': 1,
+           'SLIDER_DEPTH': 0,
+           'PROGRESS_DEPTH': 0},
+
+ 'LightBrown3': {'BACKGROUND': '#efeccb',
+                'TEXT': '#012f2f',
+                'INPUT': '#e6d3a8',
+                'SCROLL': '#e6d3a8',
+                'TEXT_INPUT': '#012f2f',
+                'BUTTON': ('white', '#046380'),
+                'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+                'BORDER': 1, 'SLIDER_DEPTH': 0,
+                'PROGRESS_DEPTH': 0},
+
+ 'LightBlue3': {'BACKGROUND': '#a8cfdd',
+              'TEXT': 'black',
+              'INPUT': '#dfedf2',
+              'SCROLL': '#dfedf2',
+              'TEXT_INPUT': 'black',
+              'BUTTON': ('white', '#183440'),
+              'PROGRESS': DEFAULT_PROGRESS_BAR_COLOR,
+              'BORDER': 1,
+              'SLIDER_DEPTH': 0,
+              'PROGRESS_DEPTH': 0},
+
+
+################################## End Renamed Original Themes ##################################
+
+
+#
+ 'LightBrown4': {'BACKGROUND': '#d7c79e', 'TEXT': '#a35638', 'INPUT': '#9dab86', 'TEXT_INPUT': '#000000', 'SCROLL': '#a35638', 'BUTTON': ('white', '#a35638'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#a35638', '#9dab86', '#e08f62', '#d7c79e'], },
+ 'DarkTeal': {'BACKGROUND': '#003f5c', 'TEXT': '#fb5b5a', 'INPUT': '#bc4873', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#bc4873', 'BUTTON': ('white', '#fb5b5a'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#003f5c', '#472b62', '#bc4873', '#fb5b5a'], },
+ 'DarkPurple': {'BACKGROUND': '#472b62', 'TEXT': '#fb5b5a', 'INPUT': '#bc4873', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#bc4873', 'BUTTON': ('#FFFFFF', '#472b62'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#003f5c', '#472b62', '#bc4873', '#fb5b5a'], },
+ 'LightGreen6': {'BACKGROUND': '#eafbea', 'TEXT': '#1f6650', 'INPUT': '#6f9a8d', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#1f6650', 'BUTTON': ('white', '#1f6650'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#1f6650', '#6f9a8d', '#ea5e5e', '#eafbea'], },
+ 'DarkGrey2': {'BACKGROUND': '#2b2b28', 'TEXT': '#f8f8f8', 'INPUT': '#f1d6ab', 'TEXT_INPUT': '#000000', 'SCROLL': '#f1d6ab', 'BUTTON': ('#2b2b28', '#e3b04b'),
+              'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+              'COLOR_LIST': ['#2b2b28', '#e3b04b', '#f1d6ab', '#f8f8f8'], },
+ 'LightBrown6': {'BACKGROUND': '#f9b282', 'TEXT': '#8f4426', 'INPUT': '#de6b35', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#8f4426', 'BUTTON': ('white', '#8f4426'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#8f4426', '#de6b35', '#64ccda', '#f9b282'], },
+ 'DarkTeal1': {'BACKGROUND': '#396362', 'TEXT': '#ffe7d1', 'INPUT': '#f6c89f', 'TEXT_INPUT': '#000000', 'SCROLL': '#f6c89f',
+                   'BUTTON': ('#ffe7d1', '#4b8e8d'), 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                   'COLOR_LIST': ['#396362', '#4b8e8d', '#f6c89f', '#ffe7d1'],},
+ 'LightBrown7': {'BACKGROUND': '#f6c89f', 'TEXT': '#396362', 'INPUT': '#4b8e8d', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#396362',
+                    'BUTTON': ('white', '#396362'), 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                    'COLOR_LIST': ['#396362', '#4b8e8d', '#f6c89f', '#ffe7d1'],},
+ 'DarkPurple1': {'BACKGROUND': '#0c093c', 'TEXT': '#fad6d6', 'INPUT': '#eea5f6', 'TEXT_INPUT': '#000000', 'SCROLL': '#eea5f6', 'BUTTON': ('#FFFFFF', '#df42d1'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#0c093c', '#df42d1', '#eea5f6', '#fad6d6'], },
+ 'DarkGrey3': {'BACKGROUND': '#211717', 'TEXT': '#dfddc7', 'INPUT': '#f58b54', 'TEXT_INPUT': '#000000', 'SCROLL': '#f58b54', 'BUTTON': ('#dfddc7', '#a34a28'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#211717', '#a34a28', '#f58b54', '#dfddc7'], },
+ 'LightBrown8': {'BACKGROUND': '#dfddc7', 'TEXT': '#211717', 'INPUT': '#a34a28', 'TEXT_INPUT': '#dfddc7', 'SCROLL': '#211717', 'BUTTON': ('#dfddc7', '#a34a28'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#211717', '#a34a28', '#f58b54', '#dfddc7'], },
+ 'DarkBlue4': {'BACKGROUND': '#494ca2', 'TEXT': '#e3e7f1', 'INPUT': '#c6cbef', 'TEXT_INPUT': '#000000', 'SCROLL': '#c6cbef', 'BUTTON': ('#FFFFFF', '#8186d5'),
+              'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+              'COLOR_LIST': ['#494ca2', '#8186d5', '#c6cbef', '#e3e7f1'],},
+ 'LightBlue4': {'BACKGROUND': '#5c94bd', 'TEXT': '#470938', 'INPUT': '#1a3e59', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#470938', 'BUTTON': ('white', '#470938'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#470938', '#1a3e59', '#5c94bd', '#f2d6eb'],},
+ 'DarkTeal2': {'BACKGROUND': '#394a6d', 'TEXT': '#c0ffb3', 'INPUT': '#52de97', 'TEXT_INPUT': '#000000', 'SCROLL': '#52de97',
+                    'BUTTON': ('#c0ffb3', '#394a6d'), 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                    'COLOR_LIST': ['#394a6d', '#3c9d9b', '#52de97', '#c0ffb3'],},
+ 'DarkTeal3': {'BACKGROUND': '#3c9d9b', 'TEXT': '#c0ffb3', 'INPUT': '#52de97', 'TEXT_INPUT': '#000000', 'SCROLL': '#52de97',
+                    'BUTTON': ('#c0ffb3', '#394a6d'), 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                    'COLOR_LIST': ['#394a6d', '#3c9d9b', '#52de97', '#c0ffb3'], },
+ 'DarkPurple5': {'BACKGROUND': '#730068', 'TEXT': '#f6f078', 'INPUT': '#01d28e', 'TEXT_INPUT': '#000000', 'SCROLL': '#01d28e', 'BUTTON': ('#f6f078', '#730068'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#730068', '#434982', '#01d28e', '#f6f078'],},
+ 'DarkPurple2': {'BACKGROUND': '#202060', 'TEXT': '#b030b0', 'INPUT': '#602080', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#602080', 'BUTTON': ('white', '#202040'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#202040', '#202060', '#602080', '#b030b0'], },
+ 'DarkBlue5': {'BACKGROUND': '#000272', 'TEXT': '#ff6363', 'INPUT': '#a32f80', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#a32f80', 'BUTTON': ('#FFFFFF', '#341677'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#000272', '#341677', '#a32f80', '#ff6363'], },
+ 'LightGrey2': {'BACKGROUND': '#f6f6f6', 'TEXT': '#420000', 'INPUT': '#d4d7dd', 'TEXT_INPUT': '#420000', 'SCROLL': '#420000', 'BUTTON': ('#420000', '#d4d7dd'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#420000', '#d4d7dd', '#eae9e9', '#f6f6f6'],},
+ 'LightGrey3': {'BACKGROUND': '#eae9e9', 'TEXT': '#420000', 'INPUT': '#d4d7dd', 'TEXT_INPUT': '#420000', 'SCROLL': '#420000', 'BUTTON': ('#420000', '#d4d7dd'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#420000', '#d4d7dd', '#eae9e9', '#f6f6f6'], },
+ 'DarkBlue6': {'BACKGROUND': '#01024e', 'TEXT': '#ff6464', 'INPUT': '#8b4367', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#8b4367', 'BUTTON': ('#FFFFFF', '#543864'),
+              'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+              'COLOR_LIST': ['#01024e', '#543864', '#8b4367', '#ff6464'],},
+ 'DarkBlue7': {'BACKGROUND': '#241663', 'TEXT': '#eae7af', 'INPUT': '#a72693', 'TEXT_INPUT': '#eae7af', 'SCROLL': '#a72693', 'BUTTON': ('#eae7af', '#160f30'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#160f30', '#241663', '#a72693', '#eae7af'], },
+ 'LightBrown9': {'BACKGROUND': '#f6d365', 'TEXT': '#3a1f5d', 'INPUT': '#c83660', 'TEXT_INPUT': '#f6d365', 'SCROLL': '#3a1f5d', 'BUTTON': ('#f6d365', '#c83660'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#3a1f5d', '#c83660', '#e15249', '#f6d365'], },
+ 'DarkPurple3': {'BACKGROUND': '#6e2142', 'TEXT': '#ffd692', 'INPUT': '#e16363', 'TEXT_INPUT': '#ffd692', 'SCROLL': '#e16363', 'BUTTON': ('#ffd692', '#943855'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#6e2142', '#943855', '#e16363', '#ffd692'], },
+ 'LightBrown10': {'BACKGROUND': '#ffd692', 'TEXT': '#6e2142', 'INPUT': '#943855', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#6e2142', 'BUTTON': ('white', '#6e2142'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#6e2142', '#943855', '#e16363', '#ffd692'],},
+ 'DarkPurple4': {'BACKGROUND': '#200f21', 'TEXT': '#f638dc', 'INPUT': '#5a3d5c', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#5a3d5c', 'BUTTON': ('#FFFFFF', '#382039'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#200f21', '#382039', '#5a3d5c', '#f638dc'],},
+ 'LightBlue5': {'BACKGROUND': '#b2fcff', 'TEXT': '#3e64ff', 'INPUT': '#5edfff', 'TEXT_INPUT': '#000000', 'SCROLL': '#3e64ff', 'BUTTON': ('white', '#3e64ff'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#3e64ff', '#5edfff', '#b2fcff', '#ecfcff'], },
+ 'DarkTeal4': {'BACKGROUND': '#464159', 'TEXT': '#c7f0db', 'INPUT': '#8bbabb', 'TEXT_INPUT': '#000000', 'SCROLL': '#8bbabb',
+                   'BUTTON': ('#FFFFFF', '#6c7b95'), 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                   'COLOR_LIST': ['#464159', '#6c7b95', '#8bbabb', '#c7f0db'], },
+ 'LightTeal': {'BACKGROUND': '#c7f0db', 'TEXT': '#464159', 'INPUT': '#6c7b95', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#464159',
+                     'BUTTON': ('white', '#464159'), 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                     'COLOR_LIST': ['#464159', '#6c7b95', '#8bbabb', '#c7f0db'],},
+ 'DarkTeal5': {'BACKGROUND': '#8bbabb', 'TEXT': '#464159', 'INPUT': '#6c7b95', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#464159',
+                     'BUTTON': ('#c7f0db', '#6c7b95'), 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                     'COLOR_LIST': ['#464159', '#6c7b95', '#8bbabb', '#c7f0db'], },
+ 'LightGrey4': {'BACKGROUND': '#faf5ef', 'TEXT': '#672f2f', 'INPUT': '#99b19c', 'TEXT_INPUT': '#672f2f', 'SCROLL': '#672f2f', 'BUTTON': ('#672f2f', '#99b19c'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#672f2f', '#99b19c', '#d7d1c9', '#faf5ef'], },
+ 'LightGreen7': {'BACKGROUND': '#99b19c', 'TEXT': '#faf5ef', 'INPUT': '#d7d1c9', 'TEXT_INPUT': '#000000', 'SCROLL': '#d7d1c9', 'BUTTON': ('#FFFFFF', '#99b19c'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#672f2f', '#99b19c', '#d7d1c9', '#faf5ef'],},
+ 'LightGrey5': {'BACKGROUND': '#d7d1c9', 'TEXT': '#672f2f', 'INPUT': '#99b19c', 'TEXT_INPUT': '#672f2f', 'SCROLL': '#672f2f', 'BUTTON': ('white', '#672f2f'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#672f2f', '#99b19c', '#d7d1c9', '#faf5ef'], },
+ 'DarkBrown3': {'BACKGROUND': '#a0855b', 'TEXT': '#f9f6f2', 'INPUT': '#f1d6ab', 'TEXT_INPUT': '#000000', 'SCROLL': '#f1d6ab', 'BUTTON': ('white', '#38470b'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#38470b', '#a0855b', '#f1d6ab', '#f9f6f2'], },
+ 'LightBrown11': {'BACKGROUND': '#f1d6ab', 'TEXT': '#38470b', 'INPUT': '#a0855b', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#38470b', 'BUTTON': ('#f9f6f2', '#a0855b'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#38470b', '#a0855b', '#f1d6ab', '#f9f6f2'],},
+ 'DarkRed': {'BACKGROUND': '#83142c', 'TEXT': '#f9d276', 'INPUT': '#ad1d45', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#ad1d45', 'BUTTON': ('#f9d276', '#ad1d45'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#44000d', '#83142c', '#ad1d45', '#f9d276'], },
+ 'DarkTeal6': {'BACKGROUND': '#204969', 'TEXT': '#fff7f7', 'INPUT': '#dadada', 'TEXT_INPUT': '#000000', 'SCROLL': '#dadada',
+                    'BUTTON': ('black', '#fff7f7'), 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                    'COLOR_LIST': ['#204969', '#08ffc8', '#dadada', '#fff7f7'],},
+ 'DarkBrown4': {'BACKGROUND': '#252525', 'TEXT': '#ff0000', 'INPUT': '#af0404', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#af0404', 'BUTTON': ('white', '#252525'),
+             'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+             'COLOR_LIST': ['#252525', '#414141', '#af0404', '#ff0000'], },
+ 'LightYellow': {'BACKGROUND': '#f4ff61', 'TEXT': '#27aa80', 'INPUT': '#32ff6a', 'TEXT_INPUT': '#000000', 'SCROLL': '#27aa80', 'BUTTON': ('#f4ff61', '#27aa80'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#27aa80', '#32ff6a', '#a8ff3e', '#f4ff61'],},
+ 'DarkGreen1': {'BACKGROUND': '#2b580c', 'TEXT': '#fdef96', 'INPUT': '#f7b71d', 'TEXT_INPUT': '#000000', 'SCROLL': '#f7b71d', 'BUTTON': ('#fdef96', '#2b580c'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#2b580c', '#afa939', '#f7b71d', '#fdef96'], },
+ 'LightGreen8': {'BACKGROUND': '#c8dad3', 'TEXT': '#63707e', 'INPUT': '#93b5b3', 'TEXT_INPUT': '#000000', 'SCROLL': '#63707e', 'BUTTON': ('white', '#63707e'),
+                'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                'COLOR_LIST': ['#63707e', '#93b5b3', '#c8dad3', '#f2f6f5'], },
+ 'DarkTeal7': {'BACKGROUND': '#248ea9', 'TEXT': '#fafdcb', 'INPUT': '#aee7e8', 'TEXT_INPUT': '#000000', 'SCROLL': '#aee7e8', 'BUTTON': ('black', '#fafdcb'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#248ea9', '#28c3d4', '#aee7e8', '#fafdcb'],},
+'DarkBlue8': {'BACKGROUND': '#454d66', 'TEXT': '#d9d872', 'INPUT': '#58b368', 'TEXT_INPUT': '#000000', 'SCROLL': '#58b368',
+              'BUTTON': ('black', '#009975'),
+              'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                                      'COLOR_LIST': ['#009975', '#454d66', '#58b368', '#d9d872'], },
+ 'DarkBlue9': {'BACKGROUND': '#263859', 'TEXT': '#ff6768', 'INPUT': '#6b778d', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#6b778d', 'BUTTON': ('#ff6768', '#263859'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#17223b', '#263859', '#6b778d', '#ff6768'], },
+ 'DarkBlue10': {'BACKGROUND': '#0028ff', 'TEXT': '#f1f4df', 'INPUT': '#10eaf0', 'TEXT_INPUT': '#000000', 'SCROLL': '#10eaf0', 'BUTTON': ('#f1f4df', '#24009c'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#24009c', '#0028ff', '#10eaf0', '#f1f4df'],},
+ 'DarkBlue11': {'BACKGROUND': '#6384b3', 'TEXT': '#e6f0b6', 'INPUT': '#b8e9c0', 'TEXT_INPUT': '#000000', 'SCROLL': '#b8e9c0', 'BUTTON': ('#e6f0b6', '#684949'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#684949', '#6384b3', '#b8e9c0', '#e6f0b6'], },
+
+ 'DarkTeal8': {'BACKGROUND': '#71a0a5', 'TEXT': '#212121', 'INPUT': '#665c84', 'TEXT_INPUT': '#FFFFFF', 'SCROLL': '#212121', 'BUTTON': ('#fab95b', '#665c84'),
+                 'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+                 'COLOR_LIST': ['#212121', '#665c84', '#71a0a5', '#fab95b']},
+ 'DarkRed1': {'BACKGROUND': '#c10000', 'TEXT': '#eeeeee', 'INPUT': '#dedede', 'TEXT_INPUT': '#000000', 'SCROLL': '#dedede', 'BUTTON': ('#c10000', '#eeeeee'),
+               'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+               'COLOR_LIST': ['#c10000', '#ff4949', '#dedede', '#eeeeee'],},
+ 'LightBrown5': {'BACKGROUND': '#fff591', 'TEXT': '#e41749', 'INPUT': '#f5587b', 'TEXT_INPUT': '#000000', 'SCROLL': '#e41749', 'BUTTON': ('#fff591', '#e41749'),
+              'PROGRESS': ('#01826B', '#D0D0D0'), 'BORDER': 1, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
+              'COLOR_LIST': ['#e41749', '#f5587b', '#ff8a5c', '#fff591']}
+                 }
 
 def ListOfLookAndFeelValues():
-    """ """
+    """
+    Get a list of the valid values to pass into your call to change_look_and_feel
+    :return: List[str] - list of valid string values
+    """
     return list(LOOK_AND_FEEL_TABLE.keys())
 
 
-def ChangeLookAndFeel(index):
+def ChangeLookAndFeel(index, force=False):
+    """
+    Change the "color scheme" of all future PySimpleGUI Windows.
+    The scheme are string names that specify a group of colors. Background colors, text colors, button colors.
+    There are 13 different color settings that are changed at one time using a single call to ChangeLookAndFeel
+    The look and feel table itself has these indexes into the dictionary LOOK_AND_FEEL_TABLE.
+    The original list was (prior to a major rework and renaming)... these names still work...
+        SystemDefault
+        SystemDefaultForRead
+        Material1
+        Material2
+        Reddit
+        Topanga
+        GreenTan
+        Dark
+        LightGreen
+        Dark2
+        Black
+        Tan
+        TanBlue
+        DarkTanBlue
+        DarkAmber
+        DarkBlue
+        Reds
+        Green
+        BluePurple
+        Purple
+        BlueMono
+        GreenMono
+        BrownBlue
+        BrightColors
+        NeutralBlue
+        Kayak
+        SandyBeach
+        TealMono
+
+    In Nov 2019 a new Theme Formula was devised to make choosing a theme easier:
+    The "Formula" is:
+    ["Dark" or "Light"] Color Number
+    Colors can be Blue Brown Grey Green Purple Red Teal Yellow Black
+    The number will vary for each pair. There are more DarkGrey entries than there are LightYellow for example.
+    Default = The default settings (only button color is different than system default)
+    Default1 = The full system default including the button (everything's gray... how sad... don't be all gray... please....)
+    :param index: (str) the name of the index into the Look and Feel table
+    :param force: (bool) if True allows Macs to use the look and feel feature. Otherwise Macs are blocked due to problems with button colors
     """
 
-    :param index:
+    # if sys.platform.startswith('darwin') and not force:
+    #     print('*** Changing look and feel is not supported on Mac platform ***')
+    #     return
 
-    """
-    # global LOOK_AND_FEEL_TABLE
+    theme = index
+    # normalize available l&f values
+    lf_values = [item.lower() for item in list_of_look_and_feel_values()]
 
-    if sys.platform == 'darwin':
-        print('*** Changing look and feel is not supported on Mac platform ***')
-        return
+    # option 1
+    opt1 = theme.replace(' ', '').lower()
 
-    # look and feel table
+    # option 2 (reverse lookup)
+    optx = theme.lower().split(' ')
+    optx.reverse()
+    opt2 = ''.join(optx)
+
+    # search for valid l&f name
+    if opt1 in lf_values:
+        ix = lf_values.index(opt1)
+    elif opt2 in lf_values:
+        ix = lf_values.index(opt2)
+    else:
+        ix = randint(0,len(lf_values))
+        print('** Warning - {} Look and Feel value not valid. Change your ChangeLookAndFeel call. **'.format(index))
+        print('valid values are', list_of_look_and_feel_values())
+        print('Instead, please enjoy a random Theme named {}'.format(list_of_look_and_feel_values()[ix]))
+
+    selection = list_of_look_and_feel_values()[ix]
 
     try:
-        colors = LOOK_AND_FEEL_TABLE[index]
+        colors = LOOK_AND_FEEL_TABLE[selection]
 
         SetOptions(background_color=colors['BACKGROUND'],
                    text_element_background_color=colors['BACKGROUND'],
                    element_background_color=colors['BACKGROUND'],
                    text_color=colors['TEXT'],
                    input_elements_background_color=colors['INPUT'],
-                   button_color=colors['BUTTON'],
+                   button_color=colors['BUTTON'] if not sys.platform.startswith('darwin') else None,
                    progress_meter_color=colors['PROGRESS'],
                    border_width=colors['BORDER'],
                    slider_border_width=colors['SLIDER_DEPTH'],
@@ -9537,16 +10588,49 @@ def ChangeLookAndFeel(index):
                    input_text_color=colors['TEXT_INPUT'])
     except:  # most likely an index out of range
         print('** Warning - Look and Feel value not valid. Change your ChangeLookAndFeel call. **')
+        print('valid values are', list_of_look_and_feel_values())
 
 
+def preview_all_look_and_feel_themes():
+    """
+    Displays a "Quick Reference Window" showing all of the different Look and Feel settings that are available.
+    They are sorted alphabetically.  The legacy color names are mixed in, but otherwise they are sorted into Dark and Light halves
+    """
+    web=False
+
+    WINDOW_BACKGROUND = 'lightblue'
+
+    def sample_layout():
+        return [[Text('Text element'), InputText('Input data here', size=(15, 1))],
+                [Button('Ok'), Button('Cancel'), Slider((1, 10), orientation='h', size=(10, 15))]]
+
+    layout = [[Text('Here is a complete list of themes', font='Default 18', background_color=WINDOW_BACKGROUND)]]
+
+    names = list_of_look_and_feel_values()
+    names.sort()
+    row = []
+    for count, theme in enumerate(names):
+        change_look_and_feel(theme)
+        if not count % 9:
+            layout += [row]
+            row = []
+        row += [Frame(theme, sample_layout() if not web else [[T(theme)]] + sample_layout())]
+    if row:
+        layout += [row]
+
+    window = Window('Preview of all Look and Feel choices', layout, background_color=WINDOW_BACKGROUND)
+    window.read()
+    window.close()
+    del window
 
 
 # Converts an object's contents into a nice printable string.  Great for dumping debug data
 def ObjToStringSingleObj(obj):
     """
-
-    :param obj:
-
+    Dumps an Object's values as a formatted string.  Very nicely done. Great way to display an object's member variables in human form
+    Returns only the top-most object's variables instead of drilling down to dispolay more
+    :param obj: (Any) The object to display
+    returns (str) Formatted output of the object's values
     """
     if obj is None:
         return 'None'
@@ -9556,10 +10640,10 @@ def ObjToStringSingleObj(obj):
 
 def ObjToString(obj, extra='    '):
     """
-
-    :param obj:
+    Dumps an Object's values as a formatted string.  Very nicely done. Great way to display an object's member variables in human form
+    :param obj: (Any) The object to display
     :param extra:  (Default value = '    ')
-
+    returns (str) Formatted output of the object's values
     """
     if obj is None:
         return 'None'
@@ -10204,7 +11288,7 @@ def PopupGetFolder(message, title=None, default_path='', no_window=False, size=(
     layout = [[Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)],
               [InputText(default_text=default_path, size=size, key='_INPUT_'),
                FolderBrowse(initial_folder=initial_folder)],
-              [CloseButton('Ok', size=(5, 1), bind_return_key=True), CloseButton('Cancel', size=(5, 1))]]
+              [Button('Ok', size=(5, 1), bind_return_key=True), Button('Cancel', size=(5, 1))]]
 
     window = Window(title=title or message, layout=layout, icon=icon, auto_size_text=True, button_color=button_color,
                     background_color=background_color,
@@ -10289,7 +11373,8 @@ def PopupGetFile(message, title=None, default_path='', default_extension='', sav
             Window.hidden_master_root.destroy()
             Window.hidden_master_root = None
         if not multiple_files and type(filename) in (tuple, list):
-            filename = filename[0]
+            if len(filename):       # only if not 0 length, otherwise will get an error
+                filename = filename[0]
         return filename
 
     if save_as:
@@ -10301,7 +11386,7 @@ def PopupGetFile(message, title=None, default_path='', default_extension='', sav
 
     layout = [[Text(message, auto_size_text=True, text_color=text_color, background_color=background_color)],
               [InputText(default_text=default_path, size=size, key='_INPUT_'), browse_button],
-              [CloseButton('Ok', size=(6, 1), bind_return_key=True), CloseButton('Cancel', size=(6, 1))]]
+              [Button('Ok', size=(6, 1), bind_return_key=True), Button('Cancel', size=(6, 1))]]
 
     window = Window(title=title or message, layout=layout, icon=icon, auto_size_text=True, button_color=button_color,
                     font=font,
@@ -10344,7 +11429,7 @@ def PopupGetText(message, title=None, default_text='', password_char='', size=(N
 
     layout = [[Text(message, auto_size_text=True, text_color=text_color, background_color=background_color, font=font)],
               [InputText(default_text=default_text, size=size, key='_INPUT_', password_char=password_char)],
-              [CloseButton('Ok', size=(5, 1), bind_return_key=True), CloseButton('Cancel', size=(5, 1))]]
+              [Button('Ok', size=(5, 1), bind_return_key=True), Button('Cancel', size=(5, 1))]]
 
     window = Window(title=title or message, layout=layout, icon=icon, auto_size_text=True, button_color=button_color,
                     no_titlebar=no_titlebar,
@@ -10811,7 +11896,8 @@ class _Debugger():
         layout = []
         line = []
         col = 0
-        self.popout_choices = self.local_choices
+        # self.popout_choices = self.local_choices
+        self.popout_choices = {}
         if self.popout_choices == {}:           # if nothing chosen, then choose all non-_ variables
             for key in sorted(self.locals.keys()):
                 self.popout_choices[key] = not key.startswith('_')
@@ -10981,7 +12067,6 @@ def _refresh_debugger():
 
 
 
-
 #                        d8b
 #                        Y8P
 #
@@ -11000,8 +12085,8 @@ def main():
     :return:
     """
     from random import randint
-
-    ChangeLookAndFeel('GreenTan')
+    # preview_all_look_and_feel_themes()
+    ChangeLookAndFeel('Light Green 1')
     # ------ Menu Definition ------ #
     menu_def = [['&File', ['!&Open', '&Save::savekey', '---', '&Properties', 'E&xit']],
                 ['!&Edit', ['!&Paste', ['Special', 'Normal', ], 'Undo'], ],
@@ -11029,8 +12114,8 @@ def main():
     ]
 
     frame2 = [
-        [Listbox(['Listbox 1', 'Listbox 2', 'Listbox 3'], select_mode=SELECT_MODE_EXTENDED, size=(20, 5))],
-        [Combo(['Combo item 1',2,3,4 ], size=(20, 3),readonly=True, text_color='red', background_color='red', key='_COMBO1_')],
+        [Listbox(['Listbox 1', 'Listbox 2', 'Listbox 3'], select_mode=SELECT_MODE_EXTENDED, size=(20, 5), no_scrollbar=True)],
+        [Combo(['Combo item 1',2,3,4 ], size=(20, 3), default_value=2, readonly=True, text_color='red', background_color='red', key='_COMBO1_')],
         # [Combo(['Combo item 1', 2,3,4], size=(20, 3), readonly=False, text_color='red', background_color='red', key='_COMBO2_')],
         [Spin([1, 2, 3, 'a','b','c'], size=(4, 3))],
     ]
@@ -11045,7 +12130,7 @@ def main():
         [Slider(range=(0, 100), orientation='v', size=(7, 15), default_value=40),
          Slider(range=(0, 100), orientation='h', size=(11, 15), default_value=40), ],
     ]
-    matrix = [[str(x * y) for x in range(4)] for y in range(8)]
+    matrix = [[str(x * y) for x in range(1,5)] for y in range(1,8)]
 
     frame5 = [
         [Table(values=matrix, headings=matrix[0],
@@ -11076,29 +12161,29 @@ def main():
         [Frame('Multiple Choice Group', frame2, title_color='green'),
          Frame('Binary Choice Group', frame3, title_color='purple', tooltip='Binary Choice'),
          Frame('Variable Choice Group', frame4, title_color='blue')],
-        [Frame('Structured Data Group', frame5, title_color='red'), ],
+        [Column([[Frame('Structured Data Group', frame5, title_color='red', element_justification='l')]]), ],
         # [Frame('Graphing Group', frame6)],
         [TabGroup([[tab1, tab2]],key='_TAB_GROUP_' )],
-        [ProgressBar(max_value=800, size=(60, 25), key='+PROGRESS+'), Button('Button'), B('Normal'),
+        [ProgressBar(max_value=800, size=(60, 25), key='+PROGRESS+'), Button('Button'), B('Normal', metadata='my metadata'),
          Button('Exit', tooltip='Exit button')],
     ]
 
-    layout = [[Menu(menu_def, key='_MENU_')],[Column(layout1)]]
-
+    layout = [[Menu(menu_def, key='_MENU_')]] + layout1
     window = Window('Window Title', layout,
                     font=('Helvetica', 13),
                     # background_color='black',
                     right_click_menu=['&Right', ['Right', '!&Click', '&Menu', 'E&xit', 'Properties']],
                     # transparent_color= '#9FB8AD',
                     resizable=True,
-                    debugger_enabled=False,
                     keep_on_top=True,
-                    # icon=r'X:\VMWare Virtual Machines\SHARED FOLDER\kingb.ico'
-                    ).Finalize()
-    graph_elem.DrawCircle((200, 200), 50, 'blue')
+                    element_justification='left',
+                    metadata='My window metadata',
+                    # icon=PSG_DEBUGGER_LOGO
+                    )
+    # graph_elem.DrawCircle((200, 200), 50, 'blue')
     i = 0
     while True:  # Event Loop
-        event, values = window.Read(timeout=1)
+        event, values = window.Read(timeout=20)
         if event != TIMEOUT_KEY:
             print(event, values)
         if event is None or event == 'Exit':
@@ -11108,7 +12193,6 @@ def main():
         else:
             graph_elem.Move(-1, 0)
             graph_elem.DrawLine((i, 0), (i, randint(0, 300)), width=1, color='#{:06x}'.format(randint(0, 0xffffff)))
-
         window['+PROGRESS+'].UpdateBar(i % 800)
         window.Element('_IMAGE_').UpdateAnimation(DEFAULT_BASE64_LOADING_GIF, time_between_frames=50)
         i += 1
@@ -11124,6 +12208,8 @@ def main():
             show_debugger_popout_window()
         elif event == 'Launch Debugger':
             show_debugger_window()
+        elif event == 'About...':
+            popup('About this program...')
     window.Close()
 
 
@@ -11171,10 +12257,11 @@ rgb = RGB
 set_global_icon = SetGlobalIcon
 set_options = SetOptions
 
+test = main
 
+# __all__ = ['** YOUR from PySimpleGUI import * HAS BEEN BLOCKED. YOU ARE NOT ALLOWED THIS KIND OF IMPORT WITH THIS LIBRARY **']            # do not allow import *
 
 # -------------------------------- ENTRY POINT IF RUN STANDALONE -------------------------------- #
 if __name__ == '__main__':
     main()
     exit(69)
-    

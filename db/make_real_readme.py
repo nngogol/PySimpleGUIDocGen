@@ -2,6 +2,7 @@ from inspect import getmembers, isfunction, isclass, getsource, signature, _empt
 from datetime import datetime
 import PySimpleGUIlib
 import click
+import textwrap
 import logging
 import json
 import re
@@ -18,15 +19,15 @@ import os
 #                      |_|                             #
 ########################################################
 TAB_char = '    '
-TABLE_TEMPLATE='''
-                    Parameter Descriptions:
+TABLE_TEMPLATE='''                
+                Parameter Descriptions:
 
-                        |Name|Meaning|
-                        |---|---|
-                        {md_table}
-                        {md_return}
-                        
-                        '''
+                |Name|Meaning|
+                |---|---|
+                {md_table}
+                {md_return}
+                
+                '''
 TABLE_ROW_TEMPLATE = '|{name}|{desc}|'
 TABLE_RETURN_TEMPLATE = '|||\n| **return** | {return_guy} |'
 TABLE_Only_table_RETURN_TEMPLATE = '''|Name|Meaning|\n|---|---|\n| **return** | $ |''' # $ - is the part for return value
@@ -274,8 +275,14 @@ def get_doc_desc(doc, original_obj):
 def is_propery(func):
     return isdatadescriptor(func) and not isfunction(func)
 
-def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is_method=False, line_break=None, insert_md_section_for__class_methods=False):
-    """ Convert "function + __doc__" tp "method call + params table" in MARKDOWN """
+def get_sig_table_parts(function_obj, function_name, doc_string,
+                    logger=None, is_method=False, line_break=None,
+                    insert_md_section_for__class_methods=False):
+    """
+        Convert python object "function + __doc__"
+            to
+            "method call + params table"    in MARKDOWN
+    """
     doc_string = doc_string.strip()
     # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
     # 0   0            Making INIT_CALL          0   0 #
@@ -290,14 +297,15 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
     if not is_propery(function_obj):
         for key in sig:
             val = sig[key].default
-            if 'self' == str(key):
-                continue
-            if val == _empty:        rows.append(key)
-            elif val == None:        rows.append(f'{key}=None')
-            elif type(val) is int:   rows.append(f'{key}={val}')
-            elif type(val) is str:   rows.append(f'{key}="{val}"')
-            elif type(val) is tuple: rows.append(f'{key}={val}')
-            elif type(val) is bool:  rows.append(f'{key}={val}')
+            if 'self' == str(key): continue
+            elif key == 'args': rows.append('args=*<1 or N object>')
+            elif val == _empty:                 rows.append(key)
+            elif val == None:                   rows.append(f'{key}=None')
+            elif type(val) is int:              rows.append(f'{key}={val}')
+            elif type(val) is str:              rows.append(f'{key}="{val}"')
+            elif type(val) is tuple:            rows.append(f'{key}={val}')
+            elif type(val) is bool:             rows.append(f'{key}={val}')
+            elif type(val) is bytes:            rows.append(f'{key}=...')
             else:
                 raise Exception(f'IDK this type -> {key, val}')
 
@@ -345,7 +353,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
                            get_params_part(doc_string).items()])
 
     # 3
-    params_TABLE = TABLE_TEMPLATE.format(md_table=md_table, md_return=md_return).replace(TAB_char, '').replace('    ', '').replace('\t', '')
+    params_TABLE = textwrap.dedent(TABLE_TEMPLATE).format(md_table=md_table, md_return=md_return)
 
     # 1 and N
     # if len(get_params_part(doc_string).items()) == 1:
@@ -362,7 +370,8 @@ def get_sig_table_parts(function_obj, function_name, doc_string, logger=None, is
     return sign, params_TABLE
 
 
-def pad_n(text): return f'\n{text}\n'
+def pad_n(text):
+    return f'\n{text}\n'
 
 
 def render(injection, logger=None, line_break=None, insert_md_section_for__class_methods=False):
@@ -434,13 +443,28 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
     # 8888888888888888888888888888888888888888888888888888888888888888888888888
     # ===========  2 GET classes, funcions, varialbe a.k.a. memes =========== #
     # 8888888888888888888888888888888888888888888888888888888888888888888888888
-    psg_members = getmembers(PySimpleGUIlib) # variables, functions, classes
 
+    def valid_field(pair):
+        bad_fields = 'LOOK_AND_FEEL_TABLE copyright __builtins__ icon'.split(' ')
+        bad_prefix = 'TITLE_ TEXT_ ELEM_TYPE_ DEFAULT_ BUTTON_TYPE_ LISTBOX_SELECT METER_ POPUP_ THEME_'.split(' ')
+
+        field_name, python_object = pair
+        if type(python_object) is bytes:
+            return False
+        if field_name in bad_fields:
+            return False
+        if any([i for i in bad_prefix if field_name.startswith(i)]):
+            return False
+        return True
+
+    psg_members  = [i for i in getmembers(PySimpleGUIlib) if valid_field(i)] # variables, functions, classes
+    # psg_members  = getmembers(PySimpleGUIlib) # variables, functions, classes
     psg_funcs = [o for o in psg_members if isfunction(o[1])] # only functions
     psg_classes = [o for o in psg_members if isclass(o[1])]  # only classes
     psg_classes_ = list(set([i[1] for i in psg_classes]))    # boildown B,Btn,Butt -into-> Button
     psg_classes = list(zip([i.__name__ for i in psg_classes_], psg_classes_))
-
+    # psg_props    = [o for o in psg_members if type(o[1]).__name__ == 'property']
+ 
     # 8888888888888888888888888888888888888888888888888888888
     # ===========  3 find all tags in 2_readme  =========== #
     # 8888888888888888888888888888888888888888888888888888888
