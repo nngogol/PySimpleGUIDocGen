@@ -294,6 +294,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
     except Exception as e:
         if logger: logger.error(f'PROBLEM WITH "{function_obj}" "{function_name}":\nit\'s signature is BS. Ok, I will just return \'\' for \'signature\' and \'param_table\'\nOR BETTER - delete it from the 2_readme.md.\n======')
         return '', ''
+
     if not is_propery(function_obj):
         for key in sig:
             val = sig[key].default
@@ -301,7 +302,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             elif key == 'args': rows.append('args=*<1 or N object>')
             elif val == _empty:                 rows.append(key)
             elif val == None:                   rows.append(f'{key}=None')
-            elif type(val) is int:              rows.append(f'{key}={val}')
+            elif type(val) in (int, float):     rows.append(f'{key}={val}')
             elif type(val) is str:              rows.append(f'{key}="{val}"')
             elif type(val) is tuple:            rows.append(f'{key}={val}')
             elif type(val) is bool:             rows.append(f'{key}={val}')
@@ -494,7 +495,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
     # 2> find good tags
     re_tags     = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([a-zA-Z_]+[\d\w_]*)\+> -->')
     mark_points = [i for i in readme.split('\n') if re_tags.match(i)]
-    
+
     special_dunder_methods = ['init', 'repr', 'str', 'next']
     # 3> find '_' tags OPTION
     if skip_dunder_method:
@@ -520,6 +521,7 @@ def main(do_full_readme=False, files_to_include: list = [], logger:object=None, 
 
     injection_points = []
     classes_method_tags = [j for j in mark_points if 'func.' not in j]
+    
     func_tags = [j for j in mark_points if 'func.' in j]
 
     # 0===0 functions 0===0

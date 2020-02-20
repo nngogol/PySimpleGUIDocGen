@@ -3,6 +3,7 @@
 <!-- <+Window.AlphaChannel+> -->
 <!-- <+Window._AlphaChannel+> -->
 <!-- <+Window.Size+> -->
+<!-- <+SystemTray.notify+> -->
 
 
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
@@ -11,6 +12,9 @@
 
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 ============= Format =============
+
+
+
 
 ## Title | shortcuts
 
@@ -27,6 +31,13 @@ methods
 ---
 
 additions
+
+
+
+
+
+
+
 
 <!-- Start from here -->
 
