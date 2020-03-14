@@ -1,11 +1,7 @@
 # PySimpleGUIDocGen
-PySimpleGUIDocGen - is software for generating *some* documentation.
+PySimpleGUIDocGen - is software for generating and maintaining a `readme.md` file  for ![PySimpleGUI](https://github.com/PySimpleGUI/PySimpleGUI) library.
 
-This project is created for generating and maintaining `readme.md` for ![PySimpleGUI](https://github.com/PySimpleGUI/PySimpleGUI) library.
-
-Simple and easy.
-
-# What is what?
+# File structure
 
 |Folder or File|Meaning|
 |-|-|
@@ -15,8 +11,6 @@ Simple and easy.
 |`make_real_readme.py` | the builder|
 |`PySimpleGUIlib.py` | some version of PySimpleGUI|
 |`get_CF_insight.py` | it's a core part for **SDK quick reference** in PySimpleGUI (or, in fact, any package).  Basicly, CF gives you a `dict`, that shows info about for classes and function in you given module.|
-
-
 
 # Usage
 
@@ -82,7 +76,7 @@ python3 usage.py
 ```
 
 
-### GUI:
+### GUI
 
 I removed it. *LEARN SHELL.*
 
