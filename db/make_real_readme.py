@@ -462,247 +462,252 @@ def main(do_full_readme=False,
     # ===========  1 loading files =========== #
     # ===========  2 GET classes, funcions, varialbe a.k.a. memes =========== #
     # 8888888888888888888888888888888888888888888888888888888888888888888888888
-    readme  = readfile('2_readme.md')
+    def do_magic_progressing(magic_filename):
 
-    def valid_field(pair):
-        bad_fields = 'LOOK_AND_FEEL_TABLE copyright __builtins__ icon'.split(' ')
-        bad_prefix = 'TITLE_ TEXT_ ELEM_TYPE_ DEFAULT_ BUTTON_TYPE_ LISTBOX_SELECT METER_ POPUP_ THEME_'.split(' ')
+        readme  = readfile(magic_filename)
 
-        field_name, python_object = pair
-        if type(python_object) is bytes:
-            return False
-        if field_name in bad_fields:
-            return False
-        if any([i for i in bad_prefix if field_name.startswith(i)]):
-            return False
-        return True
+        def valid_field(pair):
+            bad_fields = 'LOOK_AND_FEEL_TABLE copyright __builtins__ icon'.split(' ')
+            bad_prefix = 'TITLE_ TEXT_ ELEM_TYPE_ DEFAULT_ BUTTON_TYPE_ LISTBOX_SELECT METER_ POPUP_ THEME_'.split(' ')
 
-        
-    psg_members  = [i for i in getmembers(PySimpleGUIlib) if valid_field(i)] # variables, functions, classes
-    # psg_members  = getmembers(PySimpleGUIlib) # variables, functions, classes
-    psg_funcs = [o for o in psg_members if isfunction(o[1])] # only functions
-    psg_classes = [o for o in psg_members if isclass(o[1])]  # only classes
-    psg_classes_ = list(set([i[1] for i in psg_classes]))    # boildown B,Btn,Butt -into-> Button
-    psg_classes = list(zip([i.__name__ for i in psg_classes_], psg_classes_))
-    # psg_props    = [o for o in psg_members if type(o[1]).__name__ == 'property']
- 
-    # 8888888888888888888888888888888888888888888888888888888
-    # ===========  3 find all tags in 2_readme  =========== #
-    # 8888888888888888888888888888888888888888888888888888888
-    # PLAN:
-    # (1) REMOVE HEADER
-
-    # (2) find good tags e.g.   <!-- <+func.PopupScrolled+> -->
-
-    # (3) (optional) find '_' tags e.g.
-    #     '_' tag - is a tag, that has '_' after '.'
-    #                                               
-    #     Example:  <!-- <+func._PopupScrolled+> -->
-    #                          /\                   
-    #                          |---that's sign of a bad tags
-
-    # (4) (optional) log repeated tags.
-    #      like <!-- <+class.B+> -->
-    #                  and
-    #           <!-- <+class.Button+> -->
-    # 8888888888888888888888888888888888888888888888888888888
-
-    # >1 REMOVE HEADER
-
-    started_mark = '<!-- Start from here -->'
-    if started_mark in readme:
-        readme = readme.split('<!-- Start from here -->')[1]
-        # readme = re.sub(r'([\d\D]*)<!-- Start from here -->', '', readme, flags=re.MULTILINE)
+            field_name, python_object = pair
+            if type(python_object) is bytes:
+                return False
+            if field_name in bad_fields:
+                return False
+            if any([i for i in bad_prefix if field_name.startswith(i)]):
+                return False
+            return True
 
 
-    # 2> find good tags
-    re_tags     = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([a-zA-Z_]+[\d\w_]*)\+> -->')
-    mark_points = [i for i in readme.split('\n') if re_tags.match(i)]
+        psg_members  = [i for i in getmembers(PySimpleGUIlib) if valid_field(i)] # variables, functions, classes
+        # psg_members  = getmembers(PySimpleGUIlib) # variables, functions, classes
+        psg_funcs = [o for o in psg_members if isfunction(o[1])] # only functions
+        psg_classes = [o for o in psg_members if isclass(o[1])]  # only classes
+        psg_classes_ = list(set([i[1] for i in psg_classes]))    # boildown B,Btn,Butt -into-> Button
+        psg_classes = list(zip([i.__name__ for i in psg_classes_], psg_classes_))
+        # psg_props    = [o for o in psg_members if type(o[1]).__name__ == 'property']
 
-    special_dunder_methods = ['init', 'repr', 'str', 'next']
-    # 3> find '_' tags OPTION
-    if skip_dunder_method:
-        re_bad_tags = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([_]+[\d\w_]*)\+> -->')
-        for i in readme.split('\n'):
-            if re_bad_tags.match(i.strip()):
-                if not [s_tag for s_tag in special_dunder_methods if s_tag in i.strip()]:
-                    readme = readme.replace(i, '\n')
+        # 8888888888888888888888888888888888888888888888888888888
+        # ===========  3 find all tags in 2_readme  =========== #
+        # 8888888888888888888888888888888888888888888888888888888
+        # PLAN:
+        # (1) REMOVE HEADER
 
-    # 4> log repeated tags
-    if output_repeated_tags:
-        if not allow_multiple_tags and len(list(set(mark_points))) != len(mark_points):
-            mark_points_copy = mark_points[:]
-            [mark_points_copy.remove(x) for x in set(mark_points)]
-            if logger:
-                logger.error("You have repeated tags! \n {0}".format(
-                    ','.join(mark_points_copy)))
-            return ''
+        # (2) find good tags e.g.   <!-- <+func.PopupScrolled+> -->
 
-    # 8888888888888888888888888888888888888888888888888888888888888
-    # ===========  4 structure tags and REAL objects  =========== #
-    # 8888888888888888888888888888888888888888888888888888888888888
+        # (3) (optional) find '_' tags e.g.
+        #     '_' tag - is a tag, that has '_' after '.'
+        #
+        #     Example:  <!-- <+func._PopupScrolled+> -->
+        #                          /\
+        #                          |---that's sign of a bad tags
 
-    injection_points = []
-    classes_method_tags = [j for j in mark_points if 'func.' not in j]
-    
-    func_tags = [j for j in mark_points if 'func.' in j]
+        # (4) (optional) log repeated tags.
+        #      like <!-- <+class.B+> -->
+        #                  and
+        #           <!-- <+class.Button+> -->
+        # 8888888888888888888888888888888888888888888888888888888
+
+        # >1 REMOVE HEADER
+
+        started_mark = '<!-- Start from here -->'
+        if started_mark in readme:
+            readme = readme.split('<!-- Start from here -->')[1]
+            # readme = re.sub(r'([\d\D]*)<!-- Start from here -->', '', readme, flags=re.MULTILINE)
 
 
+        # 2> find good tags
+        re_tags     = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([a-zA-Z_]+[\d\w_]*)\+> -->')
+        mark_points = [i for i in readme.split('\n') if re_tags.match(i)]
 
-    
-    # 0===0 functions 0===0
-    for tag in func_tags:
+        special_dunder_methods = ['init', 'repr', 'str', 'next']
+        # 3> find '_' tags OPTION
+        if skip_dunder_method:
+            re_bad_tags = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([_]+[\d\w_]*)\+> -->')
+            for i in readme.split('\n'):
+                if re_bad_tags.match(i.strip()):
+                    if not [s_tag for s_tag in special_dunder_methods if s_tag in i.strip()]:
+                        readme = readme.replace(i, '\n')
 
-        try:
-            function_name = part2 = tag.split('.')[1].split('+')[0]
-
-            # {{{{{{{{{ filter number }}}}}}}}}
-            number = ''
-            if part2[0] in ['1', '2']:
-                number, part2 = part2[0], part2[1:]
-
-            # {{{{{{{{{ find function }}}}}}}}}
-            founded_function = [func for func_name,
-                                func in psg_funcs if func_name == function_name]
-            if not founded_function:
+        # 4> log repeated tags
+        if output_repeated_tags:
+            if not allow_multiple_tags and len(list(set(mark_points))) != len(mark_points):
+                mark_points_copy = mark_points[:]
+                [mark_points_copy.remove(x) for x in set(mark_points)]
                 if logger:
-                    logger.error(f'function "{function_name}" not found in PySimpleGUI')
-                continue
-            if len(founded_function) > 1:
-                if logger:
-                    logger.error(f'more than 1 function named "{function_name}" found in PySimpleGUI')
-                continue
+                    logger.error("You have repeated tags! \n {0}".format(
+                        ','.join(mark_points_copy)))
+                return ''
 
-            # {{{{{{{{{ collect }}}}}}}}}
-            injection_points.append({
-                "tag": tag,
-                "function_object": founded_function[0],
-                "parent_class": None,
-                "part1": 'func',
-                "part2": part2,
-                "number": number,
-            })
-        except Exception as e:
-            if logger:
-                logger.error(f' General error in parsing function tag: tag = "{tag}"; error="{str(e)}"')
-            continue
+        # 8888888888888888888888888888888888888888888888888888888888888
+        # ===========  4 structure tags and REAL objects  =========== #
+        # 8888888888888888888888888888888888888888888888888888888888888
 
-    injection_points.append('now, classes.')
-    # 0===0 classes 0===0
-    for tag in classes_method_tags:
-        try:
-            class_name, method_name = tag.split('.')
-            class_name, method_name = part1, part2 = class_name.split('+')[-1], method_name.split('+')[0]
+        injection_points = []
+        classes_method_tags = [j for j in mark_points if 'func.' not in j]
 
-            # {{{{{{{{{ filter number }}}}}}}}}
-            number = ''
-            if part2[0] in ['1', '2']:
-                number, method_name = part2[0], part2[1:]
+        func_tags = [j for j in mark_points if 'func.' in j]
 
-            # {{{{{{{{{ find class }}}}}}}}}
-            founded_class = [a_class_obj
-                            for a_class_name, a_class_obj in psg_classes
-                            if a_class_name == class_name]
-            if not founded_class:
-                if logger: logger.error(f'skipping tag "{tag}", WHY: not found in PySimpleGUI')
-                continue
-            if len(founded_class) > 1:
-                if logger: logger.error(f'skipping tag "{tag}", WHY: found more than 1 class in PySimpleGUI')
-                continue
 
-            # {{{{{{{{{ find method }}}}}}}}}
+
+
+        # 0===0 functions 0===0
+        for tag in func_tags:
+
             try:
-                if method_name != 'doc':
-                    founded_method = getattr(founded_class[0], method_name)
-                else:
-                    founded_method = None
-            except AttributeError as e:
-                if logger:
-                    logger.error(f'METHOD not found!: {str(e)}')
-                continue
+                function_name = part2 = tag.split('.')[1].split('+')[0]
+
+                # {{{{{{{{{ filter number }}}}}}}}}
+                number = ''
+                if part2[0] in ['1', '2']:
+                    number, part2 = part2[0], part2[1:]
+
+                # {{{{{{{{{ find function }}}}}}}}}
+                founded_function = [func for func_name,
+                                    func in psg_funcs if func_name == function_name]
+                if not founded_function:
+                    if logger:
+                        logger.error(f'function "{function_name}" not found in PySimpleGUI')
+                    continue
+                if len(founded_function) > 1:
+                    if logger:
+                        logger.error(f'more than 1 function named "{function_name}" found in PySimpleGUI')
+                    continue
+
+                # {{{{{{{{{ collect }}}}}}}}}
+                injection_points.append({
+                    "tag": tag,
+                    "function_object": founded_function[0],
+                    "parent_class": None,
+                    "part1": 'func',
+                    "part2": part2,
+                    "number": number,
+                })
             except Exception as e:
                 if logger:
-                    logger.error(f'Error in finding the METHOD: {str(e)}')
+                    logger.error(f' General error in parsing function tag: tag = "{tag}"; error="{str(e)}"')
                 continue
 
-            # {{{{{{{{{ collect }}}}}}}}}
-            injection_points.append({
-                "tag": tag,
-                "function_object": founded_method,
-                "parent_class": founded_class[0],
-                "part1": part1,
-                "part2": part2,
-                "number": number,
-            })
-        except Exception as e:
-            if logger:
-                logger.error(f' General error in parsing class_method tag: tag = "{tag}"; error="{str(e)}"')
-            continue
+        injection_points.append('now, classes.')
+        # 0===0 classes 0===0
+        for tag in classes_method_tags:
+            try:
+                class_name, method_name = tag.split('.')
+                class_name, method_name = part1, part2 = class_name.split('+')[-1], method_name.split('+')[0]
 
-    # 888888888888888888888888888888888888888
-    # ===========  5 injecting  =========== #
-    # 888888888888888888888888888888888888888
-    # PLAN:
-    # (1) replace tags in 2_readme
-    #      with properly formateed text
-    # (2) log some data
-    # 8888888888888888888888888888888888888888888888888888888
+                # {{{{{{{{{ filter number }}}}}}}}}
+                number = ''
+                if part2[0] in ['1', '2']:
+                    number, method_name = part2[0], part2[1:]
+
+                # {{{{{{{{{ find class }}}}}}}}}
+                founded_class = [a_class_obj
+                                for a_class_name, a_class_obj in psg_classes
+                                if a_class_name == class_name]
+                if not founded_class:
+                    if logger: logger.error(f'skipping tag "{tag}", WHY: not found in PySimpleGUI')
+                    continue
+                if len(founded_class) > 1:
+                    if logger: logger.error(f'skipping tag "{tag}", WHY: found more than 1 class in PySimpleGUI')
+                    continue
+
+                # {{{{{{{{{ find method }}}}}}}}}
+                try:
+                    if method_name != 'doc':
+                        founded_method = getattr(founded_class[0], method_name)
+                    else:
+                        founded_method = None
+                except AttributeError as e:
+                    if logger:
+                        logger.error(f'METHOD not found!: {str(e)}')
+                    continue
+                except Exception as e:
+                    if logger:
+                        logger.error(f'Error in finding the METHOD: {str(e)}')
+                    continue
+
+                # {{{{{{{{{ collect }}}}}}}}}
+                injection_points.append({
+                    "tag": tag,
+                    "function_object": founded_method,
+                    "parent_class": founded_class[0],
+                    "part1": part1,
+                    "part2": part2,
+                    "number": number,
+                })
+            except Exception as e:
+                if logger:
+                    logger.error(f' General error in parsing class_method tag: tag = "{tag}"; error="{str(e)}"')
+                continue
+
+        # 888888888888888888888888888888888888888
+        # ===========  5 injecting  =========== #
+        # 888888888888888888888888888888888888888
+        # PLAN:
+        # (1) replace tags in 2_readme
+        #      with properly formateed text
+        # (2) log some data
+        # 8888888888888888888888888888888888888888888888888888888
 
 
-    bar_it = lambda x: '\n' + '='*len(x) + f'\nSTARTING TO INSERT markdown text into 2_readme.md\n' + '='*len(x) + '\n'
-    # 1> log some data
-    success_tags = []
-    bad_tags = []
-    for injection in injection_points:
-        if injection == 'now, classes.':
-            logger.info(bar_it('STARTING TO INSERT markdown text into 2_readme.md'))
-            continue
-        
-        # SPECIAL CASE: X.doc tag
-        if injection['part2'] == 'doc':
-            a_tag = injection['tag']
-            logger.info(f'a_tag = {a_tag, type(a_tag).__name__}')
-            doc_ = '' if not injection['parent_class'].__doc__ else injection['parent_class'].__doc__
-            # if doc_ == None or a_tag == None:
-            
-                
-            readme = readme.replace(a_tag, doc_)
-        
-        else:
+        bar_it = lambda x: '\n' + '='*len(x) + f'\nSTARTING TO INSERT markdown text into 2_readme.md\n' + '='*len(x) + '\n'
+        # 1> log some data
+        success_tags = []
+        bad_tags = []
+        for injection in injection_points:
+            if injection == 'now, classes.':
+                logger.info(bar_it('STARTING TO INSERT markdown text into 2_readme.md'))
+                continue
 
-            content = render(injection, logger=logger, line_break=line_break,
-                insert_md_section_for__class_methods=insert_md_section_for__class_methods)
-        
-            tag = injection["tag"]
-            if content:
-                success_tags.append(f'{tag} - COMPLETE')
+            # SPECIAL CASE: X.doc tag
+            if injection['part2'] == 'doc':
+                a_tag = injection['tag']
+                logger.info(f'a_tag = {a_tag, type(a_tag).__name__}')
+                doc_ = '' if not injection['parent_class'].__doc__ else injection['parent_class'].__doc__
+                # if doc_ == None or a_tag == None:
+
+
+                readme = readme.replace(a_tag, doc_)
+
             else:
-                bad_tags.append(f'{tag} - FAIL')
 
-            readme = readme.replace(tag, content)
+                content = render(injection, logger=logger, line_break=line_break,
+                    insert_md_section_for__class_methods=insert_md_section_for__class_methods)
+
+                tag = injection["tag"]
+                if content:
+                    success_tags.append(f'{tag} - COMPLETE')
+                else:
+                    bad_tags.append(f'{tag} - FAIL')
+
+                readme = readme.replace(tag, content)
 
 
-    bad_part = '''\n\nParameter Descriptions:\n\n|Type|Name|Meaning|\n|--|--|--|\n\n'''
-    readme = readme.replace(bad_part, '\n')
+        bad_part = '''\n\nParameter Descriptions:\n\n|Type|Name|Meaning|\n|--|--|--|\n\n'''
+        readme = readme.replace(bad_part, '\n')
 
-    # 2> log some data
-    if logger:
-        success_tags_str    = '\n'.join(success_tags).strip()
-        bad_tags_str        = '\n'.join(bad_tags).strip()
-        
-        # good message
-        good_message        = f'DONE {len(success_tags)} TAGS:\n' + '\n'.join(success_tags) if success_tags_str else 'All tags are wrong//'
-        # bad  message
-        bad_message         = f'FAIL WITH {len(bad_tags)} TAGS:\n' + '\n'.join(bad_tags) if bad_tags_str else 'No bad tags, YES!'
+        # 2> log some data
+        if logger:
+            success_tags_str    = '\n'.join(success_tags).strip()
+            bad_tags_str        = '\n'.join(bad_tags).strip()
 
-        logger.info(good_message)
-        logger.info(bad_message)
+            # good message
+            good_message        = f'DONE {len(success_tags)} TAGS:\n' + '\n'.join(success_tags) if success_tags_str else 'All tags are wrong//'
+            # bad  message
+            bad_message         = f'FAIL WITH {len(bad_tags)} TAGS:\n' + '\n'.join(bad_tags) if bad_tags_str else 'No bad tags, YES!'
 
+            logger.info(good_message)
+            logger.info(bad_message)
+        return readme
 
     # 8888888888888888888888888888888888
     # ===========  6 join  =========== #
     # 8888888888888888888888888888888888
-
+    call_reference = do_magic_progressing('5_call_reference.md')
+    with open('call reference.md', 'w', encoding='utf-8') as call_ref_file:
+        call_ref_file.write(call_reference)
+    readme = do_magic_progressing('2_readme.md')
     files = []
     if 0 in files_to_include: files.append(readfile('1_HEADER_top_part.md'))
     if 1 in files_to_include: files.append(readme)
