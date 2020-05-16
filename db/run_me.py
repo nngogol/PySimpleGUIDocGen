@@ -255,33 +255,35 @@ def mini_GUI():
     my_font = ("Helvetica", 12)
     my_font2 = ("Helvetica", 12, "bold")
     my_font3 = ("Helvetica", 15, "bold")
+    my_font4 = ("Mono", 18, "bold")
 
 
     layout = [
-       [
-           sg.Column(layout=[
+        [
+            sg.Column(layout=[
                 [sg.T('debug', font=my_font, text_color='blue')],
-                [sg.ML(size=(70-15,20), key='debug')],
+                [sg.ML(size=(70-15, 20), key='debug')],
                 [sg.T('error', font=my_font, text_color='red')],
-                [sg.ML(size=(70-15,20), key='error')],
-            ])
-           ,sg.T('            ')
-           ,sg.Column(layout=[
+                [sg.ML(size=(70-15, 20), key='error')],
+            ]),
+            sg.T('            '), sg.Column(layout=[
                 [sg.T('warning', font=my_font2)],
-                [sg.ML(size=(70-12,20), key='warning')],
+                [sg.ML(size=(70-12, 20), key='warning')],
                 [sg.T('info', font=my_font2)],
-                [sg.ML(size=(70-12,20), key='info')],
+                [sg.ML(size=(70-12, 20), key='info')],
             ]),
-           sg.Column(layout=[
+            sg.Column(layout=[
                 [sg.T('warning_info', font=my_font3)],
-                [sg.ML(size=(110,42), key='warning_info')],
+                [sg.ML(size=(110, 42), key='warning_info')],
             ]),
-           
+
         ]
     ]
-    window = sg.Window('We are live! Again! --- ' + 'Completed making {}'.format(OUTPUT_FILENAME), [
-        [sg.T(size=(25,1), font=my_font, key='-compile-time-')]
-        ,[  
+
+    window = sg.Window('We are live! Again! --- ' + 'Completed making            {}, {}'.format(os.path.basename(OUTPUT_FILENAME), os.path.basename(CALL_REFERENCE_FILENAME)), [
+        [sg.T(size=(25,1), font=my_font, key='-compile-time-'),
+         sg.T(' '*40 + 'Output files will be here: {} {}'.format(os.path.basename(OUTPUT_FILENAME), os.path.basename(CALL_REFERENCE_FILENAME)), size=(135,1), font=my_font4)],
+        [  
             sg.B('Run again (F1)', key='-run-')
             ,sg.CB('show time in logs (F2)', False, key='show_time')
             ,sg.CB('Logs with Color (F3)', True, key='use_psg_color')
