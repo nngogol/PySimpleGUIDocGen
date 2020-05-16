@@ -432,6 +432,7 @@ def main(do_full_readme=False,
         insert_md_section_for__class_methods:bool=True,
         remove_repeated_sections_classmethods:bool=False,
         output_repeated_tags:bool=False,
+        main_md_file='2_readme.md',
         skip_dunder_method:bool=True):
     """
     Goal is:
@@ -462,7 +463,7 @@ def main(do_full_readme=False,
     # ===========  1 loading files =========== #
     # ===========  2 GET classes, funcions, varialbe a.k.a. memes =========== #
     # 8888888888888888888888888888888888888888888888888888888888888888888888888
-    readme  = readfile('2_readme.md')
+    readme  = readfile(main_md_file)
 
     def valid_field(pair):
         bad_fields = 'LOOK_AND_FEEL_TABLE copyright __builtins__ icon'.split(' ')
@@ -622,7 +623,7 @@ def main(do_full_readme=False,
                 continue
             except Exception as e:
                 if logger:
-                    logger.error(f'Error in finding the METHOD: {str(e)}')
+                    logger.error(f' General error in parsing class_method tag: tag = "{tag}"; error="{str(e)}"')
                 continue
 
             # {{{{{{{{{ collect }}}}}}}}}
@@ -697,6 +698,9 @@ def main(do_full_readme=False,
 
         logger.info(good_message)
         logger.info(bad_message)
+        
+        bad_part = '''\n\nParameter Descriptions:\n\n|Type|Name|Meaning|\n|--|--|--|\n\n'''
+        readme = readme.replace(bad_part, '\n')
 
 
     # 8888888888888888888888888888888888
@@ -763,7 +767,7 @@ def main(do_full_readme=False,
     if logger:
         logger.error(f'Error in main')
 
-    logger.save_messages()
+    logger.save()
 
 
 

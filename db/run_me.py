@@ -1,17 +1,40 @@
-import datetime,time,os
-cd = CD = os.path.dirname(os.path.abspath(__file__))
-
+import PySimpleGUI as sg
+import datetime,time,os,platform,json
+from subprocess import Popen
 from make_real_readme import main
+cd = os.path.dirname(os.path.abspath(__file__))
+
 def readfile(filename):
     with open(filename, 'r', encoding='utf-8') as ff: return ff.read()
 def writefile(fpath, content):
     with open(fpath, 'w', encoding='utf-8') as ff: ff.write(content)
-import json
 def writejson(a_path:str, a_dict:dict) -> None:
-    with open(a_path, 'w', encoding='utf-8') as output_file:
-        json.dump(a_dict, output_file, ensure_ascii=False, indent=2)
+    with open(a_path, 'w', encoding='utf-8') as output_file: json.dump(a_dict, output_file, ensure_ascii=False, indent=2)
 def readjson(a_path:str) -> dict:
     with open(a_path, 'r', encoding='utf-8') as f: return json.load(f)
+
+def openfile(a_path):
+    # File exists?
+    if not os.path.exists(a_path): return sg.Popup(f"Error! This file doesn't exists: {a_path}")
+
+    # check: OS
+    if 'Windows' in platform.system():
+        os.startfile(a_path)
+
+    elif 'Linux' in platform.system():
+        Popen(f'exo-open "{a_path}"', shell=True)
+
+def opendir(a_path):
+    # Folder exists?
+    if not os.path.exists(a_path): return sg.Popup(f"Error! This directory doesn't exists: {a_path}")
+
+    # check: OS
+    if 'Windows' in platform.system():
+        os.startfile(a_path)
+
+    elif 'Linux' in platform.system():
+        Popen(f'exo-open --launch FileManager --working-directory "{a_path}"', shell=True)
+
 
 ########################################################################
 #                              __ _            _                       #
@@ -23,7 +46,8 @@ def readjson(a_path:str) -> dict:
 #                                    __/ |                             #
 #                                   |___/                              #
 ########################################################################
-OUTPUT_FILENAME = 'readme.md'
+OUTPUT_FILENAME = os.path.join(cd, 'readme.md')
+CALL_REFERENCE_FILENAME = os.path.join(cd, 'call_ref.md')
 
 ##-#-#-# ##-#-#-#
 # Pre-process logic
@@ -187,11 +211,20 @@ class BESTLOG(object):
 
         return error_list, warning_list, info_list, debug_list, warning_info_
 
-def compile_all_stuff(**kw):
-    # import logging
-
-    log_file = os.path.join(cd, 'LoG')
-    log_obj = BESTLOG(log_file)
+def compile_call_ref(**kw):
+    log_obj = BESTLOG(os.path.join(cd, 'LoG_call_ref'))
+    
+    main(logger=log_obj,
+         main_md_file='5_call_reference.md',
+         insert_md_section_for__class_methods=insert_md_section_for__class_methods,
+         remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
+         files_to_include=[],
+         output_name=CALL_REFERENCE_FILENAME,
+         delete_html_comments=True)
+    log_obj.save()
+    
+def compile_readme(**kw):
+    log_obj = BESTLOG(os.path.join(cd, 'LoG'))
     main(logger=log_obj,
          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
          remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
@@ -199,10 +232,12 @@ def compile_all_stuff(**kw):
          output_name=OUTPUT_FILENAME,
          delete_html_comments=True)
     log_obj.save()
-
-    # cd = CD = os.path.dirname(os.path.abspath(__file__))
-    # log_file = os.path.join(cd, 'usage.log.txt')
     return log_obj.load(**kw)
+
+def compile_all_stuff(**kw):
+    result  = compile_readme(**kw)
+    compile_call_ref(**kw)
+    return result
 
 # if method == 'with logs': compile_all_stuff()
 
@@ -250,6 +285,9 @@ def mini_GUI():
             sg.B('Run again (F1)', key='-run-')
             ,sg.CB('show time in logs (F2)', False, key='show_time')
             ,sg.CB('Logs with Color (F3)', True, key='use_psg_color')
+            ,sg.B('open call ref', key='-open_call_ref-')
+            ,sg.B('open readme.txt', key='-open_readme.txt-')
+            ,sg.B('open "db folder"', key='-open_db_folder-')
         ]
         ,*layout
     ], resizable=True, finalize=True, location=(0,0), return_keyboard_events = True)
@@ -275,9 +313,17 @@ def mini_GUI():
     while True:
         event, values = window()
         if event in ('Exit', None): break
+        
+        print('PSG event>', event)
 
-        # print(event)
-        if event == '-run-' or 'F1' in event: update_compilation_in_psg(values)
+        # buttons
+        if event == '-run-':              update_compilation_in_psg(values)
+        if event == '-open_readme.txt-':  openfile(OUTPUT_FILENAME)
+        if event == '-open_call_ref-':    openfile(CALL_REFERENCE_FILENAME)
+        if event == '-open_db_folder-':   opendir(cd)
+        if event == '-open_github_gallery-':   opendir(cd)
+        # hotkeys
+        if 'F1' in event: update_compilation_in_psg(values)
         if 'F2' in event: window['show_time'](not values['show_time'])
         if 'F3' in event: window['use_psg_color'](not values['use_psg_color'])
 
@@ -285,7 +331,6 @@ def mini_GUI():
 
 
 if enable_popup:
-    import PySimpleGUI as sg
 
     mini_GUI()
     # sg.PopupScrolled('Completed making {}'.format(OUTPUT_FILENAME), ''.join(lines), size=(80,50))
