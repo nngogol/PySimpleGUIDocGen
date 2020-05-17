@@ -1,7 +1,4 @@
-import PySimpleGUI as sg
-import datetime,time,os,platform,json
-from subprocess import Popen
-from make_real_readme import main
+import re,datetime,time,os,platform,json,PySimpleGUI as sg; from subprocess import Popen; from make_real_readme import main
 cd = os.path.dirname(os.path.abspath(__file__))
 
 def readfile(filename):
@@ -12,6 +9,7 @@ def writejson(a_path:str, a_dict:dict) -> None:
     with open(a_path, 'w', encoding='utf-8') as output_file: json.dump(a_dict, output_file, ensure_ascii=False, indent=2)
 def readjson(a_path:str) -> dict:
     with open(a_path, 'r', encoding='utf-8') as f: return json.load(f)
+
 
 def openfile(a_path):
     # File exists?
@@ -46,57 +44,20 @@ def opendir(a_path):
 #                                    __/ |                             #
 #                                   |___/                              #
 ########################################################################
-OUTPUT_FILENAME = os.path.join(cd, 'readme.md')
-CALL_REFERENCE_FILENAME = os.path.join(cd, 'call_ref.md')
+def load_configs(): return readjson(os.path.join(cd, 'app_configs.json'))
+def save_configs(a_config:dict): writejson(os.path.join(cd, 'app_configs.json'), a_config)
 
-##-#-#-# ##-#-#-#
-# Pre-process logic
-##-#-#-# ##-#-#-#
-
-line_break = '<br>'
-# line_break can be:
-# - '<br>'
-# - ' \n '
-
-method = 'with logs'
-# method can be:
-# - 'simple, no log'
-# - 'with logs'
+APP_CONFIGS = load_configs()
+README_OFILENAME = APP_CONFIGS['README_FILENAME']
+CALL_REFERENCE_OFILENAME = APP_CONFIGS['CALL_REFERENCE_FILENAME']
 
 
 ##-#-#-# ##-#-#-#
 # Post-process logic
 ##-#-#-# ##-#-#-#
-enable_popup = True
 insert_md_section_for__class_methods = False
 remove_repeated_sections_classmethods = False
 
-
-
-##############
-#     __     #
-#    /_ |    #
-#     | |    #
-#     | |    #
-#     | |    #
-#     |_|    #
-##############
-if method == 'simple, no log':
-    main(logger=None,
-         insert_md_section_for__class_methods=insert_md_section_for__class_methods,
-         remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
-         files_to_include=[0, 1, 2, 3],
-         output_name=OUTPUT_FILENAME,
-         delete_html_comments=True)
-
-################
-#     ___      #
-#    |__ \     #
-#       ) |    #
-#      / /     #
-#     / /_     #
-#    |____|    #
-################
 class BESTLOG(object):
     def __init__(self, filename):
         # my_file = logging.FileHandler(filename, mode='w')
@@ -211,35 +172,42 @@ class BESTLOG(object):
 
         return error_list, warning_list, info_list, debug_list, warning_info_
 
-def compile_call_ref(**kw):
-    log_obj = BESTLOG(os.path.join(cd, 'LoG_call_ref'))
+def compile_call_ref(output_filename='LoG_call_ref', **kw):
+    ''' Compile a "5_call_reference.md" file'''
+
+    log_obj = BESTLOG(os.path.join(cd, output_filename))
     
     main(logger=log_obj,
          main_md_file='5_call_reference.md',
          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
          remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
          files_to_include=[],
-         output_name=CALL_REFERENCE_FILENAME,
+         output_name=CALL_REFERENCE_OFILENAME,
          delete_html_comments=True)
     log_obj.save()
-    
-def compile_readme(**kw):
-    log_obj = BESTLOG(os.path.join(cd, 'LoG'))
+    return log_obj.load(**kw)
+
+def compile_readme(output_filename='LoG', **kw):
+    ''' Compile a "2_readme.md" file'''
+    log_obj = BESTLOG(os.path.join(cd, output_filename))
     main(logger=log_obj,
          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
          remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
          files_to_include=[0, 1, 2, 3],
-         output_name=OUTPUT_FILENAME,
+         output_name=README_OFILENAME,
          delete_html_comments=True)
     log_obj.save()
     return log_obj.load(**kw)
 
 def compile_all_stuff(**kw):
-    result  = compile_readme(**kw)
-    compile_call_ref(**kw)
-    return result
+    '''
+        Compile a "2_ and 5_" .md filess
+        return output from them
+    '''
+    result_readme  = compile_readme(**kw)
+    result_call_ref = compile_call_ref(**kw)
+    return result_readme, result_call_ref
 
-# if method == 'with logs': compile_all_stuff()
 
 ########################################
 #     _____                            #
@@ -251,6 +219,42 @@ def compile_all_stuff(**kw):
 #               | |         | |        #
 #               |_|         |_|        #
 ########################################
+
+def md2psg(target_text):
+    # target = 'This is **bold** and *italic* words'
+    #              V
+    # sg.T('This is '), sg.T('bold', font=...bold), ...'
+
+    # imports
+    from collections import namedtuple
+    spec = namedtuple('spec', 'char text'.split(' '))
+
+    # START
+    # =====
+    parts = re.compile(r'([\*]{1,2})([\s\S]*?)([\*]{1,2})', flags=re.M|re.DOTALL).split(target_text)
+    chuncks, skip_this = [], 0
+    for index, part in enumerate(parts):
+        if skip_this != 0:
+            skip_this -= 1; continue
+
+        if part not in ['*', '**']: chuncks.append(part)
+        else:
+            skip_this = 2
+            chuncks.append(spec(part, parts[index+1]))
+
+    font_norm = ('Mono 13 ')     # (*sg.DEFAULT_FONT, 'italic')
+    font_bold = ('Mono 13 italic')     # (*sg.DEFAULT_FONT, 'italic')
+    font_ita  = ('Mono 13 bold')       # (*sg.DEFAULT_FONT, 'bold')
+    
+    list_of_Ts = []
+    for chunck in chuncks:
+        if type(chunck) is str:     list_of_Ts.append(sg.T(chunck, font=font_norm, size=(len(chunck), 1), pad=(0,0)))
+        elif type(chunck) is spec:
+            if chunck.char == '*':  list_of_Ts.append(sg.T(chunck.text, font=font_ita, pad=(0,0), size=(len(chunck.text), 1)))
+            if chunck.char == '**': list_of_Ts.append(sg.T(chunck.text, font=font_bold,  pad=(0,0), size=(len(chunck.text), 1)))
+    return list_of_Ts
+
+
 def mini_GUI():
     my_font = ("Helvetica", 12)
     my_font2 = ("Helvetica", 12, "bold")
@@ -258,31 +262,39 @@ def mini_GUI():
     my_font4 = ("Mono", 18, "bold")
 
 
-    layout = [
-        [
+
+
+
+    def make_tab(word):
+        return [[
             sg.Column(layout=[
                 [sg.T('debug', font=my_font, text_color='blue')],
-                [sg.ML(size=(70-15, 20), key='debug')],
+                [sg.ML(size=(70-15, 20), key=f'-{word}-debug-')],
                 [sg.T('error', font=my_font, text_color='red')],
-                [sg.ML(size=(70-15, 20), key='error')],
+                [sg.ML(size=(70-15, 20), key=f'-{word}-error-')],
             ]),
             sg.T('            '), sg.Column(layout=[
                 [sg.T('warning', font=my_font2)],
-                [sg.ML(size=(70-12, 20), key='warning')],
+                [sg.ML(size=(70-12, 20), key=f'-{word}-warning-')],
                 [sg.T('info', font=my_font2)],
-                [sg.ML(size=(70-12, 20), key='info')],
+                [sg.ML(size=(70-12, 20), key=f'-{word}-info-')],
             ]),
             sg.Column(layout=[
                 [sg.T('warning_info', font=my_font3)],
-                [sg.ML(size=(110, 42), key='warning_info')],
+                [sg.ML(size=(110, 42), key=f'-{word}-warning_info-')],
             ]),
-
+        ]]
+    layout = [
+        [ sg.TabGroup(  [[
+                            sg.Tab('README',make_tab('README')),
+                            sg.Tab('CALL_REF',make_tab('CALL_REF'))
+                        ]]
+                     )
         ]
     ]
 
-    window = sg.Window('We are live! Again! --- ' + 'Completed making            {}, {}'.format(os.path.basename(OUTPUT_FILENAME), os.path.basename(CALL_REFERENCE_FILENAME)), [
-        [sg.T(size=(25,1), font=my_font, key='-compile-time-'),
-         sg.T(' '*40 + 'Output files will be here: {} {}'.format(os.path.basename(OUTPUT_FILENAME), os.path.basename(CALL_REFERENCE_FILENAME)), size=(135,1), font=my_font4)],
+    window = sg.Window('We are live! Again! --- ' + 'Completed making            {}, {}'.format(os.path.basename(README_OFILENAME), os.path.basename(CALL_REFERENCE_OFILENAME)), [
+        [sg.T(size=(25,1), font=my_font, key='-compile-time-')],
         [  
             sg.B('Run again (F1)', key='-run-')
             ,sg.CB('show time in logs (F2)', False, key='show_time')
@@ -290,38 +302,69 @@ def mini_GUI():
             ,sg.B('open call ref', key='-open_call_ref-')
             ,sg.B('open readme.txt', key='-open_readme.txt-')
             ,sg.B('open "db folder"', key='-open_db_folder-')
+            ,sg.T(' '*30)
+            ,sg.Col([
+                    # [sg.T('output name for call_ref markdown file', key=(15,1)), sg.I(key='')],
+                    [*md2psg('markdown outputFileName *FOR* **call ref**: '), sg.I(os.path.basename(README_OFILENAME), key='md1')],
+                    [*md2psg('markdown outputFileName *FOR* **readme  **: '), sg.I(os.path.basename(CALL_REFERENCE_OFILENAME), key='md2')]
+                ])
         ]
         ,*layout
     ], resizable=True, finalize=True, location=(0,0), return_keyboard_events = True)
+    
+    def update_time_in_GUI(): window['-compile-time-'](datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f'))
 
     def update_compilation_in_psg(values):
         # get results
-        results = compile_all_stuff(use_psg_color=values['use_psg_color'], show_time=values['show_time'])
+        result_readme, result_call_ref = compile_all_stuff(use_psg_color=values['use_psg_color'], show_time=values['show_time'])
 
-        # UPDATE GUI
-        curr_time = lambda : datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f')
-        window['-compile-time-'](curr_time())
-        for key, txt in zip('error warning info debug'.split(' '), results[:4]):
-            window[key]('\n'.join(txt))
-        # colors warning_info
-        window['warning_info'].update('')
+        # DO 2_readme
+        window['-README-error-']('\n'.join(result_readme[0]))
+        window['-README-warning-']('\n'.join(result_readme[1]))
+        window['-README-info-']('\n'.join(result_readme[2]))
+        window['-README-debug-']('\n'.join(result_readme[3]))
+        # /// colors warning_info
+        window['-README-warning_info-'].update('')
         if values['use_psg_color']:
-            for text, color in results[-1]:
-                window['warning_info'].print(text, text_color=color)
+            for text, color in result_readme[-1]:
+                window['-README-warning_info-'].print(text, text_color=color)
         else:
-            window['warning_info']('\n'.join(results[-1]))
+            window['-README-warning_info-']('\n'.join(result_readme[-1]))
+        
+        # DO 5_cal_ref
+        window['-CALL_REF-error-']('\n'.join(result_call_ref[0]))
+        window['-CALL_REF-warning-']('\n'.join(result_call_ref[1]))
+        window['-CALL_REF-info-']('\n'.join(result_call_ref[2]))
+        window['-CALL_REF-debug-']('\n'.join(result_call_ref[3]))
+        # /// colors warning_info
+        window['-CALL_REF-warning_info-'].update('')
+        if values['use_psg_color']:
+            for text, color in result_call_ref[-1]:
+                window['-CALL_REF-warning_info-'].print(text, text_color=color)
+        else:
+            window['-CALL_REF-warning_info-']('\n'.join(result_call_ref[-1]))
+
+        # ~~~~~~~~~~~~
+        # GUI updating
+        # ~~~~~~~~~~~~
+        update_time_in_GUI()
 
     update_compilation_in_psg({'use_psg_color':not False, 'show_time':False})
     while True:
         event, values = window()
-        if event in ('Exit', None): break
+
+        # print(values)
+        if event in ('Exit', None):
+            APP_CONFIGS['README_FILENAME'], APP_CONFIGS['CALL_REFERENCE_FILENAME'] = window['md1'].get(), window['md2'].get()
+            save_configs(APP_CONFIGS)
+            break
         
         print('PSG event>', event)
 
         # buttons
         if event == '-run-':              update_compilation_in_psg(values)
-        if event == '-open_readme.txt-':  openfile(OUTPUT_FILENAME)
-        if event == '-open_call_ref-':    openfile(CALL_REFERENCE_FILENAME)
+        if event == '-open_readme.txt-':  openfile(README_OFILENAME)
+        if event == '-open_call_ref-':    openfile(CALL_REFERENCE_OFILENAME)
         if event == '-open_db_folder-':   opendir(cd)
         if event == '-open_github_gallery-':   opendir(cd)
         # hotkeys
@@ -332,7 +375,6 @@ def mini_GUI():
     window.close()
 
 
-if enable_popup:
-
+if __name__ == '__main__':
     mini_GUI()
-    # sg.PopupScrolled('Completed making {}'.format(OUTPUT_FILENAME), ''.join(lines), size=(80,50))
+    # sg.PopupScrolled('Completed making {}'.format(README_OFILENAME), ''.join(lines), size=(80,50))
