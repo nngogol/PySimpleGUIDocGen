@@ -1,6 +1,6 @@
 from inspect import getmembers, isfunction, isclass, getsource, signature, _empty, isdatadescriptor
 from datetime import datetime
-import PySimpleGUIlib, click, textwrap, logging, json, re, os
+import PySimpleGUI, click, textwrap, logging, json, re, os
 import os
 cd = CD = os.path.dirname(os.path.abspath(__file__))
 
@@ -479,8 +479,8 @@ def main(do_full_readme=False,
         return True
 
         
-    psg_members  = [i for i in getmembers(PySimpleGUIlib) if valid_field(i)] # variables, functions, classes
-    # psg_members  = getmembers(PySimpleGUIlib) # variables, functions, classes
+    psg_members  = [i for i in getmembers(PySimpleGUI) if valid_field(i)] # variables, functions, classes
+    # psg_members  = getmembers(PySimpleGUI) # variables, functions, classes
     psg_funcs = [o for o in psg_members if isfunction(o[1])] # only functions
     psg_classes = [o for o in psg_members if isclass(o[1])]  # only classes
     psg_classes_ = list(set([i[1] for i in psg_classes]))    # boildown B,Btn,Butt -into-> Button
