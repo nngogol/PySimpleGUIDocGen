@@ -47,6 +47,8 @@ def opendir(a_path):
 def load_configs(): return readjson(os.path.join(cd, 'app_configs.json'))
 def save_configs(a_config:dict): writejson(os.path.join(cd, 'app_configs.json'), a_config)
 
+
+
 APP_CONFIGS = load_configs()
 README_OFILENAME = APP_CONFIGS['README_FILENAME']
 CALL_REFERENCE_OFILENAME = APP_CONFIGS['CALL_REFERENCE_FILENAME']
@@ -172,13 +174,13 @@ class BESTLOG(object):
 
         return error_list, warning_list, info_list, debug_list, warning_info_
 
-def compile_call_ref(output_filename='LoG_call_ref', **kw):
+def compile_call_ref(output_filename='output/LoG_call_ref', **kw):
     ''' Compile a "5_call_reference.md" file'''
 
     log_obj = BESTLOG(os.path.join(cd, output_filename))
     
     main(logger=log_obj,
-         main_md_file='5_call_reference.md',
+         main_md_file='markdown input files/5_call_reference.md',
          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
          remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
          files_to_include=[],
@@ -187,7 +189,7 @@ def compile_call_ref(output_filename='LoG_call_ref', **kw):
     log_obj.save()
     return log_obj.load(**kw)
 
-def compile_readme(output_filename='LoG', **kw):
+def compile_readme(output_filename='output/LoG', **kw):
     ''' Compile a "2_readme.md" file'''
     log_obj = BESTLOG(os.path.join(cd, output_filename))
     main(logger=log_obj,
@@ -261,33 +263,29 @@ def mini_GUI():
     my_font3 = ("Helvetica", 15, "bold")
     my_font4 = ("Mono", 18, "bold")
 
-
-
-
-
     def make_tab(word):
         return [[
             sg.Column(layout=[
                 [sg.T('debug', font=my_font, text_color='blue')],
-                [sg.ML(size=(70-15, 20), key=f'-{word}-debug-')],
+                [sg.ML(size=(70-15, 15), key=f'-{word}-debug-')],
                 [sg.T('error', font=my_font, text_color='red')],
-                [sg.ML(size=(70-15, 20), key=f'-{word}-error-')],
+                [sg.ML(size=(70-15, 15), key=f'-{word}-error-')],
             ]),
             sg.T('            '), sg.Column(layout=[
                 [sg.T('warning', font=my_font2)],
-                [sg.ML(size=(70-12, 20), key=f'-{word}-warning-')],
+                [sg.ML(size=(70-12, 15), key=f'-{word}-warning-')],
                 [sg.T('info', font=my_font2)],
-                [sg.ML(size=(70-12, 20), key=f'-{word}-info-')],
+                [sg.ML(size=(70-12, 15), key=f'-{word}-info-')],
             ]),
             sg.Column(layout=[
                 [sg.T('warning_info', font=my_font3)],
-                [sg.ML(size=(110, 42), key=f'-{word}-warning_info-')],
+                [sg.ML(size=(110, 42-8), key=f'-{word}-warning_info-')],
             ]),
         ]]
     layout = [
         [ sg.TabGroup(  [[
-                            sg.Tab('README',make_tab('README')),
-                            sg.Tab('CALL_REF',make_tab('CALL_REF'))
+                            sg.Tab('README', make_tab('README')),
+                            sg.Tab('CALL_REF', make_tab('CALL_REF'))
                         ]]
                      )
         ]
@@ -305,8 +303,8 @@ def mini_GUI():
             ,sg.T(' '*30)
             ,sg.Col([
                     # [sg.T('output name for call_ref markdown file', key=(15,1)), sg.I(key='')],
-                    [*md2psg('markdown outputFileName *FOR* **call ref**: '), sg.I(os.path.basename(README_OFILENAME), key='md1')],
-                    [*md2psg('markdown outputFileName *FOR* **readme  **: '), sg.I(os.path.basename(CALL_REFERENCE_OFILENAME), key='md2')]
+                    [*md2psg('markdown outputFileName *FOR* **readme  **: '), sg.I(README_OFILENAME, key='md1'), sg.B('open in explorer', key='open in explorer_readme')],
+                    [*md2psg('markdown outputFileName *FOR* **call ref**: '), sg.I(CALL_REFERENCE_OFILENAME, key='md2'), sg.B('open in explorer', key='open in explorer_calref')]
                 ])
         ]
         ,*layout
@@ -367,6 +365,8 @@ def mini_GUI():
         if event == '-open_call_ref-':    openfile(CALL_REFERENCE_OFILENAME)
         if event == '-open_db_folder-':   opendir(cd)
         if event == '-open_github_gallery-':   opendir(cd)
+        if event == 'open in explorer_readme':    opendir(os.path.dirname(os.path.join(cd, values['md1'])))
+        if event == 'open in explorer_calref':   opendir(os.path.dirname(os.path.join(cd, values['md2'])))
         # hotkeys
         if 'F1' in event: update_compilation_in_psg(values)
         if 'F2' in event: window['show_time'](not values['show_time'])

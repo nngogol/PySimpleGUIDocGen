@@ -1,4 +1,4 @@
 {
-  "README_FILENAME": "readme.md",
-  "CALL_REFERENCE_FILENAME": "call reference.md"
+  "README_FILENAME": "output/readme.md",
+  "CALL_REFERENCE_FILENAME": "output/call reference.md"
 }

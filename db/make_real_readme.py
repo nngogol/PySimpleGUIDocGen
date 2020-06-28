@@ -432,7 +432,7 @@ def main(do_full_readme=False,
         insert_md_section_for__class_methods:bool=True,
         remove_repeated_sections_classmethods:bool=False,
         output_repeated_tags:bool=False,
-        main_md_file='2_readme.md',
+        main_md_file='markdown input files/2_readme.md',
         skip_dunder_method:bool=True):
     """
     Goal is:
@@ -707,11 +707,13 @@ def main(do_full_readme=False,
     # ===========  6 join  =========== #
     # 8888888888888888888888888888888888
 
+
+
     files = []
-    if 0 in files_to_include: files.append(readfile('1_HEADER_top_part.md'))
+    if 0 in files_to_include: files.append(readfile('markdown input files/1_HEADER_top_part.md'))
     if 1 in files_to_include: files.append(readme)
-    if 2 in files_to_include: files.append(readfile('3_FOOTER.md'))
-    if 3 in files_to_include: files.append(readfile('4_Release_notes.md'))
+    if 2 in files_to_include: files.append(readfile('markdown input files/3_FOOTER.md'))
+    if 3 in files_to_include: files.append(readfile('markdown input files/4_Release_notes.md'))
 
     Joined_MARKDOWN = '\n\n'.join(files) if do_full_readme or files else readme
 
