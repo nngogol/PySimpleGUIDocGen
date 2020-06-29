@@ -46,12 +46,12 @@ for aclass in psg_classes:
         continue
     
     # print standart things:
-    log(f'### {class_name} Element ')
+    log(f'## {class_name} Element ')
     log(f'<!-- <+{class_name}.doc+> -->')
     log(f'<!-- <+{class_name}.__init__+> -->\n')
 
     # print all public methods:
-    log('\n'.join([f"#### {name}\n<!-- <+{class_name}.{name}+> -->\n"
+    log('\n'.join([f"### {name}\n<!-- <+{class_name}.{name}+> -->\n"
                     for name, obj in inspect.getmembers(aclass)
                     if not name.startswith('_')  ]))
 
