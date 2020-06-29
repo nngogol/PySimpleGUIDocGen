@@ -1,4 +1,6 @@
 import subprocess,re,datetime,time,os,platform,json,PySimpleGUI as sg; from subprocess import Popen; from make_real_readme import main
+
+sg.theme('Dark2')
 cd = os.path.dirname(os.path.abspath(__file__))
 
 def readfile(filename):
@@ -247,40 +249,68 @@ def compile_all_stuff(**kw):
 #               |_|         |_|        #
 ########################################
 
+
 def md2psg(target_text):
-	# target = 'This is **bold** and *italic* words'
-	#              V
-	# sg.T('This is '), sg.T('bold', font=...bold), ...'
+	r'''
+		ib<space>color
+		i italic
+		b bold
+		color = can be word   can be color
+				red             #ff00111
+				green
+				blue
+		i?b?\s?\w+?
 
-	# imports
-	from collections import namedtuple
-	spec = namedtuple('spec', 'char text'.split(' '))
 
-	# START
-	# =====
-	parts = re.compile(r'([\*]{1,2})([\s\S]*?)([\*]{1,2})', flags=re.M|re.DOTALL).split(target_text)
-	chuncks, skip_this = [], 0
-	for index, part in enumerate(parts):
-		if skip_this != 0:
-			skip_this -= 1; continue
+		usage
+		  *i*a**            italic
+		  *b*a**            bold
+		  *ib*a**           italic bold
+		  *ib red*a**       italic bold red
+		  *b green*a**      bold green
+		
+		'This was *I*special** message from *B*him**. And from *Igreen*this** to *Ired*this**'
+	'''
 
-		if part not in ['*', '**']: chuncks.append(part)
-		else:
-			skip_this = 2
-			chuncks.append(spec(part, parts[index+1]))
+	# format
+	# ======
+	font_norm   = ('Mono 12 ')           # (*sg.DEFAULT_FONT, 'italic')
+	font_bold   = ('Mono 12 italic')     # (*sg.DEFAULT_FONT, 'italic')
+	font_italic = ('Mono 12 bold')       # (*sg.DEFAULT_FONT, 'bold')
 
-	font_norm = ('Mono 13 ')     # (*sg.DEFAULT_FONT, 'italic')
-	font_bold = ('Mono 13 italic')     # (*sg.DEFAULT_FONT, 'italic')
-	font_ita  = ('Mono 13 bold')       # (*sg.DEFAULT_FONT, 'bold')
-	
 	list_of_Ts = []
-	for chunck in chuncks:
-		if type(chunck) is str:     list_of_Ts.append(sg.T(chunck, font=font_norm, size=(len(chunck), 1), pad=(0,0)))
-		elif type(chunck) is spec:
-			if chunck.char == '*':  list_of_Ts.append(sg.T(chunck.text, font=font_ita, pad=(0,0), size=(len(chunck.text), 1)))
-			if chunck.char == '**': list_of_Ts.append(sg.T(chunck.text, font=font_bold,  pad=(0,0), size=(len(chunck.text), 1)))
-	return list_of_Ts
+	parts = [i for i in re.compile(r'(\*I?B?[a-z]*?\*[\d\D]*?\*\*)', flags=re.M|re.DOTALL).split(target_text) if i is not None]
+	for index, text in enumerate(parts):
+		if index % 2 == 0:
+			# Normal text
+			
+			T_text = text
+			T = sg.T(T_text, size=(len(T_text), 1), pad=(0,0), font=font_norm)
+		else:
+			# SPECIAL format
+			T_parameters = {
+				'font': font_norm
+			}
 
+
+			my_format = text[1:].split('*')[0]
+
+			# ::: italic
+			if 'I' in my_format: T_parameters['font'] = font_italic
+			# ::: bold
+			if 'B' in my_format: T_parameters['font'] = font_bold
+
+			# ::: colors
+			color_left = my_format.replace('I', '').replace('B', '')
+			if color_left: T_parameters['text_color'] = color_left
+
+			# making psg element
+			T_text = '*'.join(text.split('*')[2:-2])
+			T = sg.T(T_text, size=(len(T_text), 1), pad=(0,0), **T_parameters)
+
+		list_of_Ts.append(T)
+
+	return list_of_Ts
 
 def mini_GUI():
 	my_font = ("Helvetica", 12)
@@ -299,7 +329,7 @@ def mini_GUI():
 
 		return [[
 			sg.Column(layout=[
-				[sg.T('debug', font=my_font, text_color='blue')],
+				[sg.T('debug', font=my_font, text_color='grey')],
 				[sg.ML(size=(50-15, 15), key=f'-{word}-debug-')],
 				[sg.T('error', font=my_font, text_color='red')],
 				[sg.ML(size=(50-15, 15), key=f'-{word}-error-')],
@@ -319,49 +349,86 @@ def mini_GUI():
 				]),
 				('Listbox', word, [
 					[sg.T('warning info listbox', font=my_font3)]
-					,[sg.Listbox([], size=(100, 25), key=f'-{word}-listbox-', enable_events=True)]
+					,[sg.Listbox([], size=(110, 30-1), key=f'-{word}-listbox-', enable_events=True, background_color='#ffccaa')]
 				])
 			)
-
 		]]
-	layout = [
-		[ sg.TabGroup( 	[[  sg.Tab('README', make_tab('README')),
-							sg.Tab('CALL_REF', make_tab('CALL_REF')),
-							sg.Tab('General settings', [
-									[sg.T('text editor:'), sg.Combo(['pycharm', 'subl'], default_value='subl', key='_text_editor_combo_')]
-								])
-						]] )
-		]
+
+	settings_layout = [
+		[sg.Frame('Text editor', [
+			[sg.Combo(['pycharm', 'subl'], default_value='subl', key='_text_editor_combo_')]
+		])]
+
+		,[sg.Frame('⅀∉ Filter "empty tables"', [
+				[sg.CB('enable', True, key='checkbox_enable_empty_tables_filter')],
+				[sg.ML('PrintClose\nEasyPrintClose\nmain\ntheme\nRead',
+						size=(30,10), key='_filter_empty_tables_ml_')]])]
+
+		,[sg.Frame('⅀∉ Filter "tkinter class methods"', [
+				[sg.CB('enable', True, key='checkbox_enable_filter_tkinter_class_methods')],
+				[sg.ML('SetFocus\nSetTooltip\nUpdate\n__init__\nbind\nexpand\nset_cursor\nset_size',
+						size=(30,10), key='_filter_tkinter_class_methods_')]])]
 	]
+	layout = [[sg.TabGroup([[
+				sg.Tab('readme logs', 					make_tab('README')),
+				sg.Tab('Call reference logs', 	make_tab('CALL_REF')),
+				sg.Tab('General settings', 			settings_layout)
+	]])]]
+
+	# ░▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒░
+	# ░▒▒▓▓▓ progress bar ▓▓▓▒▒░
+	# ░▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒░
+	from time import sleep; from math import pi, sin; from itertools import count
+	def next_star():
+		middle = 100/2
+		for i in (int(sin(i*pi/middle)*middle + middle) for i in count()):
+			yield i
+
+	# ▓▓▓▓▓▓▒▒░░░░░▒▒▓▓▓▓▓▓▓
+	# ▓▓▓▓▓▓▓▒▒░░░▒▒▓▓▓▓▓▓▓▓
+	# ▓▓▓▓▓▓▓▓▒▒░▒▒▓▓▓▓▓▓▓▓▓
 
 	psg_module_path = str(sg).split("' from '")[1][:-2]
+	star_bar = 	sg.Col([
+			[sg.ProgressBar(max_value=100, orientation='h',
+							key='_star_bar1_', size=(50,5), bar_color=('blue', 'yellow'))],
+			[sg.ProgressBar(max_value=100, orientation='h',
+							key='_star_bar2_', size=(50,5), bar_color=('yellow', 'blue'))],
+	])
+	# guia
+	def empty_line(fontsize=12): return [sg.T('', font=('Mono '+str(fontsize)))]
 	window = sg.Window('We are live! Again! --- ' + 'Completed making            {}, {}'.format(os.path.basename(README_OFILENAME), os.path.basename(CALL_REFERENCE_OFILENAME)), [
-		[sg.T(size=(30,1), key='-compile-time-')],
-		[sg.T(f'The PySimpleGUI module being processed is "{psg_module_path}"')],
+		[sg.T(size=(30,1), key='-compile-time-'), star_bar],
+		empty_line(),
+		[*md2psg(f'The *Bmagenta*PySimpleGUI** module being processed is *Imagenta*"{psg_module_path}"**'), sg.B('< open (__init__.py)', key='open_init_file'), sg.B('< open (psg.py)', key='open_psg_file')],
+		# [sg.T(f'The **PySimpleGUI** module being processed is *"{psg_module_path}"*')],
+		empty_line(),
 		[
 			sg.B('Run again (F1)', key='-run-')
 			,sg.Col([
 					[sg.CB('show time in logs (F2)', False, key='show_time')],
 					[sg.CB('Logs with Color (F3)', True, key='use_psg_color')],
-					[sg.CB('will filter special names', True, key='checkbox_filter_special_names')]
 			])
 			,sg.Col([
-					[sg.B('open call ref', key='-open_call_ref-')],
-					[sg.B('open readme.txt', key='-open_readme.txt-')],
+					empty_line(5),
 					[sg.B('open "db folder"', key='-open_db_folder-')],
 			])
-			,sg.T(' '*10)
-			,sg.Col([
-					# [sg.T('output name for call_ref markdown file', key=(15,1)), sg.I(key='')],
-					
-					[*md2psg('markdown outputFileName *FOR* **readme  **: ')
-						,sg.I(README_OFILENAME, key='md1', size=(25, 1))
-						,sg.B('open in explorer', key='open in explorer_readme')]
-					
-					,[*md2psg('markdown outputFileName *FOR* **call ref**: ')
-						,sg.I(CALL_REFERENCE_OFILENAME, key='md2', size=(25, 1))
-						,sg.B('open in explorer', key='open in explorer_calref')]
-				])
+
+			,sg.Frame('', [[
+				sg.Col([
+						[*md2psg('markdown outputFileName *I*FOR** *B*readme  **: ')
+							,sg.I(README_OFILENAME, key='md1', size=(25, 1))
+							,sg.B('open in explorer', key='open in explorer_readme')
+							,sg.B('open in text editor', key='open file - readme')
+						]
+						
+						,[*md2psg('markdown outputFileName *I*FOR** *B*call ref**: ')
+							,sg.I(CALL_REFERENCE_OFILENAME, key='md2', size=(25, 1))
+							,sg.B('open in explorer', key='open in explorer_calref')
+							,sg.B('open in text editor', key='open file - calref')
+						]
+					])
+			]], relief=sg.RELIEF_SUNKEN, border_width=4)
 		]
 		,*layout
 	], resizable=True, finalize=True, location=(0,0), return_keyboard_events = True)
@@ -371,16 +438,48 @@ def mini_GUI():
 
 	def update_compilation_in_psg(values):
 
-		# get results
+		#
+		# ░▒▒▓▓▓▓▓◘ compile ◘▓▓▓▓▓▒▒░
+		#
 		result_readme__for_txt_n_listbox, result_call_ref__for_txt_n_listbox = compile_all_stuff(
 												use_psg_color=values['use_psg_color'],
 												show_time=values['show_time'])
-
 		result_readme_txt,   result_readme_listbox_items   = result_readme__for_txt_n_listbox
 		result_call_ref_txt, result_call_ref_listbox_items = result_call_ref__for_txt_n_listbox
 		
+		#
+		# ░▒▒▓▓▓▓▓◘ define FILTER functions ◘▓▓▓▓▓▒▒░
+		#
+		def is_valid_regex_LogMessage(msg: str):
+			# test 1 - filter tkinter class methods
+			error1_found = False
+
+			if values['checkbox_enable_filter_tkinter_class_methods']:
+				badNames = [ i for i in values['_filter_tkinter_class_methods_'].split('\n')
+								  if i.strip()]
+				badNames = '|'.join(badNames)
+				regex_str = rf"fix .:return:. in .{badNames}."
+				error1_found = bool(re.search(regex_str, msg, flags=re.M|re.DOTALL))
+			
+			# test 2 - filter "special empty tables"
+			error2_found = False
+			if values['checkbox_enable_empty_tables_filter']:
+				badNames = [ i for i in values['_filter_empty_tables_ml_'].split('\n')
+								  if i.strip()]
+				badNames = '|'.join(badNames)
+				regex_str = rf'empty md_table for .{badNames}.'
+				error2_found = bool(re.search(regex_str, msg, flags=re.M|re.DOTALL))
+			
+			return not (error1_found or error2_found)
+		def filter_log_messages(messages):
+			if type(messages) is str:
+				return '\n'.join([msg for msg in messages.split('\n') if is_valid_regex_LogMessage(msg)])
+			raise TypeError
+
+		#
+		# ▓▓▓ Update GUI ▓▓▓
+		#
 		# =========== listbox's
-		# -{word}-listbox-
 		class ParsingError(object):
 			def __init__(self, log_obj):
 				self.log_obj = log_obj
@@ -402,14 +501,19 @@ def mini_GUI():
 				if 'lineno' in metadata.keys(): lineno = "(line:" + str(metadata['lineno']) + ') '
 
 				return f'{lineno} {text}'
-
-		window['-README-listbox-']([ParsingError(i) for i in result_readme_listbox_items])
-		window['-CALL_REF-listbox-']([ParsingError(i) for i in result_call_ref_listbox_items])
+		window['-README-listbox-']([ParsingError(i) for i in result_readme_listbox_items if is_valid_regex_LogMessage(i['message_text']) ])
+		window['-CALL_REF-listbox-']([ParsingError(i) for i in result_call_ref_listbox_items if is_valid_regex_LogMessage(i['message_text']) ])
 
 		# =========== multitext's
 
 		def set_it(prefix = 'CALL_REF', messages_obj = result_call_ref_txt):
+
 			t_error, t_warning, t_info, t_debug = ['\n'.join(i) for i in messages_obj[:4]]
+			t_error = filter_log_messages(t_error)
+			t_warning = filter_log_messages(t_warning)
+			t_info = filter_log_messages(t_info)
+			t_debug = filter_log_messages(t_debug)
+
 			window[f'-{prefix}-error-'](t_error)
 			window[f'-{prefix}-warning-'](t_warning)
 			window[f'-{prefix}-info-'](t_info)
@@ -420,13 +524,8 @@ def mini_GUI():
 			t_warning_info_obj = messages_obj[-1]
 			if values['use_psg_color']:
 				
-				def is_valid_regex_LogMessage(msg):
-					regex_str = rf"fix .:return:. in .SetFocus|SetTooltip|Update|__init__|bind|expand|set_cursor|set_size."
-					return not bool(re.search(regex_str, msg, flags=re.M|re.DOTALL))
-
 				for text, color in t_warning_info_obj:
-					# print(values)
-					if values['checkbox_filter_special_names'] and not is_valid_regex_LogMessage(text): continue
+					if not is_valid_regex_LogMessage(text): continue
 					window[f'-{prefix}-warning_info-'].print(text, text_color=color)
 			else:
 				window[f'-{prefix}-warning_info-'](t_warning_info_obj)
@@ -444,53 +543,63 @@ def mini_GUI():
 	update_compilation_in_psg(values)
 	# update_compilation_in_psg({'use_psg_color':not False, 'show_time':False})
 	
+
+	next_val_gen = next_star()
 	while True:
-		event, values = window()
+		event, values = window(timeout=75)
 
 		if event in ('Exit', None):
 			APP_CONFIGS['README_FILENAME'], APP_CONFIGS['CALL_REFERENCE_FILENAME'] = window['md1'].get(), window['md2'].get()
 			save_configs(APP_CONFIGS)
 			break
 		
-		print('PSG event>', event)
+		if '__TIMEOUT__' in event:
+			window['_star_bar1_'].UpdateBar(next(next_val_gen))
+			window['_star_bar2_'].UpdateBar(next(next_val_gen))
+		if '__TIMEOUT__' not in event:
+			print('PSG event>', event)
 
 		if event == '-README-listbox-':
-			res = values['-README-listbox-'][0]
-			qwe = res.log_obj['message_metadata']
-			print(f'qwe = {qwe}')
+			metadata = values['-README-listbox-'][0].log_obj['message_metadata']
+			print(f'metadata = {metadata}')
 
 		if event == '-CALL_REF-listbox-':
-			res = values['-CALL_REF-listbox-'][0]
-			metadata = res.log_obj['message_metadata']
+			ParsingError_obj = values['-CALL_REF-listbox-'][0]
+			metadata = ParsingError_obj.log_obj['message_metadata']
 			if 'lineno' in metadata.keys():
 				lineno = metadata['lineno']
 				texteditor = values['_text_editor_combo_']
 
+				psg_module_path_SDK = psg_module_path.replace('__init__.py', 'PySimpleGUI.py')
 				if 'pycharm' == texteditor:
-					subprocess.Popen(f'{texteditor} --line {lineno} PySimpleGUI.py', shell=True)
+					subprocess.Popen(f'{texteditor} --line {lineno} "{psg_module_path_SDK}"', shell=True)
 				elif 'subl' == texteditor:
-					subprocess.Popen(f'{texteditor} PySimpleGUI.py:{lineno}', shell=True)
 
+					subprocess.Popen(f'{texteditor} "{psg_module_path_SDK}:{lineno}"', shell=True)
 
 		# if event == '-CALL_REF-listbox-':
 		# 	res = values['-CALL_REF-listbox-'][0]
 		# 	print(f'res = {res}')
 
 
-		# buttons
-		if event == '-run-':              update_compilation_in_psg(values)
-		if event == '-open_readme.txt-':  openfile(README_OFILENAME)
-		if event == '-open_call_ref-':    openfile(CALL_REFERENCE_OFILENAME)
-		if event == '-open_db_folder-':   opendir(cd)
-		if event == '-open_github_gallery-':   opendir(cd)
-		if event == 'open in explorer_readme':
-			CD = os.path.dirname(os.path.abspath(__file__))
-			opendir(os.path.dirname(os.path.join(CD, values['md1'])))
-		if event == 'open in explorer_calref':
-			CD = os.path.dirname(os.path.abspath(__file__))
-			opendir(os.path.dirname(os.path.join(CD, values['md2'])))
+		if event == '-run-' or 'F1' in event:  update_compilation_in_psg(values)
+		# folder
+		if event == '-open_db_folder-':        opendir(cd)
+		# folder
+		if event == 'open in explorer_readme': opendir(os.path.dirname(os.path.join(cd, values['md1'])))
+		if event == 'open in explorer_calref': opendir(os.path.dirname(os.path.join(cd, values['md2'])))
+		# file
+		if event == 'open file - readme':      openfile(os.path.join(cd, values['md1']))
+		if event == 'open file - calref':      openfile(os.path.join(cd, values['md2']))
+		# file
+		if event == 'open_init_file': openfile(psg_module_path)
+		if event == 'open_psg_file':  openfile(psg_module_path.replace('__init__.py', 'PySimpleGUI.py'))
+		
+
+
+
+
 		# hotkeys
-		if 'F1' in event: update_compilation_in_psg(values)
 		if 'F2' in event: window['show_time'](not values['show_time'])
 		if 'F3' in event: window['use_psg_color'](not values['use_psg_color'])
 
@@ -499,4 +608,65 @@ def mini_GUI():
 
 if __name__ == '__main__':
 	mini_GUI()
-	# sg.PopupScrolled('Completed making {}'.format(README_OFILENAME), ''.join(lines), size=(80,50))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

@@ -325,7 +325,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
         # |> find PARAM, PARAM_TYPE, PARAM_DESCRIPTIONe
         trips = [triplet(   i.group(1), replace_re(i.group(2), r'\s{2,}', ' '), process_type(i.group(3).strip()))
                             for index, i in enumerate(re.finditer(row_n_type_regex, docstring + ' \n'))]
-        if not trips:
+        if not trips: # no :param in doc
             raise Exception('no _TRIPs found!')
 
         #          ===|> format markdown table
