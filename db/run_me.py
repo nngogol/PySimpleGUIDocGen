@@ -174,7 +174,7 @@ class BESTLOG(object):
 
         return error_list, warning_list, info_list, debug_list, warning_info_
 
-def compile_call_ref(output_filename='output/LoG_call_ref', **kw):
+def compile_call_ref(output_filename='logs/LoG_call_ref', **kw):
     ''' Compile a "5_call_reference.md" file'''
 
     log_obj = BESTLOG(os.path.join(cd, output_filename))
@@ -189,7 +189,7 @@ def compile_call_ref(output_filename='output/LoG_call_ref', **kw):
     log_obj.save()
     return log_obj.load(**kw)
 
-def compile_readme(output_filename='output/LoG', **kw):
+def compile_readme(output_filename='logs/LoG', **kw):
     ''' Compile a "2_readme.md" file'''
     log_obj = BESTLOG(os.path.join(cd, output_filename))
     main(logger=log_obj,
@@ -293,6 +293,7 @@ def mini_GUI():
 
     window = sg.Window('We are live! Again! --- ' + 'Completed making            {}, {}'.format(os.path.basename(README_OFILENAME), os.path.basename(CALL_REFERENCE_OFILENAME)), [
         [sg.T(size=(25,1), font=my_font, key='-compile-time-')],
+        [sg.T(f'The PySimpleGUI module being processed is {sg}')],
         [  
             sg.B('Run again (F1)', key='-run-')
             ,sg.CB('show time in logs (F2)', False, key='show_time')

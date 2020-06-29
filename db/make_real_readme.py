@@ -1,8 +1,11 @@
 from inspect import getmembers, isfunction, isclass, getsource, signature, _empty, isdatadescriptor
 from datetime import datetime
-import PySimpleGUIlib, click, textwrap, logging, json, re, os
+import click, textwrap, logging, json, re, os
 import os
 cd = CD = os.path.dirname(os.path.abspath(__file__))
+import PySimpleGUI as sg
+
+module_to_process = sg
 
 from collections import namedtuple
 triplet = namedtuple('triplet', 'name value atype'.split(' '))
@@ -351,9 +354,10 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             rows.append(f'| {atype} | **RETURN** | {text}')
         except Exception as e:
             padded_name = "{: <25}".format(f"'{a_original_obj.__name__}'")
+            # TODO - Mike changed this!
+            # logger.warning(f"ALERT ------  Hi, Mike! Please, fix ':return:' in {padded_name}"
+            #         " \tIF you want to see 'return' row in 'signature table'")
 
-            logger.warning(f"ALERT ------  Hi, Mike! Please, fix ':return:' in {padded_name}"
-                    " \tIF you want to see 'return' row in 'signature table'")
             # import pdb; pdb.set_trace();
 
         header = '\nParameter Descriptions:\n\n|Type|Name|Meaning|\n|--|--|--|\n'
@@ -479,7 +483,7 @@ def main(do_full_readme=False,
         return True
 
         
-    psg_members  = [i for i in getmembers(PySimpleGUIlib) if valid_field(i)] # variables, functions, classes
+    psg_members  = [i for i in getmembers(module_to_process) if valid_field(i)] # variables, functions, classes
     # psg_members  = getmembers(PySimpleGUIlib) # variables, functions, classes
     psg_funcs = [o for o in psg_members if isfunction(o[1])] # only functions
     psg_classes = [o for o in psg_members if isclass(o[1])]  # only classes
