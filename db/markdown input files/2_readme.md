@@ -41,7 +41,7 @@ You can, and will be able to for some time, use both names.  However, at some po
 
 The help system will work with both names as will your IDE's docstring viewing.  However, the result found will show the CamelCase names.  For example `help(sg.Window.read)` will show the CamelCase name of the method/function.  This is what will be returned:
 
-`Read(self, timeout=None, timeout_key='__TIMEOUT__')`
+`Read(self, timeout=None, timeout_key='__TIMEOUT__', close=False)`
 
 ## The Renaming Convention
 
@@ -743,7 +743,7 @@ The button value from a Read call will be one of 2 values:
 
 If a button has a key set when it was created, then that key will be returned, regardless of what text is shown on the button.  If no key is set, then the button text is returned.  If no button was clicked, but the window returned anyway, the event value is the key that caused the event to be generated.  For example, if `enable_events` is set on an `Input` Element and someone types a character into that `Input` box, then the event will be the key of the input box.
 
-### **None is returned when the user clicks the X to close a window.**
+### **WIN_CLOSED (None) is returned when the user clicks the X to close a window.**
 
 If your window has an event loop where it is read over and over, remember to give your user an "out".  You should ***always check for a None value*** and it's a good practice to provide an Exit button of some kind. Thus design patterns often resemble this Event Loop:
 
@@ -978,7 +978,7 @@ Clicking the Submit button caused the window call to return.  The call to Popup 
 
 
 
-**`Note, event values can be None`**.  The value for `event` will be the text that is displayed on the button element when it was created or the key for the button.  If the user closed the window using the "X" in the upper right corner of the window, then `event` will be `None`.   It is ***vitally*** ***important*** that your code contain the proper checks for None. 
+**`Note, event values can be None`**.  The value for `event` will be the text that is displayed on the button element when it was created or the key for the button.  If the user closed the window using the "X" in the upper right corner of the window, then `event` will be `sg.WIN_CLOSED` which is equal to `None`.   It is ***vitally*** ***important*** that your code contain the proper checks for `sg.WIN_CLOSED`. 
 
 For "persistent windows",  **always give your users a way out of the window**.  Otherwise you'll end up  with windows that never properly close.  It's literally 2 lines of code that you'll find in every Demo Program.  While you're at it, make sure a `window.close()` call is after your event loop so that your window closes for sure.
 
@@ -1291,7 +1291,7 @@ Call to force a window to go through the final stages of initialization.  This w
 If you want to call an element's `Update` method or call a `Graph` element's drawing primitives, you ***must*** either call `Read` or `Finalize` prior to making those calls.
 
 
-#### read(timeout=None, timeout_key=TIMEOUT_KEY)
+#### read(timeout=None, timeout_key=TIMEOUT_KEY, close=False)
 
 Read the Window's input values and button clicks in a blocking-fashion
 
@@ -2479,7 +2479,7 @@ while (True):
     # This is the code that reads and updates your window
     event, values = window.read(timeout=50)
     print(event)
-    if event in ('Quit', None):
+    if event in ('Quit', sg.WIN_CLOSED):
         break
 
 window.close()  # Don't forget to close your window!
@@ -3872,7 +3872,7 @@ win2_active = False
 while True:
     ev1, vals1 = win1.read(timeout=100)
     win1['-OUTPUT-'].update(vals1[0])
-    if ev1 is None or ev1 == 'Exit':
+    if ev1 == sg.WIN_CLOSED or ev1 == 'Exit':
         break
 
      if not win2_active and ev1 == 'Launch 2':
@@ -3884,7 +3884,7 @@ while True:
 
     if win2_active:
         ev2, vals2 = win2.read(timeout=100)
-        if ev2 is None or ev2 == 'Exit':
+        if ev2 == sg.WIN_CLOSED or ev2 == 'Exit':
             win2_active  = False
             win2.close()
 ```
@@ -3906,7 +3906,7 @@ win1 = sg.Window('Window 1', layout)
 win2_active=False
 while True:
     ev1, vals1 = win1.read(timeout=100)
-    if ev1 is None:
+    if ev1 == sg.WIN_CLOSED:
         break
     win1.FindElement('-OUTPUT-').update(vals1[0])
 
@@ -3919,7 +3919,7 @@ while True:
         win2 = sg.Window('Window 2', layout2)
         while True:
             ev2, vals2 = win2.read()
-            if ev2 is None or ev2 == 'Exit':
+            if ev2 == sg.WIN_CLOSED or ev2 == 'Exit':
                 win2.close()
                 win2_active = False
                 win1.UnHide()

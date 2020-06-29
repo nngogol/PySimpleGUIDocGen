@@ -95,6 +95,11 @@ Run this command on your Mac
 
 > pyinstaller --onefile --add-binary='/System/Library/Frameworks/Tk.framework/Tk':'tk' --add-binary='/System/Library/Frameworks/Tcl.framework/Tcl':'tcl' your_program.py
 
+Another also mentioned it may be helpful to add the "windowed" option so that a console is not opened.  That should make the command:
+
+> pyinstaller --onefile --add-binary='/System/Library/Frameworks/Tk.framework/Tk':'tk' --windowed --add-binary='/System/Library/Frameworks/Tcl.framework/Tcl':'tcl' your_program.py
+
+
 
 This info was located on Reddit with the source traced back to:
 https://github.com/pyinstaller/pyinstaller/issues/1350
@@ -129,12 +134,31 @@ Or dial in the look and feel (and a whole lot more) that you like with the `SetO
 Valid look and feel values are currently:
 
 ```python
-SystemDefault Reddit Topanga
-GreenTan Dark LightGreen Dark2
-Black Tan TanBlue DarkTanBlue DarkAmber
-DarkBlue Reds Green BluePurple Purple
-BlueMono GreenMono BrownBlue BrightColors
-NeutralBlue Kayak SandyBeach TealMono
+SystemDefault
+Reddit
+Topanga
+GreenTan
+Dark
+LightGreen
+Dark2
+Black
+Tan
+TanBlue
+DarkTanBlue
+DarkAmber
+DarkBlue
+Reds
+Green
+BluePurple
+Purple
+BlueMono
+GreenMono
+BrownBlue
+BrightColors
+NeutralBlue
+Kayak
+SandyBeach
+TealMono
 ```
 
 

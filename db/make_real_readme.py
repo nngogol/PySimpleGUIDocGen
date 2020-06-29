@@ -1,3 +1,4 @@
+import inspect
 from inspect import getmembers, isfunction, isclass, getsource, signature, _empty, isdatadescriptor
 from datetime import datetime
 import PySimpleGUI, click, textwrap, logging, json, re, os
@@ -35,6 +36,9 @@ TABLE_Only_table_RETURN_TEMPLATE = '''|Type|Name|Meaning|\n|---|---|---|\n|<type
 
 from collections import namedtuple
 special_case = namedtuple('special_case', 'ok sig table just_text'.split(' '))
+
+def get_line_number(python_obj):
+    return inspect.getsourcelines(python_obj)[1]
 
 
 """
@@ -350,12 +354,14 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
 
             rows.append(f'| {atype} | **RETURN** | {text}')
         except Exception as e:
-            padded_name = "{: <25}".format(f"'{a_original_obj.__name__}'")
-
-            logger.warning(f"ALERT ------  Hi, Mike! Please, fix ':return:' in {padded_name}"
-                    " \tIF you want to see 'return' row in 'signature table'")
+            # print(a_original_obj)
             # import pdb; pdb.set_trace();
-
+            
+            func_or_method_name = a_original_obj.__name__.lower()
+            if True or func_or_method_name not in ['__init__', 'setfocus', 'settooltip', 'update', 'unbind', 'setfocus', 'bind', 'unbind', 'set_size', 'expand', 'set_cursor']:
+                padded_name = "{: <25}".format(f"'{a_original_obj.__name__}'")
+                logger.warning(f"ALERT ------  Hi, Mike! Please, fix ':return:' in {padded_name}" + 
+                        " \tIF you want to see 'return' row in 'signature table'", metadata={'lineno' : get_line_number(a_original_obj)})
         header = '\nParameter Descriptions:\n\n|Type|Name|Meaning|\n|--|--|--|\n'
 
         md_table = header+'\n'.join(rows)
@@ -369,7 +375,10 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
     try:
         params_TABLE = md_table = make_md_table_from_docstring(doc_string, function_obj)
     except Exception as e:
-        logger.warning(f'Boy=======    We got empty md_table for "{function_obj.__name__}"')
+        func_name_ = function_obj.__name__
+        if func_name_ not in ['unbind', 'theme_'] and not func_name_.startswith('theme_'):
+            logger.warning(f'Boy=======    We got empty md_table for "{func_name_}"',
+                metadata={'lineno' : get_line_number(function_obj)})
         params_TABLE = md_table = ''
 
     if not md_table.strip():
@@ -662,10 +671,10 @@ def main(do_full_readme=False,
         # SPECIAL CASE: X.doc tag
         if injection['part2'] == 'doc':
             a_tag = injection['tag']
-            logger.info(f'a_tag = {a_tag, type(a_tag).__name__}')
+            # logger.info(f'a_tag = {a_tag.split('.')[0].split('+')[1], type(a_tag).__name__}')
+            logger.info('a_tag = ' + a_tag.split('.')[0].split('+')[1])
             doc_ = '' if not injection['parent_class'].__doc__ else injection['parent_class'].__doc__
             # if doc_ == None or a_tag == None:
-            
                 
             readme = readme.replace(a_tag, doc_)
         
