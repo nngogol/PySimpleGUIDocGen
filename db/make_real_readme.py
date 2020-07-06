@@ -430,6 +430,7 @@ def readfile(fname):
         return ff.read()
 
 
+
 def main(do_full_readme=False,
         files_to_include: list = [],
         logger:object=None,
@@ -442,7 +443,7 @@ def main(do_full_readme=False,
         remove_repeated_sections_classmethods:bool=False,
         output_repeated_tags:bool=False,
         main_md_file='markdown input files/2_readme.md',
-        skip_dunder_method:bool=True):
+        skip_dunder_method:bool=True, verbose = False):
     """
     Goal is:
     1) load 1_.md 2_.md 3_.md 4_.md
@@ -488,6 +489,7 @@ def main(do_full_readme=False,
         return True
 
         
+    if verbose: timee(''' psg_members ''')
     psg_members  = [i for i in getmembers(PySimpleGUI) if valid_field(i)] # variables, functions, classes
     # psg_members  = getmembers(PySimpleGUI) # variables, functions, classes
     psg_funcs = [o for o in psg_members if isfunction(o[1])] # only functions
@@ -519,6 +521,7 @@ def main(do_full_readme=False,
 
     # >1 REMOVE HEADER
 
+    if verbose: timee(''' REMOVE HEADER ''')
     started_mark = '<!-- Start from here -->'
     if started_mark in readme:
         readme = readme.split('<!-- Start from here -->')[1]
@@ -526,6 +529,7 @@ def main(do_full_readme=False,
 
 
     # 2> find good tags
+    if verbose: timee(''' find good tags ''')
     re_tags     = re.compile(r'<!-- <\+[a-zA-Z_]+[\d\w_]*\.([a-zA-Z_]+[\d\w_]*)\+> -->')
     mark_points = [i for i in readme.split('\n') if re_tags.match(i)]
 
@@ -539,6 +543,7 @@ def main(do_full_readme=False,
                     readme = readme.replace(i, '\n')
 
     # 4> log repeated tags
+    if verbose: timee(''' log repeated tags ''')
     if output_repeated_tags:
         if not allow_multiple_tags and len(list(set(mark_points))) != len(mark_points):
             mark_points_copy = mark_points[:]
@@ -560,6 +565,7 @@ def main(do_full_readme=False,
 
 
     
+    if verbose: timee('''# 0===0 functions 0===0''')
     # 0===0 functions 0===0
     for tag in func_tags:
 
@@ -597,6 +603,7 @@ def main(do_full_readme=False,
                 logger.error(f' General error in parsing function tag: tag = "{tag}"; error="{str(e)}"')
             continue
 
+    if verbose: timee('''# 0===0 classes 0===0''')
     injection_points.append('now, classes.')
     # 0===0 classes 0===0
     for tag in classes_method_tags:
@@ -653,19 +660,20 @@ def main(do_full_readme=False,
     # ===========  5 injecting  =========== #
     # 888888888888888888888888888888888888888
     # PLAN:
-    # (1) replace tags in 2_readme
+    # (1) replace tags in main_md_file
     #      with properly formateed text
     # (2) log some data
     # 8888888888888888888888888888888888888888888888888888888
 
 
-    bar_it = lambda x: '\n' + '='*len(x) + f'\nSTARTING TO INSERT markdown text into 2_readme.md\n' + '='*len(x) + '\n'
+    if verbose: timee('''bar_it = lambda x''')
+    bar_it = lambda x: '\n' + '='*len(x) + f'\nSTARTING TO INSERT markdown text into main_md_file\n' + '='*len(x) + '\n'
     # 1> log some data
     success_tags = []
     bad_tags = []
     for injection in injection_points:
         if injection == 'now, classes.':
-            logger.info(bar_it('STARTING TO INSERT markdown text into 2_readme.md'))
+            logger.info(bar_it('STARTING TO INSERT markdown text into main_md_file'))
             continue
         
         # SPECIAL CASE: X.doc tag
@@ -675,13 +683,14 @@ def main(do_full_readme=False,
             logger.info('a_tag = ' + a_tag.split('.')[0].split('+')[1])
             doc_ = '' if not injection['parent_class'].__doc__ else injection['parent_class'].__doc__
             # if doc_ == None or a_tag == None:
-                
             readme = readme.replace(a_tag, doc_)
         
         else:
 
+            if verbose: timee('''content = render''')
             content = render(injection, logger=logger, line_break=line_break,
                 insert_md_section_for__class_methods=insert_md_section_for__class_methods)
+            if verbose: timee('''content = render end''')
         
             tag = injection["tag"]
             if content:
@@ -692,6 +701,7 @@ def main(do_full_readme=False,
             readme = readme.replace(tag, content)
 
 
+    if verbose: timee('''readme = readme.replace(bad_p''')
     bad_part = '''\n\nParameter Descriptions:\n\n|Type|Name|Meaning|\n|--|--|--|\n\n'''
     readme = readme.replace(bad_part, '\n')
 
@@ -718,6 +728,7 @@ def main(do_full_readme=False,
 
 
 
+    if verbose: timee('''files = []''')
     files = []
     if 0 in files_to_include: files.append(readfile('markdown input files/1_HEADER_top_part.md'))
     if 1 in files_to_include: files.append(readme)
@@ -726,6 +737,7 @@ def main(do_full_readme=False,
 
     Joined_MARKDOWN = '\n\n'.join(files) if do_full_readme or files else readme
 
+    if verbose: timee('''if output_name:''')
     if output_name:
         with open(output_name, 'w', encoding='utf-8') as ff:
             CURR_DT = datetime.today().strftime('<!-- CREATED: %Y-%m-%d %H.%M.%S -->\n')

@@ -1,4 +1,14 @@
+import time
 import subprocess,re,datetime,time,os,platform,json,PySimpleGUI as sg; from subprocess import Popen; from make_real_readme import main
+
+# mkdir
+import os
+cd = CD = os.path.dirname(os.path.abspath(__file__))
+dir_name = os.path.join(cd, 'output')
+if not os.path.exists(dir_name): os.mkdir(dir_name)
+else: print(f'Такая папка уже есть: "{dir_name}"')
+
+
 
 sg.theme('Dark2')
 cd = os.path.dirname(os.path.abspath(__file__))
@@ -54,15 +64,28 @@ def save_configs(a_config:dict): writejson(os.path.join(cd, 'app_configs.json'),
 
 
 APP_CONFIGS = load_configs()
-README_OFILENAME = APP_CONFIGS['README_FILENAME']
-CALL_REFERENCE_OFILENAME = APP_CONFIGS['CALL_REFERENCE_FILENAME']
-
+README_OFILENAME = APP_CONFIGS['README_OFILE']
+CALL_REFERENCE_OFILENAME = APP_CONFIGS['CALL_REF_OFILE']
 
 ##-#-#-# ##-#-#-#
 # Post-process logic
 ##-#-#-# ##-#-#-#
 insert_md_section_for__class_methods = False
 remove_repeated_sections_classmethods = False
+
+import time
+def timeit(f):
+	def wrapper(*args, **kwargs):
+		start = time.time()
+		res = f(*args, **kwargs)
+		end = time.time()
+		print('\nНачало в    : ', start)
+		print('\n ({}) Начало в    : '.format(f.__name__, start))
+		print('Окончено в  : ', end)
+		print('Длительность: ', end - start)
+		print('')
+		return res
+	return wrapper
 
 class BESTLOG(object):
 	def __init__(self, filename):
@@ -116,7 +139,7 @@ class BESTLOG(object):
 	##########################################
 	def tolist(self):    return zip([self.error_list, self.warning_list, self.info_list, self.debug_list], self.names)
 	def todict(self):    return {'error' : self.error_list, 'warning' : self.warning_list, 'info' : self.info_list, 'debug' : self.debug_list}
-	
+	@timeit
 	def save(self):
 		'''
 		{
@@ -143,6 +166,7 @@ class BESTLOG(object):
 		# for i in all_messages_list: i['message_time'] = i['message_time'].strftime('%Y-%m-%d %H:%M:%S.%f')
 
 		writejson(self.json_name, all_messages_list)
+	@timeit
 	def load(self, **kw):
 		'''
 			return dict with messages
@@ -196,6 +220,7 @@ class BESTLOG(object):
 		debug_list = [format_message(i) for i in debug_list]
 
 		return error_list, warning_list, info_list, debug_list, warning_info_
+	@timeit
 	def load_to_listbox(self):
 		'''
 		read .json
@@ -203,6 +228,7 @@ class BESTLOG(object):
 		return sorted(readjson(self.json_name),
 					  key=lambda x: x['message_time'])
 
+@timeit
 def compile_call_ref(output_filename='output/LoG_call_ref', **kw):
 	''' Compile a "5_call_reference.md" file'''
 
@@ -218,6 +244,8 @@ def compile_call_ref(output_filename='output/LoG_call_ref', **kw):
 	log_obj.save()
 	return log_obj.load(**kw), log_obj.load_to_listbox()
 
+
+@timeit
 def compile_readme(output_filename='output/LoG', **kw):
 	''' Compile a "2_readme.md" file'''
 	log_obj = BESTLOG(os.path.join(cd, output_filename))
@@ -355,24 +383,32 @@ def mini_GUI():
 		]]
 
 	settings_layout = [
-		[sg.Frame('Text editor', [
-			[sg.Combo(['pycharm', 'subl'], default_value='subl', key='_text_editor_combo_')]
-		])]
+		[sg.CB('Toggle progressbar', False, enable_events=True, key='toggle_progressbar')],
 
-		,[sg.Frame('⅀∉ Filter "empty tables"', [
-				[sg.CB('enable', True, key='checkbox_enable_empty_tables_filter')],
+		[
+		 sg.Frame('Text editor',   [[ sg.Combo(['pycharm', 'subl'], default_value='subl', enable_events=True, key='_text_editor_combo_')   ]] ),
+		 sg.Frame('Pycharm path:', [[ sg.I('', size=(40, 1), enable_events=True, key='_PyCharm_path_')                                     ]] )
+		],
+
+		[
+		 sg.Frame('⅀∉ Filter "empty tables"', [
+				[sg.T('''This is for filtering stirng, like:''')],
+				[sg.T('''Boy=======    We got empty md_table for "EasyPrintClose"''', font='Mono 8')],
+				[sg.CB('enable', True, key='checkbox_enable_empty_tables_filter', enable_events=True)],
 				[sg.ML('PrintClose\nEasyPrintClose\nmain\ntheme\nRead',
-						size=(30,10), key='_filter_empty_tables_ml_')]])]
-
-		,[sg.Frame('⅀∉ Filter "tkinter class methods"', [
-				[sg.CB('enable', True, key='checkbox_enable_filter_tkinter_class_methods')],
+						size=(30,10), enable_events=True, key='_filter_empty_tables_ml_')]]),
+		 sg.Frame('⅀∉ Filter "tkinter class methods"', [
+				[sg.T('''This is for filtering stirng, like:''')],
+				[sg.T(''' Hi, Mike! Please, fix ':return:' in 'SetFocus'                  IF you want to see 'return' row in 'signature table' ''', font='Mono 8')],
+				[sg.CB('enable', True, enable_events=True, key='checkbox_enable_filter_tkinter_class_methods')],
 				[sg.ML('SetFocus\nSetTooltip\nUpdate\n__init__\nbind\nexpand\nset_cursor\nset_size',
-						size=(30,10), key='_filter_tkinter_class_methods_')]])]
+						size=(30,10), enable_events=True, key='_filter_tkinter_class_methods_')]])
+		]
 	]
 	layout = [[sg.TabGroup([[
-				sg.Tab('readme logs', 					make_tab('README')),
-				sg.Tab('Call reference logs', 	make_tab('CALL_REF')),
-				sg.Tab('General settings', 			settings_layout)
+			sg.Tab('readme logs', 			make_tab('README')),
+			sg.Tab('Call reference logs', 	make_tab('CALL_REF')),
+			sg.Tab('General settings', 		settings_layout)
 	]])]]
 
 	# ░▒▒▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒░
@@ -381,12 +417,7 @@ def mini_GUI():
 	from time import sleep; from math import pi, sin; from itertools import count
 	def next_star():
 		middle = 100/2
-		for i in (int(sin(i*pi/middle)*middle + middle) for i in count()):
-			yield i
-
-	# ▓▓▓▓▓▓▒▒░░░░░▒▒▓▓▓▓▓▓▓
-	# ▓▓▓▓▓▓▓▒▒░░░▒▒▓▓▓▓▓▓▓▓
-	# ▓▓▓▓▓▓▓▓▒▒░▒▒▓▓▓▓▓▓▓▓▓
+		for i in (int(sin(i*pi/middle)*middle + middle) for i in count()): yield i
 
 	psg_module_path = str(sg).split("' from '")[1][:-2]
 	star_bar = 	sg.Col([
@@ -397,6 +428,9 @@ def mini_GUI():
 	])
 	# guia
 	def empty_line(fontsize=12): return [sg.T('', font=('Mono '+str(fontsize)))]
+
+
+
 	window = sg.Window('We are live! Again! --- ' + 'Completed making            {}, {}'.format(os.path.basename(README_OFILENAME), os.path.basename(CALL_REFERENCE_OFILENAME)), [
 		[sg.T(size=(30,1), key='-compile-time-'), star_bar],
 		empty_line(),
@@ -406,8 +440,8 @@ def mini_GUI():
 		[
 			sg.B('Run again (F1)', key='-run-')
 			,sg.Col([
-					[sg.CB('show time in logs (F2)', False, key='show_time')],
-					[sg.CB('Logs with Color (F3)', True, key='use_psg_color')],
+					[sg.CB('show time in logs (F2)', False, enable_events=True, key='show_time')],
+					[sg.CB('Logs with Color (F3)', True, enable_events=True, key='use_psg_color')],
 			])
 			,sg.Col([
 					empty_line(5),
@@ -417,13 +451,13 @@ def mini_GUI():
 			,sg.Frame('', [[
 				sg.Col([
 						[*md2psg('markdown outputFileName *I*FOR** *B*readme  **: ')
-							,sg.I(README_OFILENAME, key='md1', size=(25, 1))
+							,sg.I(README_OFILENAME, key='README_OFILE', size=(25, 1))
 							,sg.B('open in explorer', key='open in explorer_readme')
 							,sg.B('open in text editor', key='open file - readme')
 						]
 						
 						,[*md2psg('markdown outputFileName *I*FOR** *B*call ref**: ')
-							,sg.I(CALL_REFERENCE_OFILENAME, key='md2', size=(25, 1))
+							,sg.I(CALL_REFERENCE_OFILENAME, key='CALL_REF_OFILE', size=(25, 1))
 							,sg.B('open in explorer', key='open in explorer_calref')
 							,sg.B('open in text editor', key='open file - calref')
 						]
@@ -450,27 +484,28 @@ def mini_GUI():
 		#
 		# ░▒▒▓▓▓▓▓◘ define FILTER functions ◘▓▓▓▓▓▒▒░
 		#
+		badNames = [ i.strip() for i in values['_filter_tkinter_class_methods_'].split('\n') if i.strip()]
+		badNames = '|'.join(badNames)
+		regex_str1 = rf"fix .:return:. in .({badNames})."
+
+		badNames = [ i for i in values['_filter_empty_tables_ml_'].split('\n') if i.strip()]
+		badNames = '|'.join(badNames)
+		regex_str2 = rf'empty md_table for .({badNames}).'
+
 		def is_valid_regex_LogMessage(msg: str):
+			nonlocal regex_str1, regex_str2
+
 			# test 1 - filter tkinter class methods
 			error1_found = False
-
-			if values['checkbox_enable_filter_tkinter_class_methods']:
-				badNames = [ i for i in values['_filter_tkinter_class_methods_'].split('\n')
-								  if i.strip()]
-				badNames = '|'.join(badNames)
-				regex_str = rf"fix .:return:. in .{badNames}."
-				error1_found = bool(re.search(regex_str, msg, flags=re.M|re.DOTALL))
+			if values['checkbox_enable_filter_tkinter_class_methods'] and ':return:' in msg:
+				error1_found = bool(re.search(regex_str1, msg, flags=re.M|re.DOTALL))
 			
 			# test 2 - filter "special empty tables"
 			error2_found = False
-			if values['checkbox_enable_empty_tables_filter']:
-				badNames = [ i for i in values['_filter_empty_tables_ml_'].split('\n')
-								  if i.strip()]
-				badNames = '|'.join(badNames)
-				regex_str = rf'empty md_table for .{badNames}.'
-				error2_found = bool(re.search(regex_str, msg, flags=re.M|re.DOTALL))
+			if values['checkbox_enable_empty_tables_filter'] and 'empty md_table for' in msg:
+				error2_found = bool(re.search(regex_str2, msg, flags=re.M|re.DOTALL))
 			
-			return not (error1_found or error2_found)
+			return not error1_found and not error2_found
 		def filter_log_messages(messages):
 			if type(messages) is str:
 				return '\n'.join([msg for msg in messages.split('\n') if is_valid_regex_LogMessage(msg)])
@@ -501,8 +536,11 @@ def mini_GUI():
 				if 'lineno' in metadata.keys(): lineno = "(line:" + str(metadata['lineno']) + ') '
 
 				return f'{lineno} {text}'
-		window['-README-listbox-']([ParsingError(i) for i in result_readme_listbox_items if is_valid_regex_LogMessage(i['message_text']) ])
-		window['-CALL_REF-listbox-']([ParsingError(i) for i in result_call_ref_listbox_items if is_valid_regex_LogMessage(i['message_text']) ])
+				
+		items1 = [i for i in result_readme_listbox_items if is_valid_regex_LogMessage(i['message_text']) ]
+		items2 = [i for i in result_call_ref_listbox_items if is_valid_regex_LogMessage(i['message_text']) ]
+		window['-README-listbox-']([ ParsingError(i) for i in items1])
+		window['-CALL_REF-listbox-']([ ParsingError(i) for i in items2])
 
 		# =========== multitext's
 
@@ -522,8 +560,8 @@ def mini_GUI():
 			# /// colors warning_info
 			window[f'-{prefix}-warning_info-'].update('')
 			t_warning_info_obj = messages_obj[-1]
+
 			if values['use_psg_color']:
-				
 				for text, color in t_warning_info_obj:
 					if not is_valid_regex_LogMessage(text): continue
 					window[f'-{prefix}-warning_info-'].print(text, text_color=color)
@@ -539,25 +577,66 @@ def mini_GUI():
 		# ~~~~~~~~~~~~
 		update_time_in_GUI()
 
-	values = window.read(timeout=10)[1]
+	values = window.read(timeout=0)[1]
 	update_compilation_in_psg(values)
-	# update_compilation_in_psg({'use_psg_color':not False, 'show_time':False})
+	p_values = values
+
+	window['_PyCharm_path_'](APP_CONFIGS['_PyCharm_path_'])
+	window['_text_editor_combo_'].update(set_to_index=APP_CONFIGS['_text_editor_combo_']) # index
+
+	window['toggle_progressbar'](APP_CONFIGS['toggle_progressbar'])
+
+	window['checkbox_enable_empty_tables_filter'](APP_CONFIGS['checkbox_enable_empty_tables_filter'])
+	window['_filter_empty_tables_ml_'](APP_CONFIGS['_filter_empty_tables_ml_'])
+
+	window['checkbox_enable_filter_tkinter_class_methods'](APP_CONFIGS['checkbox_enable_filter_tkinter_class_methods'])
+	window['_filter_tkinter_class_methods_'](APP_CONFIGS['_filter_tkinter_class_methods_'])
+
+	window['show_time'](APP_CONFIGS['show_time'])
+	window['use_psg_color'](APP_CONFIGS['use_psg_color'])
 	
+	window['README_OFILE'](APP_CONFIGS['README_OFILE'])
+	window['CALL_REF_OFILE'](APP_CONFIGS['CALL_REF_OFILE'])
+
 
 	next_val_gen = next_star()
+	my_timeout = None
 	while True:
-		event, values = window(timeout=75)
-
+		event, values = window(timeout=my_timeout)
 		if event in ('Exit', None):
-			APP_CONFIGS['README_FILENAME'], APP_CONFIGS['CALL_REFERENCE_FILENAME'] = window['md1'].get(), window['md2'].get()
+			# save to disk
+			
+			# APP_CONFIGS['_PyCharm_path_']  								= p_values['_PyCharm_path_']
+			APP_CONFIGS['_text_editor_combo_']  						= 1 if window['_text_editor_combo_'].get() == 'subl' else 0
+
+			APP_CONFIGS['toggle_progressbar']  							= p_values['toggle_progressbar']
+
+			APP_CONFIGS['checkbox_enable_empty_tables_filter']  		= p_values['checkbox_enable_empty_tables_filter']
+			APP_CONFIGS['_filter_empty_tables_ml_']  					= p_values['_filter_empty_tables_ml_']
+
+			APP_CONFIGS['checkbox_enable_filter_tkinter_class_methods'] = p_values['checkbox_enable_filter_tkinter_class_methods']
+			APP_CONFIGS['_filter_tkinter_class_methods_']  				= p_values['_filter_tkinter_class_methods_']
+
+			APP_CONFIGS['show_time']  									= p_values['show_time']
+			APP_CONFIGS['use_psg_color']  								= p_values['use_psg_color']
+			
+			APP_CONFIGS['README_OFILE'] 								= p_values['README_OFILE']
+			APP_CONFIGS['CALL_REF_OFILE'] 								= p_values['CALL_REF_OFILE']
+
 			save_configs(APP_CONFIGS)
 			break
+		p_values = values
+
 		
 		if '__TIMEOUT__' in event:
-			window['_star_bar1_'].UpdateBar(next(next_val_gen))
-			window['_star_bar2_'].UpdateBar(next(next_val_gen))
+			if values['toggle_progressbar']:
+				window['_star_bar1_'].UpdateBar(next(next_val_gen))
+				window['_star_bar2_'].UpdateBar(next(next_val_gen))
 		if '__TIMEOUT__' not in event:
 			print('PSG event>', event)
+
+		if event == 'toggle_progressbar':
+			my_timeout = None if not values['toggle_progressbar'] else 100
 
 		if event == '-README-listbox-':
 			metadata = values['-README-listbox-'][0].log_obj['message_metadata']
@@ -569,12 +648,11 @@ def mini_GUI():
 			if 'lineno' in metadata.keys():
 				lineno = metadata['lineno']
 				texteditor = values['_text_editor_combo_']
-
 				psg_module_path_SDK = psg_module_path.replace('__init__.py', 'PySimpleGUI.py')
 				if 'pycharm' == texteditor:
-					subprocess.Popen(f'{texteditor} --line {lineno} "{psg_module_path_SDK}"', shell=True)
+					texteditor = values['_PyCharm_path_']
+					subprocess.Popen(f'\'{texteditor}\' --line {lineno} "{psg_module_path_SDK}"', shell=True)
 				elif 'subl' == texteditor:
-
 					subprocess.Popen(f'{texteditor} "{psg_module_path_SDK}:{lineno}"', shell=True)
 
 		# if event == '-CALL_REF-listbox-':
@@ -586,11 +664,11 @@ def mini_GUI():
 		# folder
 		if event == '-open_db_folder-':        opendir(cd)
 		# folder
-		if event == 'open in explorer_readme': opendir(os.path.dirname(os.path.join(cd, values['md1'])))
-		if event == 'open in explorer_calref': opendir(os.path.dirname(os.path.join(cd, values['md2'])))
+		if event == 'open in explorer_readme': opendir(os.path.dirname(os.path.join(cd, values['README_OFILE'])))
+		if event == 'open in explorer_calref': opendir(os.path.dirname(os.path.join(cd, values['CALL_REF_OFILE'])))
 		# file
-		if event == 'open file - readme':      openfile(os.path.join(cd, values['md1']))
-		if event == 'open file - calref':      openfile(os.path.join(cd, values['md2']))
+		if event == 'open file - readme':      openfile(os.path.join(cd, values['README_OFILE']))
+		if event == 'open file - calref':      openfile(os.path.join(cd, values['CALL_REF_OFILE']))
 		# file
 		if event == 'open_init_file': openfile(psg_module_path)
 		if event == 'open_psg_file':  openfile(psg_module_path.replace('__init__.py', 'PySimpleGUI.py'))

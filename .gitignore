@@ -1,4 +1,6 @@
 __pycache__/
 */__pycache__/
 *.log
+*.7z
 *.mkv
+*.mp4
