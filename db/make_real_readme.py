@@ -325,7 +325,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
         # |> find PARAM, PARAM_TYPE, PARAM_DESCRIPTIONe
         trips = [triplet(   i.group(1), replace_re(i.group(2), r'\s{2,}', ' '), process_type(i.group(3).strip()))
                             for index, i in enumerate(re.finditer(row_n_type_regex, docstring + ' \n'))]
-        if not trips: # no :param in doc
+        if not trips and ':return:' not in docstring: # no :param in doc
             raise Exception('no _TRIPs found!')
 
         #          ===|> format markdown table
@@ -334,9 +334,14 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
         # ROW template:
         max_type_width, max_name_width = 20, 20
         try:
-            max_type_width, max_name_width = max([len(i.atype) for i in trips]), max([len(i.name) for i in trips])
+            if trips:
+                max_type_width, max_name_width = max([len(i.atype) for i in trips]), max([len(i.name) for i in trips])
         except Exception as e:
-            logger.warning(f"ALERT ------ bug with max_type_width, max_name_width variables")
+            logger.debug(f"just ALERT ------ bug with max_type_width, max_name_width variables: {a_original_obj.__name__}")
+
+            # print(f"ALERT ------ bug with max_type_width, max_name_width variables")
+            # import pdb; pdb.set_trace();
+            
         row_template = f'| {{: ^{max_type_width}}} | {{: ^{max_name_width}}} | {{}} |'
 
         # rows, and finally table.
@@ -375,6 +380,9 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
 
     # 3
     try:
+        # if 'list of valid string' in doc_string:
+        #     import pdb; pdb.set_trace();
+            
         params_TABLE = md_table = make_md_table_from_docstring(doc_string, function_obj)
     except Exception as e:
         func_name_ = function_obj.__name__

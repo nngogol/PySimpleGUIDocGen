@@ -79,11 +79,11 @@ def timeit(f):
 		start = time.time()
 		res = f(*args, **kwargs)
 		end = time.time()
-		print('\nНачало в    : ', start)
-		print('\n ({}) Начало в    : '.format(f.__name__, start))
-		print('Окончено в  : ', end)
-		print('Длительность: ', end - start)
-		print('')
+		# print('\nНачало в    : ', start)
+		# print('\n ({}) Начало в    : '.format(f.__name__, start))
+		# print('Окончено в  : ', end)
+		# print('Длительность: ', end - start)
+		# print('')
 		return res
 	return wrapper
 
