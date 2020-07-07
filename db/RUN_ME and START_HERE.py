@@ -651,7 +651,7 @@ def mini_GUI():
 				psg_module_path_SDK = psg_module_path.replace('__init__.py', 'PySimpleGUI.py')
 				if 'pycharm' == texteditor:
 					texteditor = values['_PyCharm_path_']
-					subprocess.Popen(f'\'{texteditor}\' --line {lineno} "{psg_module_path_SDK}"', shell=True)
+					subprocess.Popen(f'"{texteditor}" --line {lineno} "{psg_module_path_SDK}"', shell=True)
 				elif 'subl' == texteditor:
 					subprocess.Popen(f'{texteditor} "{psg_module_path_SDK}:{lineno}"', shell=True)
 
