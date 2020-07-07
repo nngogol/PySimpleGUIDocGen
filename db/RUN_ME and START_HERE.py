@@ -229,7 +229,7 @@ class BESTLOG(object):
 					  key=lambda x: x['message_time'])
 
 @timeit
-def compile_call_ref(output_filename='output/LoG_call_ref', **kw):
+def compile_call_ref(output_filename='LoG_call_ref', **kw):
 	''' Compile a "5_call_reference.md" file'''
 
 	log_obj = BESTLOG(os.path.join(cd, output_filename))
@@ -246,7 +246,7 @@ def compile_call_ref(output_filename='output/LoG_call_ref', **kw):
 
 
 @timeit
-def compile_readme(output_filename='output/LoG', **kw):
+def compile_readme(output_filename='LoG', **kw):
 	''' Compile a "2_readme.md" file'''
 	log_obj = BESTLOG(os.path.join(cd, output_filename))
 	main(logger=log_obj,
@@ -402,7 +402,7 @@ def mini_GUI():
 				[sg.T(''' Hi, Mike! Please, fix ':return:' in 'SetFocus'                  IF you want to see 'return' row in 'signature table' ''', font='Mono 8')],
 				[sg.CB('enable', True, enable_events=True, key='checkbox_enable_filter_tkinter_class_methods')],
 				[sg.ML('SetFocus\nSetTooltip\nUpdate\n__init__\nbind\nexpand\nset_cursor\nset_size',
-						size=(30,10), enable_events=True, key='_filter_tkinter_class_methods_')]])
+						size=(30,10), enable_events=True, key='_filter_tkinter_class_methods_')]], visible=not True)
 		]
 	]
 	layout = [[sg.TabGroup([[
@@ -690,61 +690,3 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	

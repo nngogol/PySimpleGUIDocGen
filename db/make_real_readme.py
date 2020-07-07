@@ -351,17 +351,19 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             a_doc = docstring + ' \n'
             aa =  list(re.finditer(regex_pattern, a_doc))[0]
             text, atype = aa.group(1).strip(), aa.group(2).strip()
-
-            rows.append(f'| {atype} | **RETURN** | {text}')
+            if text.strip():
+                rows.append(f'| {atype} | **RETURN** | {text}')
         except Exception as e:
             # print(a_original_obj)
             # import pdb; pdb.set_trace();
             
-            func_or_method_name = a_original_obj.__name__.lower()
-            if True or func_or_method_name not in ['__init__', 'setfocus', 'settooltip', 'update', 'unbind', 'setfocus', 'bind', 'unbind', 'set_size', 'expand', 'set_cursor']:
-                padded_name = "{: <25}".format(f"'{a_original_obj.__name__}'")
-                logger.warning(f"ALERT ------  Hi, Mike! Please, fix ':return:' in {padded_name}" + 
-                        " \tIF you want to see 'return' row in 'signature table'", metadata={'lineno' : get_line_number(a_original_obj)})
+            pass
+            # func_or_method_name = a_original_obj.__name__.lower()
+            # if True or func_or_method_name not in ['__init__', 'setfocus', 'settooltip', 'update', 'unbind', 'setfocus', 'bind', 'unbind', 'set_size', 'expand', 'set_cursor']:
+            #     padded_name = "{: <25}".format(f"'{a_original_obj.__name__}'")
+            #     logger.warning(f"ALERT ------  Hi, Mike! Please, fix ':return:' in {padded_name}" + 
+            #             " \tIF you want to see 'return' row in 'signature table'", metadata={'lineno' : get_line_number(a_original_obj)})
+
         header = '\nParameter Descriptions:\n\n|Type|Name|Meaning|\n|--|--|--|\n'
 
         md_table = header+'\n'.join(rows)
@@ -385,6 +387,8 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
         params_TABLE = ''
         
         if return_guy:
+            # import pdb; pdb.set_trace();
+            
             sign = sign[:-4] + f' -> {return_guy}\n```\n'
 
     return sign, params_TABLE
