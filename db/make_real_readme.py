@@ -332,7 +332,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
         #          ---------------------------
 
         # ROW template:
-        max_type_width, max_name_width = 20, 20
+        max_type_width, max_name_width = 40, 40
         try:
             if trips:
                 max_type_width, max_name_width = max([len(i.atype) for i in trips]), max([len(i.name) for i in trips])
@@ -366,7 +366,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             # func_or_method_name = a_original_obj.__name__.lower()
             # if True or func_or_method_name not in ['__init__', 'setfocus', 'settooltip', 'update', 'unbind', 'setfocus', 'bind', 'unbind', 'set_size', 'expand', 'set_cursor']:
             #     padded_name = "{: <25}".format(f"'{a_original_obj.__name__}'")
-            #     logger.warning(f"ALERT ------  Hi, Mike! Please, fix ':return:' in {padded_name}" + 
+            #     logger.warning(f"ALERT ------  Warning=== Please, fix ':return:' in {padded_name}" + 
             #             " \tIF you want to see 'return' row in 'signature table'", metadata={'lineno' : get_line_number(a_original_obj)})
 
         header = '\nParameter Descriptions:\n\n|Type|Name|Meaning|\n|--|--|--|\n'
@@ -387,7 +387,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
     except Exception as e:
         func_name_ = function_obj.__name__
         if func_name_ not in ['unbind', 'theme_'] and not func_name_.startswith('theme_'):
-            logger.warning(f'Boy=======    We got empty md_table for "{func_name_}"',
+            logger.warning(f'Warning=======    We got empty md_table for "{func_name_}"',
                 metadata={'lineno' : get_line_number(function_obj)})
         params_TABLE = md_table = ''
 

@@ -1,5 +1,4 @@
-import time
-import subprocess,re,datetime,time,os,platform,json,PySimpleGUI as sg; from subprocess import Popen; from make_real_readme import main
+import re,textwrap,subprocess,re,datetime,time,os,platform,json,PySimpleGUI as sg; from subprocess import Popen; from make_real_readme import main
 
 # mkdir
 import os
@@ -389,17 +388,18 @@ def mini_GUI():
 		 sg.Frame('Text editor',   [[ sg.Combo(['pycharm', 'subl'], default_value='subl', enable_events=True, key='_text_editor_combo_')   ]] ),
 		 sg.Frame('Pycharm path:', [[ sg.I('', size=(40, 1), enable_events=True, key='_PyCharm_path_')                                     ]] )
 		],
+		[sg.CB('Verbose events log', True, key='verbose_events_log')],
 
 		[
 		 sg.Frame('⅀∉ Filter "empty tables"', [
 				[sg.T('''This is for filtering stirng, like:''')],
-				[sg.T('''Boy=======    We got empty md_table for "EasyPrintClose"''', font='Mono 8')],
+				[sg.T('''Warning=======    We got empty md_table for "EasyPrintClose"''', font='Mono 8')],
 				[sg.CB('enable', True, key='checkbox_enable_empty_tables_filter', enable_events=True)],
 				[sg.ML('PrintClose\nEasyPrintClose\nmain\ntheme\nRead',
 						size=(30,10), enable_events=True, key='_filter_empty_tables_ml_')]]),
 		 sg.Frame('⅀∉ Filter "tkinter class methods"', [
 				[sg.T('''This is for filtering stirng, like:''')],
-				[sg.T(''' Hi, Mike! Please, fix ':return:' in 'SetFocus'                  IF you want to see 'return' row in 'signature table' ''', font='Mono 8')],
+				[sg.T(''' Warning=== Please, fix ':return:' in 'SetFocus'                  IF you want to see 'return' row in 'signature table' ''', font='Mono 8')],
 				[sg.CB('enable', True, enable_events=True, key='checkbox_enable_filter_tkinter_class_methods')],
 				[sg.ML('SetFocus\nSetTooltip\nUpdate\n__init__\nbind\nexpand\nset_cursor\nset_size',
 						size=(30,10), enable_events=True, key='_filter_tkinter_class_methods_')]], visible=not True)
@@ -585,6 +585,7 @@ def mini_GUI():
 	window['_text_editor_combo_'].update(set_to_index=APP_CONFIGS['_text_editor_combo_']) # index
 
 	window['toggle_progressbar'](APP_CONFIGS['toggle_progressbar'])
+	window['verbose_events_log'](APP_CONFIGS['verbose_events_log'])
 
 	window['checkbox_enable_empty_tables_filter'](APP_CONFIGS['checkbox_enable_empty_tables_filter'])
 	window['_filter_empty_tables_ml_'](APP_CONFIGS['_filter_empty_tables_ml_'])
@@ -610,6 +611,7 @@ def mini_GUI():
 			APP_CONFIGS['_text_editor_combo_']  						= 1 if window['_text_editor_combo_'].get() == 'subl' else 0
 
 			APP_CONFIGS['toggle_progressbar']  							= p_values['toggle_progressbar']
+			APP_CONFIGS['verbose_events_log']  							= p_values['verbose_events_log']
 
 			APP_CONFIGS['checkbox_enable_empty_tables_filter']  		= p_values['checkbox_enable_empty_tables_filter']
 			APP_CONFIGS['_filter_empty_tables_ml_']  					= p_values['_filter_empty_tables_ml_']
@@ -627,13 +629,13 @@ def mini_GUI():
 			break
 		p_values = values
 
-		
 		if '__TIMEOUT__' in event:
 			if values['toggle_progressbar']:
 				window['_star_bar1_'].UpdateBar(next(next_val_gen))
 				window['_star_bar2_'].UpdateBar(next(next_val_gen))
-		if '__TIMEOUT__' not in event:
-			print('PSG event>', event)
+		if values['verbose_events_log'] and '__TIMEOUT__' not in event:
+			if not re.search(r'^(Escape|Shift|Control|Alt|Mouse|F\d{1,2}).*', val, flags=re.M|re.DOTALL):
+				print('PSG event>', event)
 
 		if event == 'toggle_progressbar':
 			my_timeout = None if not values['toggle_progressbar'] else 100
