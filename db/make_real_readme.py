@@ -228,7 +228,8 @@ def is_propery(func):
 
 def get_sig_table_parts(function_obj, function_name, doc_string,
                     logger=None, is_method=False, line_break=None,
-                    insert_md_section_for__class_methods=False):
+                    insert_md_section_for__class_methods=False,
+                    replace_pipe_bar_in_TYPE_TEXT_char=''):
     """
         Convert python object "function + __doc__"
             to
@@ -312,15 +313,23 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             (str)                       -> str
             Union[str, Tuple[str, int]] -> Union[str, Tuple[str, int]]
             '''
+            final_txt = ''
             if re.compile(r'\(\s?\w+\s?\)', flags=re.M|re.DOTALL).match(txt):
-                return txt.rstrip(')').lstrip('(')
+                final_txt = txt.rstrip(')').lstrip('(')
             else:
-                return txt
+                final_txt = txt
+            
+            if ') or (' in final_txt:
+                final_txt = final_txt.replace(') or (', ' OR ')
+
+            if replace_pipe_bar_in_TYPE_TEXT_char and '|' in final_txt:
+                final_txt = final_txt.replace('|', replace_pipe_bar_in_TYPE_TEXT_char)
+
+            return final_txt
 
         # if 'led by application to change the tooltip text for an Element.  Normally invoked using ' in docstring:
         #     pass
         #     print(123)
-            
 
         # |> find PARAM, PARAM_TYPE, PARAM_DESCRIPTIONe
         trips = [triplet(   i.group(1), replace_re(i.group(2), r'\s{2,}', ' '), process_type(i.group(3).strip()))
@@ -406,7 +415,7 @@ def pad_n(text):
     return f'\n{text}\n'
 
 
-def render(injection, logger=None, line_break=None, insert_md_section_for__class_methods=False):
+def render(injection, logger=None, line_break=None, insert_md_section_for__class_methods=False, replace_pipe_bar_in_TYPE_TEXT_char=''):
     
     try:
         if 'skip readme' in injection['function_object'].__doc__:
@@ -418,13 +427,15 @@ def render(injection, logger=None, line_break=None, insert_md_section_for__class
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=injection['part2'],
                                          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
-                                         doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break)
+                                         doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break,
+                                         replace_pipe_bar_in_TYPE_TEXT_char=replace_pipe_bar_in_TYPE_TEXT_char)
     else:  # class method
         function_name = injection['parent_class'].__name__ if injection['part2'] == '__init__' else injection['part2']
         sig, table = get_sig_table_parts(function_obj=injection['function_object'],
                                          function_name=function_name, is_method=True,
                                          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
-                                         doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break)
+                                         doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break,
+                                         replace_pipe_bar_in_TYPE_TEXT_char=replace_pipe_bar_in_TYPE_TEXT_char)
 
 
     if injection['number'] == '':
@@ -455,7 +466,8 @@ def main(do_full_readme=False,
         remove_repeated_sections_classmethods:bool=False,
         output_repeated_tags:bool=False,
         main_md_file='markdown input files/2_readme.md',
-        skip_dunder_method:bool=True, verbose = False):
+        skip_dunder_method:bool=True, verbose = False,
+        replace_pipe_bar_in_TYPE_TEXT_char=''):
     """
     Goal is:
     1) load 1_.md 2_.md 3_.md 4_.md
@@ -701,7 +713,8 @@ def main(do_full_readme=False,
 
             if verbose: timee('''content = render''')
             content = render(injection, logger=logger, line_break=line_break,
-                insert_md_section_for__class_methods=insert_md_section_for__class_methods)
+                insert_md_section_for__class_methods=insert_md_section_for__class_methods,
+                replace_pipe_bar_in_TYPE_TEXT_char=replace_pipe_bar_in_TYPE_TEXT_char)
             if verbose: timee('''content = render end''')
         
             tag = injection["tag"]

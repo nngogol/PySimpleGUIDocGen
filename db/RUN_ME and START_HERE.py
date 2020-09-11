@@ -228,7 +228,7 @@ class BESTLOG(object):
 					  key=lambda x: x['message_time'])
 
 @timeit
-def compile_call_ref(output_filename='LoG_call_ref', **kw):
+def compile_call_ref(output_filename='LoG_call_ref', replace_pipe_bar_in_TYPE_TEXT_char='', **kw):
 	''' Compile a "5_call_reference.md" file'''
 
 	log_obj = BESTLOG(os.path.join(cd, output_filename))
@@ -239,13 +239,14 @@ def compile_call_ref(output_filename='LoG_call_ref', **kw):
 		 remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
 		 files_to_include=[],
 		 output_name=CALL_REFERENCE_OFILENAME,
-		 delete_html_comments=True)
+		 delete_html_comments=True,
+		 replace_pipe_bar_in_TYPE_TEXT_char=replace_pipe_bar_in_TYPE_TEXT_char)
 	log_obj.save()
 	return log_obj.load(**kw), log_obj.load_to_listbox()
 
 
 @timeit
-def compile_readme(output_filename='LoG', **kw):
+def compile_readme(output_filename='LoG', replace_pipe_bar_in_TYPE_TEXT_char='', **kw):
 	''' Compile a "2_readme.md" file'''
 	log_obj = BESTLOG(os.path.join(cd, output_filename))
 	main(logger=log_obj,
@@ -253,7 +254,8 @@ def compile_readme(output_filename='LoG', **kw):
 		 remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
 		 files_to_include=[0, 1, 2, 3],
 		 output_name=README_OFILENAME,
-		 delete_html_comments=True)
+		 delete_html_comments=True,
+		 replace_pipe_bar_in_TYPE_TEXT_char=replace_pipe_bar_in_TYPE_TEXT_char)
 	log_obj.save()
 	return log_obj.load(**kw), log_obj.load_to_listbox()
 
@@ -383,12 +385,13 @@ def mini_GUI():
 
 	settings_layout = [
 		[sg.CB('Toggle progressbar', False, enable_events=True, key='toggle_progressbar')],
-
 		[
 		 sg.Frame('Text editor',   [[ sg.Combo(['pycharm', 'subl'], default_value='subl', enable_events=True, key='_text_editor_combo_')   ]] ),
 		 sg.Frame('Pycharm path:', [[ sg.I('', size=(40, 1), enable_events=True, key='_PyCharm_path_')                                     ]] )
 		],
 		[sg.CB('Verbose events log', True, key='verbose_events_log')],
+		[sg.T('Char, used for replaing | symbol in TYPE section in __doc__', font='Consolas 7', tooltip='PIPE in :type: section'),
+				sg.I('\\|', size=(5, 1), key='replace_pipe_bar_in_TYPE_TEXT_char')],
 
 		[
 		 sg.Frame('⅀∉ Filter "empty tables"', [
@@ -447,7 +450,6 @@ def mini_GUI():
 					empty_line(5),
 					[sg.B('open "db folder"', key='-open_db_folder-')],
 			])
-
 			,sg.Frame('', [[
 				sg.Col([
 						[*md2psg('markdown outputFileName *I*FOR** *B*readme  **: ')
@@ -476,8 +478,10 @@ def mini_GUI():
 		# ░▒▒▓▓▓▓▓◘ compile ◘▓▓▓▓▓▒▒░
 		#
 		result_readme__for_txt_n_listbox, result_call_ref__for_txt_n_listbox = compile_all_stuff(
-												use_psg_color=values['use_psg_color'],
-												show_time=values['show_time'])
+																					use_psg_color=values['use_psg_color'],
+																					show_time=values['show_time'],
+																					replace_pipe_bar_in_TYPE_TEXT_char=values['replace_pipe_bar_in_TYPE_TEXT_char'],
+																					)
 		result_readme_txt,   result_readme_listbox_items   = result_readme__for_txt_n_listbox
 		result_call_ref_txt, result_call_ref_listbox_items = result_call_ref__for_txt_n_listbox
 		
@@ -595,6 +599,8 @@ def mini_GUI():
 
 	window['show_time'](APP_CONFIGS['show_time'])
 	window['use_psg_color'](APP_CONFIGS['use_psg_color'])
+
+	window['replace_pipe_bar_in_TYPE_TEXT_char'](APP_CONFIGS['replace_pipe_bar_in_TYPE_TEXT_char'])
 	
 	window['README_OFILE'](APP_CONFIGS['README_OFILE'])
 	window['CALL_REF_OFILE'](APP_CONFIGS['CALL_REF_OFILE'])
@@ -622,6 +628,8 @@ def mini_GUI():
 			APP_CONFIGS['show_time']  									= p_values['show_time']
 			APP_CONFIGS['use_psg_color']  								= p_values['use_psg_color']
 			
+			APP_CONFIGS['replace_pipe_bar_in_TYPE_TEXT_char']  			= p_values['replace_pipe_bar_in_TYPE_TEXT_char']
+			
 			APP_CONFIGS['README_OFILE'] 								= p_values['README_OFILE']
 			APP_CONFIGS['CALL_REF_OFILE'] 								= p_values['CALL_REF_OFILE']
 
@@ -634,7 +642,7 @@ def mini_GUI():
 				window['_star_bar1_'].UpdateBar(next(next_val_gen))
 				window['_star_bar2_'].UpdateBar(next(next_val_gen))
 		if values['verbose_events_log'] and '__TIMEOUT__' not in event:
-			if not re.search(r'^(Escape|Shift|Control|Alt|Mouse|F\d{1,2}).*', val, flags=re.M|re.DOTALL):
+			if not re.search(r'^(Escape|Shift|Control|Alt|Mouse|F\d{1,2}).*', event, flags=re.M|re.DOTALL):
 				print('PSG event>', event)
 
 		if event == 'toggle_progressbar':
@@ -675,10 +683,6 @@ def mini_GUI():
 		if event == 'open_init_file': openfile(psg_module_path)
 		if event == 'open_psg_file':  openfile(psg_module_path.replace('__init__.py', 'PySimpleGUI.py'))
 		
-
-
-
-
 		# hotkeys
 		if 'F2' in event: window['show_time'](not values['show_time'])
 		if 'F3' in event: window['use_psg_color'](not values['use_psg_color'])
