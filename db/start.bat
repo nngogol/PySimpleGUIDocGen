@@ -1,1 +1,1 @@
-py 'RUN_ME and START_HERE.py'
+python 'RUN_ME_and_START_HERE.py'

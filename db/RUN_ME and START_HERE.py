@@ -1,11 +1,15 @@
-import re,textwrap,subprocess,re,datetime,time,os,platform,json,PySimpleGUI as sg; from subprocess import Popen; from make_real_readme import main
+import time,re,textwrap,subprocess,re,datetime,time,os,platform,json,PySimpleGUI as sg; from subprocess import Popen;
+
+
+def sh(command,cwd=None): return subprocess.check_output(command, shell=True, cwd=cwd, executable='/bin/bash' if 'Linux' in platform.system() else None)
 
 # mkdir
 import os
 cd = CD = os.path.dirname(os.path.abspath(__file__))
 dir_name = os.path.join(cd, 'output')
 if not os.path.exists(dir_name): os.mkdir(dir_name)
-else: print(f'Такая папка уже есть: "{dir_name}"')
+else: print(f'Folder already exists (Такая папка уже есть): "{dir_name}"')
+rmfile = os.remove
 
 
 
@@ -69,10 +73,7 @@ CALL_REFERENCE_OFILENAME = APP_CONFIGS['CALL_REF_OFILE']
 ##-#-#-# ##-#-#-#
 # Post-process logic
 ##-#-#-# ##-#-#-#
-insert_md_section_for__class_methods = False
-remove_repeated_sections_classmethods = False
 
-import time
 def timeit(f):
     def wrapper(*args, **kwargs):
         start = time.time()
@@ -86,154 +87,11 @@ def timeit(f):
         return res
     return wrapper
 
-class BESTLOG(object):
-    def __init__(self, filename):
-        # my_file = logging.FileHandler(filename, mode='w')
-        # my_file.setLevel(logging.DEBUG)
-        # my_file.setFormatter(logging.Formatter('%(asctime)s>%(levelname)s: %(message)s'))
-        # logger = logging.getLogger(__name__)
-        # logger.setLevel(logging.DEBUG)
-        # logger.addHandler(my_file)
-        self.filename = filename
-        self.json_name = filename + '.json'
-        self.error_list = []
-        self.warning_list = []
-        self.info_list = []
-        self.debug_list = []
-        self.tick_amount=1
-        self.names = self.messages_names = 'error warning info debug'.split(' ')
-
-    def tick(self):
-        self.tick_amount+=1
-        return self.tick_amount
-
-    #######################################################################
-    #      __             _                             _ _               #
-    #     / _|           | |                           (_) |              #
-    #    | |_ ___  _ __  | |_ _ __ __ _ _ __  ___ _ __  _| | ___ _ __     #
-    #    |  _/ _ \| '__| | __| '__/ _` | '_ \/ __| '_ \| | |/ _ \ '__|    #
-    #    | || (_) | |    | |_| | | (_| | | | \__ \ |_) | | |  __/ |       #
-    #    |_| \___/|_|     \__|_|  \__,_|_| |_|___/ .__/|_|_|\___|_|       #
-    #                                            | |                      #
-    #                                            |_|                      #
-    #######################################################################
-    def error(self, m, metadata={}):
-        self.error_list.append([self.tick(), m, metadata])
-    def warning(self, m, metadata={}):
-        self.warning_list.append([self.tick(), m, metadata])
-    def info(self, m, metadata={}):
-        self.info_list.append([self.tick(), m, metadata])
-    def debug(self, m, metadata={}):
-        self.debug_list.append([self.tick(), m, metadata])
-
-    ##########################################
-    #      __                                #
-    #     / _|                               #
-    #    | |_ ___  _ __   _ __ ___   ___     #
-    #    |  _/ _ \| '__| | '_ ` _ \ / _ \    #
-    #    | || (_) | |    | | | | | |  __/    #
-    #    |_| \___/|_|    |_| |_| |_|\___|    #
-    #                                        #
-    #                                        #
-    ##########################################
-    def tolist(self):    return zip([self.error_list, self.warning_list, self.info_list, self.debug_list], self.names)
-    def todict(self):    return {'error' : self.error_list, 'warning' : self.warning_list, 'info' : self.info_list, 'debug' : self.debug_list}
-    @timeit
-    def save(self):
-        '''
-        {
-            'message_type' : message_type,
-            'message_text' : m_text,
-            'message_time' : m_time,
-            'message_metadata' : m_metadata
-        }
-        '''
-        all_messages_list = []
-        for messages, message_type in self.tolist():
-            results_ = [{'message_type' : message_type,
-                        'message_text' : m_text,
-                        'message_time' : m_time,
-                        'message_metadata' : m_metadata}
-                        for m_time, m_text, m_metadata in messages]
-            all_messages_list.extend(results_)
-
-        # sort messages on time
-        all_messages_list = sorted(all_messages_list,
-                            key=lambda x: x['message_time'])
-        
-        # convert time
-        # for i in all_messages_list: i['message_time'] = i['message_time'].strftime('%Y-%m-%d %H:%M:%S.%f')
-
-        writejson(self.json_name, all_messages_list)
-    @timeit
-    def load(self, **kw):
-        '''
-            return dict with messages
-            
-            kw = {
-                use_psg_color : bool
-                show_time : bool
-            }
-        '''
-
-        # plan:
-        # read json, convert time
-
-        # read
-        all_messages_list = readjson(self.json_name)
-        # convert time
-        # for i in all_messages_list: i['message_time'] = datetime.datetime.strptime(i['message_time'], '%Y-%m-%d %H:%M:%S.%f')
-
-        def format_message(message):
-            if kw['show_time']:
-                return str(message['message_time']) + ':' + message['message_text'] 
-            else:
-                return message['message_text']
-
-
-        #=========#
-        # 4 lists #
-        #=========#
-        error_list =   [i for i in all_messages_list if i['message_type'] == 'error']
-        warning_list = [i for i in all_messages_list if i['message_type'] == 'warning']
-        info_list =    [i for i in all_messages_list if i['message_type'] == 'info']
-        debug_list =   [i for i in all_messages_list if i['message_type'] == 'debug']
-
-
-        #=================#
-        # and 1 more list #
-        #=================#
-        # colors = {'warning' : 'magenta', 'info' : 'black'}
-        colors = {'warning' : 'blue', 'info' : 'black'}
-        warning_info_ = []
-        for message in sorted(warning_list + info_list, key=lambda x: x['message_time']):
-            if kw['use_psg_color']:
-                warning_info_.append([   format_message(message),
-                                        colors.get(message['message_type'])   ])
-            else:
-                warning_info_.append(format_message(message))
-
-        error_list = [format_message(i) for i in error_list]
-        warning_list = [format_message(i) for i in warning_list]
-        info_list = [format_message(i) for i in info_list]
-        debug_list = [format_message(i) for i in debug_list]
-
-        return error_list, warning_list, info_list, debug_list, warning_info_
-    @timeit
-    def load_to_listbox(self):
-        '''
-        read .json
-        '''
-        return sorted(readjson(self.json_name),
-                      key=lambda x: x['message_time'])
-
 @timeit
 def compile_call_ref(output_filename='LoG_call_ref', replace_pipe_bar_in_TYPE_TEXT_char='', **kw):
     ''' Compile a "5_call_reference.md" file'''
-
-    log_obj = BESTLOG(os.path.join(cd, output_filename))
     
-    main(logger=log_obj,
+    return main(
          main_md_file='markdown input files/5_call_reference.md',
          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
          remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
@@ -241,23 +99,18 @@ def compile_call_ref(output_filename='LoG_call_ref', replace_pipe_bar_in_TYPE_TE
          output_name=CALL_REFERENCE_OFILENAME,
          delete_html_comments=True,
          replace_pipe_bar_in_TYPE_TEXT_char=replace_pipe_bar_in_TYPE_TEXT_char)
-    log_obj.save()
-    return log_obj.load(**kw), log_obj.load_to_listbox()
 
 
 @timeit
 def compile_readme(output_filename='LoG', replace_pipe_bar_in_TYPE_TEXT_char='', **kw):
     ''' Compile a "2_readme.md" file'''
-    log_obj = BESTLOG(os.path.join(cd, output_filename))
-    main(logger=log_obj,
+    return main(
          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
          remove_repeated_sections_classmethods=remove_repeated_sections_classmethods,
          files_to_include=[0, 1, 2, 3],
          output_name=README_OFILENAME,
          delete_html_comments=True,
          replace_pipe_bar_in_TYPE_TEXT_char=replace_pipe_bar_in_TYPE_TEXT_char)
-    log_obj.save()
-    return log_obj.load(**kw), log_obj.load_to_listbox()
 
 def compile_all_stuff(**kw):
     '''
@@ -422,7 +275,6 @@ def mini_GUI():
         middle = 100/2
         for i in (int(sin(i*pi/middle)*middle + middle) for i in count()): yield i
 
-    psg_module_path = str(sg).split("' from '")[1][:-2]
     star_bar =  sg.Col([
             [sg.ProgressBar(max_value=100, orientation='h',
                             key='_star_bar1_', size=(50,5), bar_color=('blue', 'yellow'))],
@@ -432,14 +284,46 @@ def mini_GUI():
     # guia
     def empty_line(fontsize=12): return [sg.T('', font=('Mono '+str(fontsize)))]
 
-
-
-    window = sg.Window('We are live! Again! --- ' + 'Completed making            {}, {}'.format(os.path.basename(README_OFILENAME), os.path.basename(CALL_REFERENCE_OFILENAME)), [
+    fixed_spacer = [sg.T('', text_color='grey')]
+    # psg_module_path = str(sg).split("' from '")[1][:-2]
+    psg_module_path = ''
+    window_title = 'We are live! Again! --- ' + 'Completed making            {}, {}'.format(os.path.basename(README_OFILENAME), os.path.basename(CALL_REFERENCE_OFILENAME))
+    mainLayout = [
         [sg.T(size=(30,1), key='-compile-time-'), star_bar],
-        empty_line(),
-        [*md2psg(f'The *Bmagenta*PySimpleGUI** module being processed is *Imagenta*"{psg_module_path}"**'), sg.B('< open (__init__.py)', key='open_init_file'), sg.B('< open (psg.py)', key='open_psg_file')],
-        # [sg.T(f'The **PySimpleGUI** module being processed is *"{psg_module_path}"*')],
-        empty_line(),
+        
+        [
+            *md2psg(f'*Bmagenta*PySimpleGUI**:'),
+            sg.I( os.path.join(os.path.dirname(sg.__file__), f'{sg.__name__}.py'),
+                 key='psgPY_abspath', s=(70,1)),
+            sg.B('< open in text editor', pad=(0,0), key='open_psg_file')
+        ,sg.Col([
+            [   sg.Frame('', [[
+                    sg.T('PySimpleGUI history:'), 
+                    sg.B('Save current', pad=(12,0), font='Mono 10', k='-save_curr_psg_file-', button_color=('#FFFFFF', '#171218')),
+                    sg.Combo([], s=(55, 1), key='-psg_paths-', text_color = '#2E2F7B'),
+                    sg.B('pick', pad=(0,0), font='Mono 8', k='-pick_psg_file_from_combo-', button_color=('#FFFFFF', '#171218'))],
+                ], pad=(2,2), border_width=3)]
+            ], pad=(0,0)),
+        ],
+        [
+            *md2psg(f'*Bpink*.md DIR**:'),
+            sg.I( '',
+                key='_underscore_MD_files_FOLDER', s=(75,1)),
+            sg.B('< open in explorer', key='open_mdDir_file')
+        ,
+        sg.Col([
+            [   sg.Frame('', [[
+                    sg.T('.md dir history'), 
+                    sg.B('Save curr .md DIR', pad=(12,0), font='Mono 10', k='-save_curr_md_dir-', button_color=('#FFFFFF', '#171218')),
+                    sg.Combo([], s=(55, 1), key='-mdDir_paths-', text_color = '#2E2F7B'),
+                    sg.B('pick', pad=(0,0), font='Mono 8', k='-pick_md_dir_from_combo-', button_color=('#FFFFFF', '#171218'))],
+                ], pad=(2,2), border_width=3)]
+            ], pad=(0,0)),
+        ],
+
+
+        empty_line(), ######################################
+        empty_line(), ######################################
         [
             sg.B('Run again (F1)', key='-run-')
             ,sg.Col([
@@ -452,13 +336,14 @@ def mini_GUI():
             ])
             ,sg.Frame('', [[
                 sg.Col([
-                        [*md2psg('markdown outputFileName *I*FOR** *B*readme  **: ')
+                        [sg.T('                       OUTPUT FILEs ', font='Mono 11', text_color='#aa00ca', pad=(0,0))],
+                        [*md2psg('*B*readme ** abspath')
                             ,sg.I(README_OFILENAME, key='README_OFILE', size=(25, 1))
                             ,sg.B('open in explorer', key='open in explorer_readme')
                             ,sg.B('open in text editor', key='open file - readme')
                         ]
                         
-                        ,[*md2psg('markdown outputFileName *I*FOR** *B*call ref**: ')
+                        ,[*md2psg('*B*callred** abspath')
                             ,sg.I(CALL_REFERENCE_OFILENAME, key='CALL_REF_OFILE', size=(25, 1))
                             ,sg.B('open in explorer', key='open in explorer_calref')
                             ,sg.B('open in text editor', key='open file - calref')
@@ -467,7 +352,13 @@ def mini_GUI():
             ]], relief=sg.RELIEF_SUNKEN, border_width=4)
         ]
         ,*layout
-    ], resizable=True, finalize=True, location=(0,0), return_keyboard_events = True)
+    ]
+    window = sg.Window(window_title, mainLayout,
+        resizable=True,
+        finalize=True,
+        location=(0,0),
+        return_keyboard_events=True
+    )
     
     def update_time_in_GUI():
         window['-compile-time-'](datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S.%f'))
@@ -477,13 +368,90 @@ def mini_GUI():
         #
         # ░▒▒▓▓▓▓▓◘ compile ◘▓▓▓▓▓▒▒░
         #
-        result_readme__for_txt_n_listbox, result_call_ref__for_txt_n_listbox = compile_all_stuff(
-                                                                                    use_psg_color=values['use_psg_color'],
-                                                                                    show_time=values['show_time'],
-                                                                                    replace_pipe_bar_in_TYPE_TEXT_char=values['replace_pipe_bar_in_TYPE_TEXT_char'],
-                                                                                    )
-        result_readme_txt,   result_readme_listbox_items   = result_readme__for_txt_n_listbox
-        result_call_ref_txt, result_call_ref_listbox_items = result_call_ref__for_txt_n_listbox
+        #                                     .-------.
+        #                                .----|RUN ME |------.
+        #                                |    '-------'      |
+        #                                |                   |
+        #                                |                   |
+        #                                v                   v
+        # .---------------.       .-------------.   .----------------.
+        # | write "input" |  #    | -==>> input |   | -==>> input    |
+        # | data to files |  #    | psg.py file |   | values == json |
+        # '---------------'  #    |             |   '----------------'
+        #                    #    '-------------'
+        #                    #
+        #                    #
+        #                    #
+        # .-----------.      #      .------------------.
+        # | run in sh |      #      | rac_exTractor.py |####
+        # '-----------'      #      '------------------'   #
+        #                    #                             #
+        #                    #                             #
+        # .------------.     #                             v
+        # | read ->    |     #               .---------------------------.
+        # | show in UI |     #               | rac_exTractor_output.json |
+        # '------------'     #               '---------------------------'
+        #                    v
+        #                    end
+
+        # or, in short, in bash:
+        # $ psg_abspath='...'
+        # $ psg_params='...'
+        # $ dira=`mktemp`
+        # $ cp "$psg_abspath" "$dira/psg.py" 
+        # $ cp "$PWD/extractor.py" "$dira/extractor.py" 
+        # $ echo psg_params > cp "$dira/input_params.json"
+        # $ ofile=$PWD/out.json
+        # $ pushd "$dira"; python3 extractor.py -ofile=$ofile; popd
+        # $ rm -rf "$dira"
+
+
+        cd = CD = os.path.dirname(os.path.abspath(__file__))
+        psg_abspath = values['psgPY_abspath']
+        if not os.path.exists(psg_abspath): return
+        ##########################################
+
+        # ABS   files
+        psgPy                 = os.path.join(cd, 'input_PySimpleGUI.py')
+        input_psg_values_json = os.path.join(cd, 'input_psg_values.json')
+        output_json           = os.path.join(cd, 'psg_info_extractor.json')
+        
+        # write SDK
+        writefile(psgPy,                 readfile(psg_abspath))
+        # write "input values" JSON
+        values['README_OFILENAME'] = README_OFILENAME
+        values['CALL_REFERENCE_OFILENAME'] = CALL_REFERENCE_OFILENAME
+        writejson(input_psg_values_json, str(values))
+        
+
+        # run Extractor
+        com = '{} "{}" -ojson "{}"'.format(
+            'python' if 'Windows' in platform.system() else 'python3',
+            os.path.join(cd, 'extract_readmelog_and_callref_log_from_PSGfile.py'),
+            output_json
+        )
+        
+        sh(com)
+        os.remove(psgPy)
+        os.remove(input_psg_values_json)
+        data = readjson(output_json); os.remove(output_json)
+        # return data
+        '''
+            {
+                'class_messages': [...]
+                'funcs_messages'           : [...]
+                'funcs_messages__nodunder' : [...]
+            }
+        '''
+
+        #
+        #
+        # unpack results from shell script
+        #
+        #
+        result_readme__for_txt_n_listbox, result_call_ref__for_txt_n_listbox = data
+        result_readme_txt,   result_readme_listbox_items                     = result_readme__for_txt_n_listbox
+        result_call_ref_txt, result_call_ref_listbox_items                   = result_call_ref__for_txt_n_listbox
         
         #
         # ░▒▒▓▓▓▓▓◘ define FILTER functions ◘▓▓▓▓▓▒▒░
@@ -582,7 +550,7 @@ def mini_GUI():
         update_time_in_GUI()
 
     values = window.read(timeout=0)[1]
-    update_compilation_in_psg(values)
+    # update_compilation_in_psg(values)
     p_values = values
 
     window['_PyCharm_path_'](APP_CONFIGS['_PyCharm_path_'])
@@ -604,7 +572,11 @@ def mini_GUI():
     
     window['README_OFILE'](APP_CONFIGS['README_OFILE'])
     window['CALL_REF_OFILE'](APP_CONFIGS['CALL_REF_OFILE'])
+    if some_psg_libs_list := APP_CONFIGS.get('psg_libs_list', []):
+        window['-psg_paths-'](some_psg_libs_list[-1], values = some_psg_libs_list)
 
+    if some_md_dirs_list := APP_CONFIGS.get('md_dirs_list', []):
+        window['-mdDir_paths-'](some_md_dirs_list[-1], values = some_md_dirs_list)
 
     next_val_gen = next_star()
     my_timeout = None
@@ -645,6 +617,55 @@ def mini_GUI():
             if not re.search(r'^(Escape|Shift|Control|Alt|Mouse|F\d{1,2}).*', event, flags=re.M|re.DOTALL):
                 print('PSG event>', event)
 
+
+
+
+        if event == 'eat_psg':
+            psgPY_abspath = values['psgPY_abspath']
+            if os.path.exists(psgPY_abspath):
+                update_compilation_in_psg(values)
+
+        if event == '-save_curr_md_dir-':
+            _underscore_MD_files_FOLDER = values['_underscore_MD_files_FOLDER']
+            if not os.path.exists(_underscore_MD_files_FOLDER):
+                sg.popup('Sorry, this DIR doesn\'t exists!')
+            elif not os.path.isdir(_underscore_MD_files_FOLDER):
+                sg.popup('Sorry, this is not a DIR!')
+            else:
+                if not APP_CONFIGS.get('md_dirs_list', []):
+                    APP_CONFIGS['md_dirs_list'] = [_underscore_MD_files_FOLDER]
+                else:
+                    APP_CONFIGS['md_dirs_list'].append(_underscore_MD_files_FOLDER)
+
+                window['-mdDir_paths-'](APP_CONFIGS['md_dirs_list'][-1], values = APP_CONFIGS['md_dirs_list'])
+        if event == '-save_curr_psg_file-':
+            psgPY_abspath = values['psgPY_abspath']
+            if not os.path.exists(psgPY_abspath):
+                sg.popup('Sorry, this FILE doesn\'t exists!')
+            elif not os.path.isfile(psgPY_abspath):
+                sg.popup('Sorry, this is not a FILE!')
+            else:
+                if not APP_CONFIGS.get('psg_libs_list', []):
+                    APP_CONFIGS['psg_libs_list'] = [psgPY_abspath]
+                else:
+                    APP_CONFIGS['psg_libs_list'].append(psgPY_abspath)
+
+                window['-psg_paths-'](APP_CONFIGS['psg_libs_list'][-1], values = APP_CONFIGS['psg_libs_list'])
+
+
+        if event == '-pick_md_dir_from_combo-':
+            md_dirs_list = values['-mdDir_paths-']
+            if md_dirs_list:
+                window['_underscore_MD_files_FOLDER'](md_dirs_list)
+
+        if event == '-pick_psg_file_from_combo-':
+            psg_paths_list = values['-psg_paths-']
+            if psg_paths_list:
+                window['psgPY_abspath'](psg_paths_list)
+
+
+
+
         if event == 'toggle_progressbar':
             my_timeout = None if not values['toggle_progressbar'] else 100
 
@@ -680,8 +701,8 @@ def mini_GUI():
         if event == 'open file - readme':      openfile(os.path.join(cd, values['README_OFILE']))
         if event == 'open file - calref':      openfile(os.path.join(cd, values['CALL_REF_OFILE']))
         # file
-        if event == 'open_init_file': openfile(psg_module_path)
-        if event == 'open_psg_file':  openfile(psg_module_path.replace('__init__.py', 'PySimpleGUI.py'))
+        if event == 'open_psg_file':    openfile( values['psgPY_abspath'])
+        if event == 'open_mdDir_file':  opendir( values['_underscore_MD_files_FOLDER'])
         
         # hotkeys
         if 'F2' in event: window['show_time'](not values['show_time'])

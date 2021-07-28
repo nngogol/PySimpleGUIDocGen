@@ -1,7 +1,7 @@
 import inspect
 from inspect import getmembers, isfunction, isclass, getsource, signature, _empty, isdatadescriptor
 from datetime import datetime
-import PySimpleGUI, click, textwrap, logging, json, re, os
+import input_PySimpleGUI as sg, click, textwrap, logging, json, re, os
 import os
 cd = CD = os.path.dirname(os.path.abspath(__file__))
 
@@ -34,7 +34,6 @@ TABLE_Only_table_RETURN_TEMPLATE = '''|Type|Name|Meaning|\n|---|---|---|\n|<type
 #                                                                            #
 ##############################################################################
 
-from collections import namedtuple
 special_case = namedtuple('special_case', 'ok sig table just_text'.split(' '))
 
 def get_line_number(python_obj):
@@ -274,10 +273,11 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             elif val == None:                   rows.append(f'{key} = None')
             elif type(val) in (int, float):     rows.append(f'{key} = {val}')
             elif type(val) is str:              rows.append(f'{key} = "{val}"')
-            elif type(val) is tuple:            rows.append(f'{key} = {val}')
             elif type(val) is bool:             rows.append(f'{key} = {val}')
             elif type(val) is bytes:            rows.append(f'{key} = ...')
+            elif type(val) in [tuple,list]:     rows.append(f'{key} = {repr(val)}')
             else:
+                breakpoint();
                 raise Exception(f'IDK this type -> {key, val}')
 
 
@@ -493,7 +493,8 @@ def main(do_full_readme=False,
         insert_md_section_for__class_methods:bool=True,
         remove_repeated_sections_classmethods:bool=False,
         output_repeated_tags:bool=False,
-        main_md_file='markdown input files/2_readme.md',
+            main_md_file='markdown input files/2_readme.md',
+            _underscore_MD_files_FOLDER='markdown input files',
         skip_dunder_method:bool=True, verbose = False,
         replace_pipe_bar_in_TYPE_TEXT_char=''):
     """
@@ -542,8 +543,8 @@ def main(do_full_readme=False,
 
         
     if verbose: timee(''' psg_members ''')
-    psg_members  = [i for i in getmembers(PySimpleGUI) if valid_field(i)] # variables, functions, classes
-    # psg_members  = getmembers(PySimpleGUI) # variables, functions, classes
+    psg_members  = [i for i in getmembers(sg) if valid_field(i)] # variables, functions, classes
+    # psg_members  = getmembers(sg) # variables, functions, classes
     psg_funcs = [o for o in psg_members if isfunction(o[1])] # only functions
     psg_classes = [o for o in psg_members if isclass(o[1])]  # only classes
     psg_classes_ = list(set([i[1] for i in psg_classes]))    # boildown B,Btn,Butt -into-> Button
@@ -783,10 +784,10 @@ def main(do_full_readme=False,
 
     if verbose: timee('''files = []''')
     files = []
-    if 0 in files_to_include: files.append(readfile('markdown input files/1_HEADER_top_part.md'))
+    if 0 in files_to_include: files.append(readfile(f'{_underscore_MD_files_FOLDER}/1_HEADER_top_part.md'))
     if 1 in files_to_include: files.append(readme)
-    if 2 in files_to_include: files.append(readfile('markdown input files/3_FOOTER.md'))
-    if 3 in files_to_include: files.append(readfile('markdown input files/4_Release_notes.md'))
+    if 2 in files_to_include: files.append(readfile(f'{_underscore_MD_files_FOLDER}/3_FOOTER.md'))
+    if 3 in files_to_include: files.append(readfile(f'{_underscore_MD_files_FOLDER}/4_Release_notes.md'))
 
     Joined_MARKDOWN = '\n\n'.join(files) if do_full_readme or files else readme
 

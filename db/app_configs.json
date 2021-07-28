@@ -9,5 +9,10 @@
   "_filter_empty_tables_ml_": "PrintClose\nEasyPrintClose\nmain\ntheme\nRead\n\n\n",
   "_filter_tkinter_class_methods_": "SetFocus\nSetTooltip\nUpdate\n__init__\nbind\nexpand\nset_cursor\nset_size\n\n\n",
   "checkbox_enable_empty_tables_filter": true,
-  "checkbox_enable_filter_tkinter_class_methods": true
+  "checkbox_enable_filter_tkinter_class_methods": true,
+  "verbose_events_log": true,
+  "replace_pipe_bar_in_TYPE_TEXT_char": "\\|",
+  "psg_libs_list": [],
+  "md_dirs_list": []
+  
 }
