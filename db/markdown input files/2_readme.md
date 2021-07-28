@@ -31,11 +31,11 @@ As long as you know you're sticking with tkinter for the short term, it's safe t
 
 ## The Non-PEP8 Methods and Functions
 
-Why the need for these bindings?  Simply put, the PySimpleGUI SDK has a PEP8 violation in the method and function names.  PySimpleGUI uses CamelCase names for methods and functions.  PEP8 suggests using snake_case_variables instead.  
+Why the need for these bindings?  Simply put, the PySimpleGUI SDK has a PEP8 violation in the method and function names.  PySimpleGUI uses CamelCase names for methods and functions.  PEP8 suggests using snake_case_variables instead.
 
 This has not caused any problems and few complaints, but it's important the the interfaces into PySimpleGUI be compliant.  Perhaps one of the reasons for lack of complaints is that the Qt library also uses SnakeCase for its methods.  This practice has the effect of labelling a package as being "not Pythonic" and also suggests that this package was originally used in another language and then ported to Python.  This is exactly the situation with Qt.  It was written for C++ and the interfaces continue to use C++ conventions.
 
-***PySimpleGUI was written in Python, for Python.***  The reason for the name problem was one of ignorance.  The PEP8 convention wasn't understood by the developers when PySimpleGUI was designed and implemented.  
+***PySimpleGUI was written in Python, for Python.***  The reason for the name problem was one of ignorance.  The PEP8 convention wasn't understood by the developers when PySimpleGUI was designed and implemented.
 
 You can, and will be able to for some time, use both names.  However, at some point in the future, the CamelCase names will disappear.  A utility is planned to do the conversion for the developer when the old names are remove from PySimpleGUI.
 
@@ -60,7 +60,7 @@ For the time being, class variables will remain the way they are currently.  It 
 
 Think of Popups as your first windows, sorta like your first bicycle. It worked well, but was limited.  It probably wasn't long before you wanted more features and it seemed too limiting for your newly found sense of adventure.
 
-When you've reached the point with Popups that you are thinking of filing a GitHub "Enhancement Issue" to get the Popup call extended to include a new feature that you think would be helpful.... not just to you but others is what you had in mind, right?  For the good of others. 
+When you've reached the point with Popups that you are thinking of filing a GitHub "Enhancement Issue" to get the Popup call extended to include a new feature that you think would be helpful.... not just to you but others is what you had in mind, right?  For the good of others.
 
 Well, don't file that enhancement request.  Instead, it's at THIS time that you should immediately turn to the section entitled "Custom Window API Calls - Your First Window".  Congratulations, you just graduated and are now an official "GUI Designer".  Oh, never mind that you only started learning Python 2 weeks ago, you're a real GUI Designer now so buck up and start acting like one.  Write a popup function of your own.  And then, compact that function down to a **single line of code**.  Yes, these popups can be written in 1 line of code.  The secret is to use the `close` parameter on your call to `window.read()`
 
@@ -68,15 +68,15 @@ But, for now, let's stick with these 1-line window calls, the Popups.   This is 
 
 popup_animated
 popup_annoying
-popup_auto_close 
+popup_auto_close
 popup_cancel
 popup_error
-popup_get_file 
-popup_get_folder 
+popup_get_file
+popup_get_folder
 popup_get_text
 popup_no_border
 popup_no_buttons
-popup_no_frame 
+popup_no_frame
 popup_no_titlebar
 popup_no_wait
 popup_notify
@@ -145,7 +145,7 @@ Preview of popups:
 	<img src="https://user-images.githubusercontent.com/13696193/44957595-9e15da00-aea1-11e8-8909-6b6121b74509.jpg">
 </p>
 
-<!-- <+func.Popup+> -->
+<!-- <+func.popup+> -->
 
 The other output Popups are variations on parameters.  Usually the button_type parameter is the primary one changed.
 
@@ -178,15 +178,15 @@ sg.popup_scrolled(my_text)
 ![scrolledtextbox 2](https://user-images.githubusercontent.com/13696193/43667324-712aa0d4-9745-11e8-83a9-a0d0570d0865.jpg)
 
 
-The `popup_scrolled` will auto-fit the window size to the size of the text.  Specify `None` in the height field of a `size` parameter to get auto-sized height. 
+The `popup_scrolled` will auto-fit the window size to the size of the text.  Specify `None` in the height field of a `size` parameter to get auto-sized height.
 
-This call will create a scrolled box 80 characters wide and a height dependent upon the number of lines of text. 
+This call will create a scrolled box 80 characters wide and a height dependent upon the number of lines of text.
 
-`sg.popup_scrolled(my_text, size=(80, None))`  
+`sg.popup_scrolled(my_text, size=(80, None))`
 
-Note that the default max number of lines before scrolling happens is set to 50. At 50 lines the scrolling will begin. 
+Note that the default max number of lines before scrolling happens is set to 50. At 50 lines the scrolling will begin.
 
-If `non_blocking` parameter is set, then  the call will not blocking waiting for the user to close the window.  Execution will immediately return to the user.  Handy when you want to dump out debug info without disrupting the program flow. 
+If `non_blocking` parameter is set, then  the call will not blocking waiting for the user to close the window.  Execution will immediately return to the user.  Handy when you want to dump out debug info without disrupting the program flow.
 
 
 ### Non-Blocking Popups - popup_no_wait and the non_blocking parameter
@@ -195,7 +195,7 @@ If `non_blocking` parameter is set, then  the call will not blocking waiting for
 
 The `popup` call `popup_no_wait` or `popup_non_blocking` will create a popup window and then immediately return control back to you.  You can turn other popup calls into non-blocking popups if they have a `non_blocking` parameter.  Setting `non_blocking` to True will cause the function to return immediately rather than waiting for the window to be closed.
 
-This function is very handy for when you're **debugging** and want to display something as output but don't want to change the programs's overall timing by blocking.  Think of it like a `print` statement. There are no return values on one of these Popups. 
+This function is very handy for when you're **debugging** and want to display something as output but don't want to change the programs's overall timing by blocking.  Think of it like a `print` statement. There are no return values on one of these Popups.
 
 
 ### Popup Parameter Combinations
@@ -206,7 +206,7 @@ So that you don't have to specify a potentially long list common parameters ther
 
 ## Popup Input
 
-There are Popup calls for single-item inputs. These follow the pattern of `popup_get` followed by the type of item to get.  There are 3 of these input Popups to choose from, each with settings enabling customization. 
+There are Popup calls for single-item inputs. These follow the pattern of `popup_get` followed by the type of item to get.  There are 3 of these input Popups to choose from, each with settings enabling customization.
 
 - `popup_get_text` - get a single line of text
 - `popup_get_file` - get a filename
@@ -238,7 +238,7 @@ Gets one or more filenames from the user.  There are options to configure the ty
 <!-- <+func.popup_get_file+> -->
 
 
-If configured as an Open File Popup then (save_as is not True)  the dialog box will look like this. 
+If configured as an Open File Popup then (save_as is not True)  the dialog box will look like this.
 
 ![snag-0060](https://user-images.githubusercontent.com/13696193/46761050-9831c680-cca1-11e8-8de9-68b15efe2c46.jpg)
 
@@ -546,7 +546,7 @@ This is a slightly more complex, but maybe more realistic version that reads inp
 
 Do not worry yet what all of these statements mean.   Just copy it so you can begin to play with it, make some changes.  Experiment to see how thing work.
 
-This example introduces the concept of "keys".  Keys are super important in PySimpleGUI as they enable you to identify and work with Elements using names you want to use.  Keys can be (almost) ANYTHING, except `None` or a List (a tuple is fine).  To access an input element's data that is read in the example below, you will use `values['-IN-']` instead of `values[0]` like before.  
+This example introduces the concept of "keys".  Keys are super important in PySimpleGUI as they enable you to identify and work with Elements using names you want to use.  Keys can be (almost) ANYTHING, except `None` or a List (a tuple is fine).  To access an input element's data that is read in the example below, you will use `values['-IN-']` instead of `values[0]` like before.
 
 ```python
 import PySimpleGUI as sg
@@ -575,7 +575,7 @@ window.close()
 
 There actually is a PySimpleGUI Window Designer that uses Qt's window designer.  It's outside the scope of this document however.  You'll find the project here: https://github.com/nngogol/PySimpleGUIDesigner
 
-I hope to start using it more soon.  
+I hope to start using it more soon.
 
 ## How GUI Programming in Python Should Look?  At least for beginners ?
 
@@ -607,9 +607,9 @@ print(folder_path, file_path)
 
 ![image](https://user-images.githubusercontent.com/46163555/70470775-cd01ff00-1a99-11ea-8b9c-8b33c8880c99.png)
 
-The first line of code after the import is a call to `theme`.  
+The first line of code after the import is a call to `theme`.
 
-Until Dec 2019 the way a "theme" was specific in PySimpleGUI was to call `change_look_and_feel`.  That call has been replaced by the more simple function `theme`.  
+Until Dec 2019 the way a "theme" was specific in PySimpleGUI was to call `change_look_and_feel`.  That call has been replaced by the more simple function `theme`.
 
 
 ### Window contents (The Layout)
@@ -688,49 +688,6 @@ For Windows that have specifically enabled these.  Please see the appropriate se
 
 ***Most*** of the time the event will be a button click or the window was closed.  The other Element-specific kinds of events happen when you set `enable_events=True` when you create the Element.
 
-### Window closed event
-
-Another convention to follow is the check for windows being closed with an X.  *This is an critically important event to catch*.  If you don't check for this and you attempt to use the window, your program will crash, or silently consume 100% of your CPU.  Please check for closed window and exit your program gracefully.  Your users will like you for it.  
-
-Close your windows when you're done with them even though exiting the program will also close them.  tkinter can generate an error/warning sometimes if you don't close the window.  For other ports, such as PySimpleGUIWeb, not closing the Window will potentially cause your program to continue to run in the background.
-
-To check for a closed window use this line of code:
-
-```python
-if event == sg.WIN_CLOSED:
-```
-
-Prior to release 4.19.0 you'll find code that checks for `None` instead of `WIN_CLOSED`.  These are in fact the same as `WIN_CLOSED` is `None`.
-
-Putting it all together we end up with an "event loop" that looks something like this:
-
-```python
-while True:
-	event, values = window.read()
-	if event == sg.WIN_CLOSED:
-		break
-window.close()
-```
-
-You will very often see the examples and demo programs write this check as:
-
-```python
-	event, values = window.read()
-	if event in (sg.WIN_CLOSED, 'Exit'):
-		break
-```
-
-The keyword `in` means to check the list of things to see if the `event` is in that list (or tuple)
-
-This if statement is the same as:
-```python
-	if event == sg.WIN_CLOSED or event == 'Exit':
-		break
-```
-
-Instead of `'Exit'` use the name/key of the button you want to exit the window (Cancel, Quit, etc.)
-
-
 ### Button Click Events
 
 By default buttons will always return a click event, or in the case of realtime buttons, a button down event.  You don't have to do anything to enable button clicks.  To disable the events, disable the button using its Update method.
@@ -742,29 +699,6 @@ The button value from a Read call will be one of 2 values:
 2. The Button's key      - If a key is specified
 
 If a button has a key set when it was created, then that key will be returned, regardless of what text is shown on the button.  If no key is set, then the button text is returned.  If no button was clicked, but the window returned anyway, the event value is the key that caused the event to be generated.  For example, if `enable_events` is set on an `Input` Element and someone types a character into that `Input` box, then the event will be the key of the input box.
-
-### **WIN_CLOSED (None) is returned when the user clicks the X to close a window.**
-
-If your window has an event loop where it is read over and over, remember to give your user an "out".  You should ***always check for a None value*** and it's a good practice to provide an Exit button of some kind. Thus design patterns often resemble this Event Loop:
-
-```python
-while True:
-	event, values = window.read()
-	if event == sg.WIN_CLOSED or event == 'Quit':
-		break
-```
-
-Actually, the more "Pythonic version" is used in most Demo Programs and examples.   They do  **exactly** the same thing.
-
-```python
-while True:
-	event, values = window.read()
-	if event in (sg.WIN_CLOSED, 'Quit'):
-		break
-```
-
-
-
 
 ### Element Events
 
@@ -812,6 +746,153 @@ Windows are capable of returning keyboard events.  These are returned as either 
 #### Timeouts
 
 If you set a timeout parameter in your read, then the system TIMEOUT_KEY will be returned.  If you specified your own timeout key in the Read call then that value will be what's returned instead.
+
+
+## Window Closed Events
+
+Detecting and correctly handling Windows being closed is an important part of your PySimpleGUI application.  You will find in every event loop in every Demo Program an if statement that checks for the events that signal that a window has closed.
+
+The most obvious way to close a window is to click the "X" in the upper right corner of the window (on Windows, Linux.... Mac doesn't use an "X" but still has a close button).  On Windows systems, the keyboard keys ALT+F4 will force a Window to close.  This is one way to close a window without using a mouse.  Some programs can also send a "close" command to the window.
+
+Regardless of how the close is performed on the window, PySimpleGUI returns an event for this closure.
+
+### WIN_CLOSED Event
+
+**The constant WIN_CLOSED (None) is returned when the user clicks the X to close a window.**
+
+Typically, the check for a closed window happens right after the `window.read()` call returns.  The reason for this is that operating on a closed window can result in errors.  The check for closure is an "if" statement.
+
+**ALWAYS** include a check for a closed window in your event loop.  
+
+### The Window Closed If Statement
+
+There are 2 forms you'll find for this if statement in the documentation and the Demo Programs.  One is "Pythonic" the other is more understandable by beginners.  This is the format you'll see most often in the PySimpleGUI materials if the window has both a button that is used to signal the user wishes to exit.  In this example, I'm using a "Quit" button:
+
+```python
+if event == sg.WIN_CLOSED or event == 'Exit':
+    break
+```
+
+The more "Pythonic" version of this same statement is:
+
+```python
+if event in (sg.WIN_CLOSED, 'Exit'):
+    break
+```
+
+In case you're yelling at the documentation that the second form should always be used, remember that many of the PySimpleGUI users are new to  Python.  If the very first example of a PySimpleGUI program they see has that if statement in it, they will instantly be lost before they can even begin their journey.  So, the decision was made to, you guessed it, go SIMPLE.  The statement with the "or" is simpler to understand.
+
+
+### A Complete Example - Traditional Window Closed Check
+
+Let's put this if statement into context so you can see where it goes and how it works with the event loop
+
+```python
+import PySimpleGUI as sg
+
+layout = [[sg.Text('Very basic Window')],
+          [sg.Text('Click X in titlebar or the Exit button')],
+          [sg.Button('Go'), sg.Button('Exit')]]
+
+window = sg.Window('Window Title', layout)
+
+while True:
+    event, values = window.read()
+    print(event, values)
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+
+window.close()
+```
+
+Notice that the line after the while loop is a call to `window.close()`.  The reason for this is that exiting the loop can be in 2 ways. 
+* The "X" is clicked
+* The Exit button is clicked
+
+If the Exit button is clicked, the window will still be open.  Get in the habit of closing your windows explicitly like this.
+
+If the user clicked "X" and closed the window, then it will have been destroyed by the underlying framework.  You should STILL call `window.close()` because come cleanup work may be needed and there is no harm in closing an already closed window.
+
+tkinter can generate an error/warning sometimes if you don't close the window.  For other ports, such as PySimpleGUIWeb, not closing the Window will potentially cause your program to continue to run in the background.  This can cause your program to not be visible and yet consuming 100% of the CPU time.  Not fun for your users.
+
+### Window Close Confirmation
+
+In 4.33.0 a new parameter, `enable_close_attempted_event`, was added to the `Window` object.  This boolean parameter indicates if you would like to receive an event that a user **wants** to close the window rather than an event that the user **has** closed the window.
+
+To enable this feature, the `Window` is created with something like this:
+
+```python
+window = sg.Window('Window Title', layout, enable_close_attempted_event=True)
+```
+
+When the close attempted feature is enabled, when the user clicks the "X" or types ALT+F4, you will not get a WIN_CLOSED event like previously, you will instead get an event `WINDOW_CLOSE_ATTEMPTED_EVENT` and the window will remain open.  
+
+Usually this feature is used to add a "close confirmation" popup.  The flow goes something like this:
+
+* Window is shown
+* User  clicks X
+* A popup window is shown with message "Do you really want to close the window?"
+* If confirmed a close is desired, the window is closed.  It not, the event loop continues on, basically ignoring the event occurred.
+
+### A Complete Example - Window Closed Confirmation (`enable_close_attempted_event=True`)
+
+Returning to the example used above, there has been only 2 modifications. 
+
+1. Added the parameter `enable_close_attempted_event=True` to the call to `Window`
+2. The if statement in the event loop has changed to add a confirmation
+
+```python
+import PySimpleGUI as sg
+
+layout = [[sg.Text('Very basic Window')],
+          [sg.Text('Click X in titlebar or the Exit button')],
+          [sg.Button('Go'), sg.Button('Exit')]]
+
+window = sg.Window('Window Title', layout, enable_close_attempted_event=True)
+
+while True:
+    event, values = window.read()
+    print(event, values)
+    if (event == sg.WINDOW_CLOSE_ATTEMPTED_EVENT or event == 'Exit') and sg.popup_yes_no('Do you really want to exit?') == 'Yes':
+        break
+
+window.close()
+```
+
+The event loop changed from a check like this:
+```python
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+```
+
+To one like this:
+```python
+    if (event == sg.WINDOW_CLOSE_ATTEMPTED_EVENT or event == 'Exit') and sg.popup_yes_no('Do you really want to exit?') == 'Yes':
+        break
+```
+
+Let's run this last program so you can see what all this looks like to users.
+
+In both cases that a user previously exited the window, there is now an additional confirmation step.
+
+![download](https://raw.githubusercontent.com/PySimpleGUI/PySimpleGUI/master/images/for_readme/Window%20Closed%20Confirmation.gif)
+
+
+
+### Demo Programs.... A PySimpleGUI Program's Best Friend
+
+Like all features of PySimpleGUI, one of the best resources available to you to learn about parameters, like this close attempted parameter, are the Demo Programs.  When you run into a parameter or a feature you've not used before, one way to find some examples of its use is to use the Demo Browser to search through the demo programs.  You'll find the Demo Browser described in the Cookbook.
+
+As of this writing, the name of the Demo Program Browser is:
+
+`Browser_START_HERE_Demo_Programs_Browser.py`
+
+If you enter the parameter described in this section - `enable_close_attempted_event` you'll find a Demo Program that uses this parameter.
+
+![DemoBrowser](https://raw.githubusercontent.com/PySimpleGUI/PySimpleGUI/master/images/for_readme/Demo%20Browser%20Search%20Close%20Attempted.jpg)
+
+This demo shows you code similar to the code used in this section of the documentation. Use this Browser program!  It will make finding examples ***much easier***!
+
 
 ### The `values` Variable - Return values as a list
 
@@ -962,7 +1043,7 @@ This is a complex window with quite a bit of custom sizing to make things line u
 
 This window may look "ugly" to you which is because no effort has been made to make it look nice. It's purely functional. There are 30 Elements in the window.  THIRTY Elements. Considering what it does, it's miraculous or in the least incredibly impressive.  Why?  Because in less than 50 lines of code that window was created, shown, collected the results and showed the results in another window.
 
-50 lines.  It'll take you 50 lines of tkinter or Qt code to get the first 3 elements of the window written, if you can even do that.  
+50 lines.  It'll take you 50 lines of tkinter or Qt code to get the first 3 elements of the window written, if you can even do that.
 
 No, let's be clear here... this window will take a massive amount of code using the conventional Python GUI packages.  It's a fact and if you care to prove me wrong, then by ALL means PLEASE do it.  Please write this window using tkinter, Qt, or WxPython and send the code!
 
@@ -978,7 +1059,7 @@ Clicking the Submit button caused the window call to return.  The call to Popup 
 
 
 
-**`Note, event values can be None`**.  The value for `event` will be the text that is displayed on the button element when it was created or the key for the button.  If the user closed the window using the "X" in the upper right corner of the window, then `event` will be `sg.WIN_CLOSED` which is equal to `None`.   It is ***vitally*** ***important*** that your code contain the proper checks for `sg.WIN_CLOSED`. 
+**`Note, event values can be None`**.  The value for `event` will be the text that is displayed on the button element when it was created or the key for the button.  If the user closed the window using the "X" in the upper right corner of the window, then `event` will be `sg.WIN_CLOSED` which is equal to `None`.   It is ***vitally*** ***important*** that your code contain the proper checks for `sg.WIN_CLOSED`.
 
 For "persistent windows",  **always give your users a way out of the window**.  Otherwise you'll end up  with windows that never properly close.  It's literally 2 lines of code that you'll find in every Demo Program.  While you're at it, make sure a `window.close()` call is after your event loop so that your window closes for sure.
 
@@ -996,15 +1077,96 @@ You have a couple of options for dealing this with.  If your operation can be br
 
 If, on the other hand, your operation is not under your control or you are unable to add `Refresh` calls, then the next option available to you is to move your long operations into a thread.
 
-There are a couple of demo programs available for you to see how to do this.  You basically put your work into a thread.  When the thread is completed, it tells the GUI by sending a message through a queue.  The event loop will run with a timer set to a value that represents how "responsive" you want your GUI to be to the work completing.  
+### The "Old Way"
 
-These 2 demo programs are called
+There are a couple of demo programs available for you to see how to do this.  You basically put your work into a thread.  When the thread is completed, it tells the GUI by sending a message through a queue.  The event loop will run with a timer set to a value that represents how "responsive" you want your GUI to be to the work completing.
+
+
+### The "New Way" - `Window.write_event_value`
+
+This new function that is available currently only in the tkinter port as of July 2020 is exciting and represents the future way multi-threading will be handled in PySimpleGUI (or so is hoped).
+
+Previously, a queue was used where your event loop would **poll** for incoming messages from a thread.
+
+Now, threads can directly inject events into a Window so that it will show up in the `window.read()` calls.  This allows a your event loop to "pend", waiting for normal window events as well as events being generated by threads.
+
+You can see this new capability in action in this demo:  Demo_Multithreaded_Write_Event_Value.py
+
+Here is that program for your inspection and education.  It's SO nice to no longer poll for threaded events.
+
 ```python
-Demo_Threaded_Work.py - Best documented.  Single thread used for long task
-Demo_Multithreaded_Long_Tasks.py - Similar to above, but with less fancy GUI. Allows you to set amount of time
+import threading
+import time
+import PySimpleGUI as sg
+
+
+"""
+    Threaded Demo - Uses Window.write_event_value communications
+
+    Requires PySimpleGUI.py version 4.25.0 and later
+
+    This is a really important demo  to understand if you're going to be using multithreading in PySimpleGUI.
+
+    Older mechanisms for multi-threading in PySimpleGUI relied on polling of a queue. The management of a communications
+    queue is now performed internally to PySimpleGUI.
+
+    The importance of using the new window.write_event_value call cannot be emphasized enough.  It will hav a HUGE impact, in
+    a positive way, on your code to move to this mechanism as your code will simply "pend" waiting for an event rather than polling.
+
+    Copyright 2020 PySimpleGUI.org
+"""
+
+THREAD_EVENT = '-THREAD-'
+
+cp = sg.cprint
+
+def the_thread(window):
+    """
+    The thread that communicates with the application through the window's events.
+
+    Once a second wakes and sends a new event and associated value to the window
+    """
+    i = 0
+    while True:
+        time.sleep(1)
+        window.write_event_value('-THREAD-', (threading.current_thread().name, i))      # Data sent is a tuple of thread name and counter
+        cp('This is cheating from the thread', c='white on green')
+        i += 1
+
+
+def main():
+    """
+    The demo will display in the multiline info about the event and values dictionary as it is being
+    returned from window.read()
+    Every time "Start" is clicked a new thread is started
+    Try clicking "Dummy" to see that the window is active while the thread stuff is happening in the background
+    """
+
+    layout = [  [sg.Text('Output Area - cprint\'s route to here', font='Any 15')],
+                [sg.Multiline(size=(65,20), key='-ML-', autoscroll=True, reroute_stdout=True, write_only=True, reroute_cprint=True)],
+                [sg.T('Input so you can see data in your dictionary')],
+                [sg.Input(key='-IN-', size=(30,1))],
+                [sg.B('Start A Thread'), sg.B('Dummy'), sg.Button('Exit')]  ]
+
+    window = sg.Window('Window Title', layout, finalize=True)
+
+    while True:             # Event Loop
+        event, values = window.read()
+        cp(event, values)
+        if event == sg.WIN_CLOSED or event == 'Exit':
+            break
+        if event.startswith('Start'):
+            threading.Thread(target=the_thread, args=(window,), daemon=True).start()
+        if event == THREAD_EVENT:
+            cp(f'Data from the thread ', colors='white on purple', end='')
+            cp(f'{values[THREAD_EVENT]}', colors='white on red')
+    window.close()
+
+
+if __name__ == '__main__':
+    main()
 ```
 
-These 2 particular demos have a LOT of comments showing you where to add your code, etc..  The amount of code to do this is actually quite small and you don't need to understand the mechanisms used if you simply follow the demo that's been prepared for you.
 
 ### Multithreaded Programs
 
@@ -1127,9 +1289,28 @@ theme_previewer
 
 # Window Object - Beginning a window
 
-The first step is to create the window object using the desired window customizations.  
+The first step is to create the window object using the desired window customizations.
 
-Note - There is no direct support for "**modal windows**" in PySimpleGUI.  All windows are accessible at all times unless you manually change the windows' settings.
+## Modal Windows (only applied to tkinter port currently
+)
+NOTE - as of PySimpleGUI 4.25.0 Modal Windows are supported!  By default the `popup` windows that block will be marked Modal by default.  This is a somewhat risky change because your expisting applications will behave differently. However, in theory, you shouldn't have been interacting with other windows while the popup is active.  All of those actions are at best queued.  It's implementation dependent.
+
+"Modal" in this case means that you must close this "modal" window before you will be able to interact with windows created before this window.  Think about an "about" box.  You normally have to close this little popup in most programs.  So, that's what PySimpleGUI is doing now.
+
+## Making your window modal
+
+To make a Modal  Wio=ndow you have 2 options.
+
+1. Set the `moodel=True` parameter in your Window calls.
+
+2. Call the method `Window.make_modal()` to chance a window from non-modal to modal.  There is no modal to non-modal.  Don't see the need for one. If one comes up, sure!
+
+
+### Disabling modal windows
+
+Popups that block are the only windows that have modal on by default. There is a modal parameter than you  can set to False to turn it off.
+
+For the earlier than 4.25.0 and other ports of PySimpleGUI There is no direct support for "**modal windows**" in PySimpleGUI.  All windows are accessible at all times unless you manually change the windows' settings.
 
 
 **IMPORTANT** - Many of the `Window` methods require you to either call `Window.read` or `Window.Finalize` (or set `finalize=True` in your `Window` call) before you call the method. This is because these 2 calls are what actually creates the window using the underlying GUI Framework.  Prior to one of those calls, the methods are likely to crash as they will not yet have their underlying widgets created.
@@ -1141,8 +1322,8 @@ PySimpleGUI computes the exact center of your window and centers the window on t
 
 #### Multiple Monitors and Linux
 
-The auto-centering (default) location for your PySimpleGUI window may not be correct if you have multiple monitors on a Linux system.  On Windows multiple monitors appear to work ok as the primary monitor the tkinter utilizes and reports on.  
- 
+The auto-centering (default) location for your PySimpleGUI window may not be correct if you have multiple monitors on a Linux system.  On Windows multiple monitors appear to work ok as the primary monitor the tkinter utilizes and reports on.
+
 Linux users with multiple monitors that have a problem when running with the default location will need to specify the location the window should be placed when creating the window by setting the `location` parameter.
 
 ### Window Size
@@ -1308,7 +1489,7 @@ If it feels like this layout section is too much too soon, then come back to thi
 
 While you've not learned about Elements yet, it makes sense for this section to be up front so that you'll have learned how to use the elements prior to learning how each element works.  At this point in your PySimpleGUI education, it is better for you to grasp time efficient ways of working with Elements than what each Element does.  By learning now how to assemble Elements now, you'll have a good model to put the elements you learn into.
 
-There are *several* aspects of PySimpleGUI that make it more "Pythonic" than other Python GUI SDKs.  One of the areas that is unique to PySimpleGUI is how a window's "layout" is defined, specified or built.  A window's "layout" is simply a list of lists of elements.  As you've already learned, these lists combine to form a complete window.  This method of defining a window is super-powerful because lists are core to the Python language as a whole and thus are very easy to create and manipulate.  
+There are *several* aspects of PySimpleGUI that make it more "Pythonic" than other Python GUI SDKs.  One of the areas that is unique to PySimpleGUI is how a window's "layout" is defined, specified or built.  A window's "layout" is simply a list of lists of elements.  As you've already learned, these lists combine to form a complete window.  This method of defining a window is super-powerful because lists are core to the Python language as a whole and thus are very easy to create and manipulate.
 
 Think about that for a moment and compare/contrast with Qt, tkinter, etc..  With PySimpleGUI the location of your element in a matrix determines where that Element is shown in the window.  It's so ***simple*** and that makes it incredibly powerful.  Want to switch a row in your GUI that has text with the one below it that has an input element?  No problem, swap the lines of code and you're done.
 
@@ -1316,7 +1497,7 @@ Layouts were designed to be visual. The idea is for you to be able to envision h
 
 In the process of creating your window, you can manipulate these lists of elements without having an impact on the elements or on your window.  Until you perform a "layout" of the list, they are nothing more than lists containing objects (they just happen to be your window's elements).
 
-Many times your window definition / layout will be a static, straightforward to create.  
+Many times your window definition / layout will be a static, straightforward to create.
 
 However, window layouts are not limited to being one of these statically defined list of Elements.
 
@@ -1387,7 +1568,7 @@ BUT, we're not done yet!
 This is **Python**, we're using lists to build something up, so we should be looking at ****list comprehensions****.  Let's change the `for` loop into a list comprehension.  Recall that our `for` loop was used to concatenate 6 rows into a layout.
 
 ```python
-layout =  [[sg.Text(f'{i}. '), sg.In(key=i)] for i in range(1,6)] 
+layout =  [[sg.Text(f'{i}. '), sg.In(key=i)] for i in range(1,6)]
 ```
 
 Here we've moved the `for` loop to inside of the list definition (a list comprehension)
@@ -1397,7 +1578,7 @@ Here we've moved the `for` loop to inside of the list definition (a list compreh
 We have our rows built using the list comprehension, now we just need the buttons.  They can be easily "tacked onto the end" by simple addition.
 
 ```python
-layout =  [[sg.Text(f'{i}. '), sg.In(key=i)] for i in range(1,6)] 
+layout =  [[sg.Text(f'{i}. '), sg.In(key=i)] for i in range(1,6)]
 layout += [[sg.Button('Save'), sg.Button('Exit')]]
 ```
 
@@ -1442,7 +1623,7 @@ event, values = sg.Window('To Do List Example', layout=[[sg.Text(f'{i}. '), sg.I
 
 ## Example - List Comprehension to Build Rows - Table Simulation - Grid of Inputs
 
-In this example we're building a "table" that is 4 wide by 10 high using `Input` elements 
+In this example we're building a "table" that is 4 wide by 10 high using `Input` elements
 
 The end results we're seeking is something like this:
 
@@ -1587,9 +1768,9 @@ Using your new `CBtn` Element, you could rewrite the row of buttons above as:
 [CBtn('1'), CBtn('2'), CBtn('3'), CBtn('log'), CBtn('ln'), CBtn('-')],
 ```
 
-See the tremendous amount of code you do not have to write!  USE this construct any time you find yourself copying an element many times.  
+See the tremendous amount of code you do not have to write!  USE this construct any time you find yourself copying an element many times.
 
-But let's not stop there.  
+But let's not stop there.
 
 Since we've been discussing list comprehensions, let's use them to create this row.  The way to do that is to make a list of the symbols that go across the row make a loop that steps through that list.  The result is a list that looks like this:
 
@@ -1694,7 +1875,7 @@ You will find information on Elements and all other classes and functions are lo
 
 ## Keys
 
-***Keys are a super important concept to understand in PySimpleGUI.*** 
+***Keys are a super important concept to understand in PySimpleGUI.***
 
 If you are going to do anything beyond the basic stuff with your GUI, then you need to understand keys.
 
@@ -1723,7 +1904,7 @@ You also use the same key if you want to call Update on an element.  Please see 
 window['key']
 ```
 
-While you'll often see keys written as strings in examples in this document, know that keys can be ***ANYTHING***.  
+While you'll often see keys written as strings in examples in this document, know that keys can be ***ANYTHING***.
 
 Let's say you have a window with a grid of input elements.  You could use their row and column location as a key (a tuple)
 
@@ -1735,7 +1916,7 @@ Then when you read the `values` variable that's returned to you from calling `Wi
 Most of the time they are simple text strings.  In the Demo Programs, keys are written with this convention:
 `_KEY_NAME_` (underscore at beginning and end with all caps letters) or the most recent convention is to use a dash at the beginning and end (e.g. `'-KEY_NAME-'`).  You don't have to follow the convention, but it's not a bad one to follow as other users are used to seeing this format and it's easy to spot when element keys are being used.
 
-If you have an element object, to find its key, access the member variable `.Key` for the element.  This assumes you've got the element in a variable already. 
+If you have an element object, to find its key, access the member variable `.Key` for the element.  This assumes you've got the element in a variable already.
 
 ```python
 text_elem = sg.Text('', key='-TEXT-')
@@ -1745,9 +1926,9 @@ the_key = text_elem.Key
 
 ### Default Keys
 
-If you fail to place a key on an Element, then one will be created for you automatically.  
+If you fail to place a key on an Element, then one will be created for you automatically.
 
-For `Buttons`, the text on the button is that button's key. `Text` elements will default to the text's string (for when events are enabled and the text is clicked) 
+For `Buttons`, the text on the button is that button's key. `Text` elements will default to the text's string (for when events are enabled and the text is clicked)
 
 If the element is one of the input elements (one that will cause an generate an entry in the return values dictionary) and you fail to specify one, then a number will be assigned to it beginning with the number 0.  The effect will be as if the values are represented as a list even if a dictionary is used.
 
@@ -1772,6 +1953,160 @@ Then to turn off return values for that element, the `Multiline` element would b
 ```python
 sg.Multiline(size=(40,8), key='-MLINE-' + sg.WRITE_ONLY_KEY)
 ```
+
+## Key Errors - Key error recovery algorithm
+
+In the primary (tkinter) port of PySimpleGUI, starting in version 4.27.0 (not yet on PyPI... but available on GitHub as 4.26.0.14+)
+
+There are now 3 controls over key error handling and a whole new era of key reporting.
+
+```python
+SUPPRESS_ERROR_POPUPS = False
+SUPPRESS_RAISE_KEY_ERRORS = False
+SUPPRESS_KEY_GUESSING = False
+```
+
+You can modify these values by calling `set_options`.
+
+```python
+    sg.set_options(suppress_raise_key_errors=False, suppress_error_popups=False, suppress_key_guessing=False)
+```
+
+A basic definition of them are:
+`suppress_error_popups` - Disables error popups that are generated within PySimpleGUI itself to not be shown
+`suppress_raise_key_errors` - Disables raising a key error if a key or a close match are not found
+`suppress_key_guessing` - Disables the key guessing algorithm should you have a key error
+
+With the defaults left as defined (all `False`), here is how key errors work.
+
+This is the program being used in this example:
+
+```python
+import PySimpleGUI as sg
+
+def main():
+    sg.set_options(suppress_raise_key_errors=False, suppress_error_popups=False, suppress_key_guessing=False)
+
+    layout = [  [sg.Text('My Window')],
+                [sg.Input(k='-IN-'), sg.Text(size=(12,1), key='-OUT-')],
+                [sg.Button('Go'), sg.Button('Exit')]  ]
+
+    window = sg.Window('Window Title', layout, finalize=True)
+
+    while True:             # Event Loop
+        event, values = window.read()
+        print(event, values)
+        if event == sg.WIN_CLOSED or event == 'Exit':
+            break
+        window['-O U T'].update(values['-IN-'])
+    window.close()
+
+
+def func():
+
+    main()
+
+func()
+```
+
+A few things to note about it:
+
+* There are multiple levels of functions being called, not just a flat program
+* There are 2 keys explicitly defined, both are text at this point (we'll change them later)
+* There are 2 lookups happening, one with `window` the other with `values`
+
+This key error recovery algorithm only applies to element keys being used to lookup keys inside of windows.  The `values` key lookup is a plain dictionary and so nothing fancy is done for that lookup.
+
+
+### Example 1 - Simple text string misspelling
+
+In our example, this line of code has an error:
+
+```python
+window['-O U T'].update(values['-IN-'])
+```
+
+There are multiple problems with the key `'-OUT-'`.  It is missing a dash and it has a bunch of extra spaces.
+
+When the program runs, you'll first see the layout with no apparent problems:
+
+![SNAG-0882](https://user-images.githubusercontent.com/46163555/88704649-60954800-d0dc-11ea-885a-1ebadba039b7.jpg)
+
+
+Clicking the OK button will cause the program to return from `window.read()` and thus hit our bad key.  The result will be a popup window that resembles this:
+
+![SNAG-0883](https://user-images.githubusercontent.com/46163555/88704635-5bd09400-d0dc-11ea-88a2-42e7386b076b.jpg)
+
+
+Note a few things about this error popup.  Your shown your bad key and you're also shown what you likely meant.  Additionally, you're shown the filename, the line number and the line of code itself that has the error.
+
+Because this error was recoverable, the program continues to run after you close the error popup.  The result is what you expect from this program... the output field is the same as your information input.
+
+![SNAG-0884](https://user-images.githubusercontent.com/46163555/88704691-71de5480-d0dc-11ea-8800-9379044a3f1f.jpg)
+
+
+### Example 2 - Tuple error
+
+Keys can be a variety of types, including tuples.  In this particular program we have a tuple specified in the layout and have used an incorrect tuple in the lookup.  Once again the recovery process worked and the program continued.
+
+![SNAG-0885](https://user-images.githubusercontent.com/46163555/88705188-2d9f8400-d0dd-11ea-9a91-f92cef9f6219.jpg)
+
+
+### Example 3 - No close match found
+
+In this example, as you can see in the error popup, there was such a mismatch that no substitution could be performed.
+
+![SNAG-0886](https://user-images.githubusercontent.com/46163555/88705707-e6fe5980-d0dd-11ea-8fcc-bc024298705d.jpg)
+
+
+This is an unrecoverable error, so a key error exception is raised.
+
+```python
+
+Traceback (most recent call last):
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 25, in <module>
+    func()
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 23, in func
+    main()
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 17, in main
+    window[(1,2,3)].update(values['-IN-'])
+  File "C:\Python\PycharmProjects\PSG\PySimpleGUI.py", line 8591, in __getitem__
+    return self.FindElement(key)
+  File "C:\Python\PycharmProjects\PSG\PySimpleGUI.py", line 7709, in FindElement
+    raise KeyError(key)
+KeyError: (1, 2, 3)
+```
+
+If you're running an IDE such as PyCharm, you can use the information from the assert to jump to the line of code in your IDE based on the crash data provided.
+
+
+### Choose Your Desired Combination
+
+There are enough controls on this error handling that you can control how you want your program to fail.  If you don't want any popups, and no guessing and would instead like to simply get an exception when the key error happens, then call `set_options` with this combination:
+
+
+```python
+    sg.set_options(suppress_raise_key_errors=False, suppress_error_popups=True, suppress_key_guessing=True)
+```
+
+This will cause Example #1 above to immediately get an exception when hitting the statement with the error.  Even though the guessing is turned off, you're still provided with the closest match to help with your debugging....
+
+```
+** Error looking up your element using the key:  -O U T The closest matching key:  -OUT-
+Traceback (most recent call last):
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 25, in <module>
+    func()
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 23, in func
+    main()
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_978 - key error example.py", line 17, in main
+    window['-O U T'].update(values['-IN-'])
+  File "C:\Python\PycharmProjects\PSG\PySimpleGUI.py", line 8591, in __getitem__
+    return self.FindElement(key)
+  File "C:\Python\PycharmProjects\PSG\PySimpleGUI.py", line 7709, in FindElement
+    raise KeyError(key)
+KeyError: '-O U T'
+```
+
 
 
 
@@ -1801,7 +2136,7 @@ Tooltips are one of those "polish" items that really dress-up a GUI and show's a
 
 Info on setting default element sizes is discussed in the Window section above.
 
-Specifies the amount of room reserved for the Element.  For elements that are character based, such a Text, it is (# characters, # rows).  Sometimes it is a pixel measurement such as the Image element.  And sometimes a mix like on the Slider element (characters long by pixels wide).  
+Specifies the amount of room reserved for the Element.  For elements that are character based, such a Text, it is (# characters, # rows).  Sometimes it is a pixel measurement such as the Image element.  And sometimes a mix like on the Slider element (characters long by pixels wide).
 
 Some elements, Text and Button, have an auto-size setting that is `on` by default. It will size the element based on the contents.  The result is that buttons and text fields will be the size of the string creating them.  You can turn it off.  For example, for Buttons, the effect will be that all buttons will be the same size in that window.
 
@@ -1864,7 +2199,7 @@ See the section above that has full information about keys.
 
 Beginning in version 3.17 you can create Elements that are initially invisible that you can later make visible.
 
-To create an invisible Element, place the element in the layout like you normally would and add the parameter 
+To create an invisible Element, place the element in the layout like you normally would and add the parameter
 
 `visible=False`.
 
@@ -1874,9 +2209,9 @@ This feature works best on Qt, but does work on the tkinter version as well.  Th
 
 Note - Tkinter elements behave differently than Qt elements in how they arrange themselves when going from invisible to visible.
 
-tkinter elements tend to STACK themselves.  
+tkinter elements tend to STACK themselves.
 
-One workaround is to place the element in a Column with other elements on its row.  This will hold the place of the row it is to be placed on.  It will move the element to the end of the row however.  
+One workaround is to place the element in a Column with other elements on its row.  This will hold the place of the row it is to be placed on.  It will move the element to the end of the row however.
 
 If you want to not only make the element invisible, on tkinter you can call `Element.
 
@@ -1885,11 +2220,11 @@ Qt elements tend to hold their place really well and the window resizes itself n
 
 ## Shortcut Functions / Multiple Function Names
 
-Perhaps not the best idea, but one that's done none the less is the naming of methods and functions.  Some of the more "Heavily Travelled Elements" (and methods/functions) have "shortcuts".  
+Perhaps not the best idea, but one that's done none the less is the naming of methods and functions.  Some of the more "Heavily Travelled Elements" (and methods/functions) have "shortcuts".
 
 In other words, I am lazy and don't like to type. The result is multiple ways to do exactly the same thing.  Typically, the Demo Programs and other examples use the full name, or at least a longer name.  Thankfully PyCharm will show you the same documentation regardless which you use.
 
-This enables you to code much quicker once you are used to using the SDK.  The Text Element, for example, has 3 different names `Text`, `Txt` or`T`.  InputText can also be written `Input` or `In` .  
+This enables you to code much quicker once you are used to using the SDK.  The Text Element, for example, has 3 different names `Text`, `Txt` or`T`.  InputText can also be written `Input` or `In` .
 
 The shortcuts aren't limited to Elements.  The `Window` method `Window.FindElement` can be written as `Window.Element` because it's such a commonly used function.  BUT, even that has now been shortened to `window[key]`
 
@@ -1912,7 +2247,7 @@ layout = [
 ![simple text](https://user-images.githubusercontent.com/13696193/44959877-e9d97b00-aec3-11e8-9d24-b4405ee4a148.jpg)
 
 
-When creating a Text Element that you will later update, make sure you reserve enough characters for the new text.  When a Text Element is created without a size parameter, it is created to exactly fit the characters provided. 
+When creating a Text Element that you will later update, make sure you reserve enough characters for the new text.  When a Text Element is created without a size parameter, it is created to exactly fit the characters provided.
 
 With proportional spaced fonts (normally the default) the pixel size of one set of characters will differ from the pixel size of a different set of characters even though the set is of the same number of characters.  In other words, not all letters use the same number of pixels.  Look at the text you're reading right now and you will see this.  An "i" takes up a less space then an "A".
 
@@ -1923,7 +2258,7 @@ With proportional spaced fonts (normally the default) the pixel size of one set 
 
 ## `Window.FindElement(key)` shortened to `Window[key]`
 
-There's been a fantastic leap forward in making PySimpleGUI code more compact.  
+There's been a fantastic leap forward in making PySimpleGUI code more compact.
 
 Instead of writing:
 ```python
@@ -1943,9 +2278,9 @@ MANY Thanks is owed to the nngogol that suggested and showed me how to do this. 
 
 ## `Element.update()` ->  `Element()` shortcut
 
-This has to be one of the strangest syntactical constructs I've ever written.  
+This has to be one of the strangest syntactical constructs I've ever written.
 
-It is best used in combination with `FindElement` (see prior section on how to shortcut `FindElement`).  
+It is best used in combination with `FindElement` (see prior section on how to shortcut `FindElement`).
 
 Normally to change an element, you "find" it, then call its `update` method.  The code usually looks like this, as you saw in the previous section:
 
@@ -1983,7 +2318,7 @@ event, values = window.read()
 
 It is confusing looking however so when used, it might be a good idea to write a comment at the end of the statement to help out the poor beginner programmer coming along behind you.
 
-Because it's such a foreign construct that someone with 1 week of Python classes will not recognize, the demos will continue to use the `.update` method.  
+Because it's such a foreign construct that someone with 1 week of Python classes will not recognize, the demos will continue to use the `.update` method.
 
 It does not have to be used in conjuction with `FindElement`.  The call works on any previously made Element.  Sometimes elements are created, stored into a variable and then that variable is used in the layout.  For example.
 
@@ -2013,7 +2348,7 @@ Individual colors are specified using either the color names as defined in tkint
 	"#RRGGBB"        or          "darkblue"
 
 ### `auto_size_text      `
-A `True` value for `auto_size_text`, when placed on Text Elements, indicates that the width of the Element should be shrunk do the width of the text.   The default setting is True.  You need to remember this when you create `Text` elements that you are using for output.  
+A `True` value for `auto_size_text`, when placed on Text Elements, indicates that the width of the Element should be shrunk do the width of the text.   The default setting is True.  You need to remember this when you create `Text` elements that you are using for output.
 
 `Text(key='-TXTOUT-)` will create a `Text` Element that has 0 length.  Notice that for Text elements with an empty string, no string value needs to be indicated.  The default value for strings is `''` for Text Elements.  If you try to output a string that's 5 characters, it won't be shown in the window because there isn't enough room.  The remedy is to manually set the size to what you expect to output
 
@@ -2286,7 +2621,7 @@ These Pre-made buttons are some of the most important elements of all because th
 - SaveAs
 - Open
 
-### "Chooser" Buttons 
+### "Chooser" Buttons
 
 These buttons are used to show dialog boxes that choose something like a filename, date, color, etc.. that are filled into an `InputText` Element (or some other "target".... see below regarding targets)
 
@@ -2408,7 +2743,7 @@ Your button images need to be in PNG or GIF format.  When you make a button with
 `TRANSPARENT_BUTTON` - **Important** - This is a legacy value that is misleading.  It is currently defined as this constant value:
 
 ```python
-TRANSPARENT_BUTTON = ('#F0F0F0', '#F0F0F0')  
+TRANSPARENT_BUTTON = ('#F0F0F0', '#F0F0F0')
 ```
 
 As you can see it is simply a tuple of 2 gray colors.  The effect is that the button text and the button background color to a specific shade of gray.  Way back in time, before you could change the background colors and all windows were gray, this value worked. But now that your button can be on any background color, you'll want to set the buttons color to match the background so that your button blends with the background color.
@@ -2441,7 +2776,7 @@ sg.Button('Pause', button_color=(sg.theme_background_color(), sg.theme_backgroun
               border_width=0)
 ```
 
-Experimentation is sometimes required for these concepts to really sink in and they can vary depending on the underlying GUI framework. 
+Experimentation is sometimes required for these concepts to really sink in and they can vary depending on the underlying GUI framework.
 
 Button Images do work so play with them.  You can use PIL to change the size of your images before passing to PySimpleGUI.
 
@@ -2652,14 +2987,13 @@ Starting in version 2.9 you'll be able to do more complex layouts by using the C
 
 Columns are specified, like all "container elements", in exactly the same way as a window, as a list of lists.
 
-Columns are needed when you want to specify more than 1 element in a single row.  
+Columns are needed when you want to specify more than 1 element in a single row.
 
 For example, this layout has a single slider element that spans several rows followed by 7 `Text` and `Input` elements on the same row.
 
 ![column](https://user-images.githubusercontent.com/13696193/44959988-66b92480-aec5-11e8-9c26-316ed24a68c0.jpg)
 
 Without a Column Element you can't create a layout like this.  But with it, you should be able to closely match any layout created using tkinter only.
-
 
 ```python
 
@@ -2695,9 +3029,10 @@ sg.Popup(event, values, line_width=200)
 
 ```
 
-### Column, Frame, Tab, Window element_justification
 
-Beginning in Release 4.3 you can set the justification for any container element.  This is done through the `element_justification` parameter.  This will greatly help anyone that wants to center all of their content in a window.  Previously it was difficult to do these kinds of layouts, if not impossible.
+## Columns As a Way to Modify Elements
+
+Sometimes Columns are used to contain a single elemnet, but to give that elemously it was difficult to do these kinds of layouts, if not impossible.
 
 justify the `Column` element's row by setting the `Column`'s `justification` parameter.
 
@@ -2712,7 +3047,7 @@ This is currently only available in the primary PySimpleGUI port.
 
 They can also be used to justify a group of elements in a particular way.
 
-Placing `Column` elements inside `Columns` elements make it possible to create a multitude of 
+Placing `Column` elements inside `Columns` elements make it possible to create a multitude of
 
 
 
@@ -2856,7 +3191,7 @@ graph.DeleteFigure(my_circle)
 
 ### Mouse Events Inside Graph Elements
 
-If you have enabled events for your Graph Element, then you can receive mouse click events.  If you additionally enable `drag_submits` in  your creation of the Graph Element, then you will also get events when you "DRAG" inside of a window.  A "Drag" is defined as a left button down and then the mouse is moved.  
+If you have enabled events for your Graph Element, then you can receive mouse click events.  If you additionally enable `drag_submits` in  your creation of the Graph Element, then you will also get events when you "DRAG" inside of a window.  A "Drag" is defined as a left button down and then the mouse is moved.
 
 When a drag event happens, the event will be the Graph Element's key.  The `value` returned in the values dictionary is a tuple of the (x,y) location of the mouse currently.
 
@@ -2920,7 +3255,7 @@ data = [['' for row in range(15)]for col in range(6)]
 
 ### Events from Tables
 
-There are two ways to get events generated from Table Element.  
+There are two ways to get events generated from Table Element.
 `change_submits` event generated as soon as a row is clicked on
 `bind_return_key` event generate when a row is double clicked or the return key is press while on a row.
 
@@ -2979,7 +3314,7 @@ Just like windows and the other container elements, the `Tab` Element has a layo
 
 `Tab` layouts look exactly like Window layouts, that is they are **a list of lists of Elements**.
 
-*How you place a Tab element into a window is different than all other elements.*  You cannot place a Tab directly into a Window's layout.  
+*How you place a Tab element into a window is different than all other elements.*  You cannot place a Tab directly into a Window's layout.
 
 Also, tabs cannot be made invisible at this time.  They have a visibility parameter but calling update will not change it.
 
@@ -3108,7 +3443,7 @@ SystemTray(menu=None, filename=None, data=None, data_base64=None, tooltip=None, 
  :param filename: filename for icon
  :param data: in-ram image for icon
  :param data_base64: basee-64 data for icon
- :param tooltip: tooltip string 
+ :param tooltip: tooltip string
  :param metadata: (Any) User metadata that can be set to ANYTHING
 '''
 ```
@@ -3320,14 +3655,14 @@ This is a blocking call so expect it to take a few seconds if you're fading the 
 
 # Global Settings
 
-There are multiple ways to customize PySimpleGUI.  The call with the most granularity (allows access to specific and precise settings).  The `ChangeLookAndFeel` call is in reality a single call to `SetOptions` where it changes 13 different settings.  
+There are multiple ways to customize PySimpleGUI.  The call with the most granularity (allows access to specific and precise settings).  The `ChangeLookAndFeel` call is in reality a single call to `SetOptions` where it changes 13 different settings.
 
 **Mac Users** - You can't call `ChangeLookAndFeel` but you can call `SetOptions` with any sets of values you want.  Nothing is being blocked or filtered.
 
 **These settings apply to all windows that are created in the future.**
 
  `SetOptions`.  The  options and Element options will take precedence over these settings.  Settings can be thought of as levels of settings with the window-level being the highest and the Element-level the lowest.  Thus the levels are:
- 
+
  - Global
  - Window
  - Element
@@ -3369,7 +3704,7 @@ window.close()
 
 ## Read(timeout = t, timeout_key=TIMEOUT_KEY, close=False)
 
-Read with a timeout is a very good thing for your GUIs to use in a non-blocking read situation.  If your device can wait for a little while, then use this kind of read.  The longer you're able to add to the timeout value, the less CPU time you'll be taking.  
+Read with a timeout is a very good thing for your GUIs to use in a non-blocking read situation.  If your device can wait for a little while, then use this kind of read.  The longer you're able to add to the timeout value, the less CPU time you'll be taking.
 
 The idea to wait for some number of milliseconds before returning.  It's a trivial way to make a window that runs on a periodic basis.
 
@@ -3388,7 +3723,7 @@ while True:             # Event Loop
     time.sleep(.1)     # sleep 1/10 second  DO NOT PUT SLEEPS IN YOUR EVENT LOOP!
 ```
 
-This program will quickly test for user input, then deal with the hardware.  Then it'll sleep for 100ms, while your gui is non-responsive, then it'll check in with your GUI again.  
+This program will quickly test for user input, then deal with the hardware.  Then it'll sleep for 100ms, while your gui is non-responsive, then it'll check in with your GUI again.
 
 The better way using PySimpleGUI... using the Read Timeout mechanism, the sleep goes away.
 
@@ -3426,7 +3761,7 @@ You may find some PySimpleGUI programs that set the timeout value to zero.  This
 
 A true non-blocking (timeout=0) read is generally reserved as a "last resort".  Too many times people use non-blocking reads when a blocking read will do just fine or a read with a timeout would work.
 
-It's valid to use a timeout value of zero if you're in need of every bit of CPU horsepower in your application.  Maybe your loop is doing something super-CPU intensive and you can't afford for the GUI to use any CPU time. This is the kind of situation where a timeout of zero is appropriate.  
+It's valid to use a timeout value of zero if you're in need of every bit of CPU horsepower in your application.  Maybe your loop is doing something super-CPU intensive and you can't afford for the GUI to use any CPU time. This is the kind of situation where a timeout of zero is appropriate.
 
 Be a good computing citizen.  Run with a non-zero timeout so that other programs on your CPU will have time to run.
 
@@ -3579,7 +3914,7 @@ window = sg.Window('My new window', layout, finalize=True)
 window['-TEXT-'].update('My new text value')
 
 while True:             # Event Loop
-  event, values = window.read()
+    event, values = window.read()
     if event == sg.WIN_CLOSED:
         break
 ```
@@ -3674,6 +4009,47 @@ You'll find the pattern - `window.Element(key)` in older code.  All of code afte
 ### ProgressBar / Progress Meters
 
 Note that to change a progress meter's progress, you call `update_bar`, not `update`.  A change to this is being considered for a future release.
+
+# Cursors - Setting for Elements and Windows
+
+It is possible to change the normal arrow cursor into something else by setting the cursor for an element or the entire window.  The result will be the cursor changing when you move the mouse over the elements or Window.
+
+One of the best examples is URLs.  Users are accustomed to seeing a hand cursor when the mouse is moved over a link.  By setting the cursor to a hand for a Text element that has text that is in the format of a URL, it signals to the user that it's a link that can be clicked.
+
+The `set_cursor` method is used to set the cursor for an element.  Perform an element look-up or use a variable containing an element, and call the `set_cursor` method, passing in a string that selects the cursor.  The valid cursor names are documented in the tkinter docs as this call maps directly to a tkinter call.
+
+These cursor strings were obtained from the Tk manual and are what you pass into the `set_cursor` methods.
+
+## Windows Level Cursor
+
+You can also set the cursor for the Window as a whole, including the margins and areas elements don't directly fill.  Call `Window.set_cursor()` to set the cursor at the Window level.
+
+## Valid Cursor Strings
+
+ `X_cursor, arrow, based_arrow_down, based_arrow_up, boat, bogosity, bottom_left_corner, bottom_right_corner, bottom_side, bottom_tee, box_spiral, center_ptr, circle, clock, coffee_mug, cross, cross_reverse, crosshair, diamond_cross, dot, dotbox, double_arrow, draft_large, draft_small, draped_box, exchange, fleur, gobbler, gumby, hand1, hand2, heart, icon, iron_cross, left_ptr, left_side, left_tee, leftbutton, ll_angle, lr_angle, man, middlebutton, mouse, pencil, pirate, plus, question_arrow, right_ptr, right_side, right_tee, rightbutton, rtl_logo, sailboat, sb_down_arrow, sb_h_double_arrow, sb_left_arrow, sb_right_arrow, sb_up_arrow, sb_v_double_arrow, shuttle, sizing, spider, spraycan, star, target, tcross, top_left_arrow, top_left_corner, top_right_corner, top_side, top_tee, trek, ul_angle, umbrella, ur_angle, watch, xterm`
+
+
+## No Cursor
+
+To specify no cursor should be shown, the cursor `'no'` can be used on some platforms
+
+## Windows OS Specific
+
+One windows, these cursors map to native Windows cursors:
+
+`arrow, center_ptr, crosshair, fleur, ibeam, icon, sb_h_double_arrow, sb_v_double_arrow, watch, xterm`
+
+And these are also available:
+
+`no, starting, size, size_ne_sw, size_ns, size_nw_se, size_we, uparrow, wait`
+
+## Mac OS Specific
+
+`arrow, cross, crosshair, ibeam, plus, watch, xterm`
+
+And these additional native cursors are available for the Mac
+
+`copyarrow, aliasarrow, contextualmenuarrow, text, cross-hair, closedhand, openhand, pointinghand, resizeleft, resizeright, resizeleftright, resizeup, resizedown, resizeupdown, none, notallowed, poof, countinguphand, countingdownhand, countingupanddownhand, spinning`
 
 
 # Keyboard & Mouse Capture
@@ -3820,7 +4196,7 @@ This would work to make a menu bar from a series of these individual menu defint
 menu_bar = [right_click_menu_1, right_click_menu_2, button_menu_def ]
 ```
 
-And, of course, the direction works the opposite too.  You can take a Menu Bar definition and pull out an individual menu item to create a right click or button menu. 
+And, of course, the direction works the opposite too.  You can take a Menu Bar definition and pull out an individual menu item to create a right click or button menu.
 
 
 
@@ -3992,7 +4368,7 @@ This timeout value of 200 means that your debugger GUI will be updated 5 times a
 
 Let's say you're in a situation where a very intermettent bug has just happened and the debugger would really help you, but you don't have a timeout on your `windows.read()` call.  It's OK.  Recall that the way the debugger gets its "cycles" is to borrow from your `Read` calls.  What you need to do is alternate between using the debugger and then generating another pass through your event loop.
 
-Maybe it's an OK button that will cause your loop to execute again (without exiting).  If so, you can use it to help move the debugger along.  
+Maybe it's an OK button that will cause your loop to execute again (without exiting).  If so, you can use it to help move the debugger along.
 
 Yes, this is a major pain in the ass, but it's not THAT bad and compared to nothing in a time of crisis and this is potentially your "savior tool" that's going to save your ass, pressing that OK button a few times is going to look like nothing to you.  You just want to dump out the value of a variable that holds an instance of your class!
 
@@ -4038,7 +4414,7 @@ There are 3 ways of opening the Popout window.
 #### When you are asked for the "Location of your PySimpleGUI package or PySimpleGUI.py file" do this
 
 If you wish to use the debugger to find the location of THIS running program's PySimpleGUI package / the PySimpleGUI.py file, then all you need to do is:
-* Press the `BREAK` key on your keyboard. 
+* Press the `BREAK` key on your keyboard.
     * This is sometimes labelled as the `Cancel` key
     * May also have `Pause` printed on key
     * On some US keyboards, it is located next to `Scroll Lock` and/or above `PageUp` key
@@ -4107,22 +4483,22 @@ We can see the variables we checked as well as the defined expression `values[0]
 ![SNAG-0441](https://user-images.githubusercontent.com/13696193/62797507-e7a37780-baa9-11e9-93c4-6ff0c8acb11d.jpg)
 
 
-This tab is provided to you as a way to interact with your running program on a real-time basis.  
+This tab is provided to you as a way to interact with your running program on a real-time basis.
 
-If you want to quickly look at the values of variables, nearly ANY variables, then type the information into one of the 3 spaces provided to "Watch" either variables or experessions.  In this example, the variable window was typed into the first slow.  
+If you want to quickly look at the values of variables, nearly ANY variables, then type the information into one of the 3 spaces provided to "Watch" either variables or experessions.  In this example, the variable window was typed into the first slow.
 
 ***Immediately*** after typing the character 'w', the information to the right was displayed.  No button needs to be clicked.  You merely neeed to type in a valid experession and it will be displayed to you.... and it will be displayed on an on-going, constantly-refreshing-basis.
 
 ![SNAG-0447](https://user-images.githubusercontent.com/13696193/62797393-a0b58200-baa9-11e9-8016-1cadca4d97e7.jpg)
 
 
-If the area to the right of the input field is too small, then you can click on the "Detail" button and you will be shown a popup, scrolled window with all of the information displayed as if it were printed.  
+If the area to the right of the input field is too small, then you can click on the "Detail" button and you will be shown a popup, scrolled window with all of the information displayed as if it were printed.
 
 I'm sure you've had the lovely experience of printing an object.  When clicking the "Detail" button next to the `window` variable being shown, this window is shown:
 
 ![SNAG-0449](https://user-images.githubusercontent.com/13696193/62801423-b0d25f00-bab3-11e9-829a-aebb429521cd.jpg)
 
-Oh, Python, -sigh-.  I just want to see my `window` object printed.  
+Oh, Python, -sigh-.  I just want to see my `window` object printed.
 
 #### `Obj` Button to the Rescue!
 
@@ -4135,13 +4511,13 @@ PySimpleGUI has a fun and very useful function that is discussed in the docs nam
 
 While not **really** a Python REPL prompt, this window's `REPL >>>` prompt is meant to act as much like one as possible.  Here you can enter experessions and code too.
 
-The uses for this prompt are so numerous and diverse that listing them all won't be attempted. 
+The uses for this prompt are so numerous and diverse that listing them all won't be attempted.
 
 ### Your "XRay" and "Endoscope" into Your Program
 
-Think of this prompt as a way to get specific diagnostics information about your ***running*** program.  It cannot be stressed enough that the power and the usefullness of this tool is in its ability to diagnose a running program, after you've already started it running. 
+Think of this prompt as a way to get specific diagnostics information about your ***running*** program.  It cannot be stressed enough that the power and the usefullness of this tool is in its ability to diagnose a running program, after you've already started it running.
 
-### Execute Code 
+### Execute Code
 
 In addition to displaying information, getting paths to packages, finding version information, you can execute code from the PySimpleGUI Debugger's `REPL >>>` prompt.  You can type in any expression as well as any **executable statement**.
 
@@ -4152,7 +4528,7 @@ The result is that you are shown a popup window with the text you supplied.
 
 ### KNOW Answers to Questions About Your Program
 
-Using this runtime tool, you can be confident in the data you collect.  Right?  
+Using this runtime tool, you can be confident in the data you collect.  Right?
 
 ***There's no better way to find what version of a package that your program is using than to ask your program.***  This is so true.  Think about it.  Rather than go into PyCharm, look at your project's "Virtual Environment", follow some path to get to a window that lists packages installed for that project, get the verstion and your're done, right?  Well, maybe.  But are you CERTAIN your program is using THAT version of the package in question?
 
@@ -4203,10 +4579,404 @@ Exception module 'tkinter' has no attribute '__version__'
 ```
 ---
 
+# User Settings API
+
+In release 4.30.0 there is a new set of API calls available to help with "user settings".  Think of user settings as a dictionary that is automatically written to your hard drive.  That's basically what it is.  Underpinning the code is the JSON package provided by Python.
+
+While using JSON files to save and load a settings dictionary isn't very difficult, it is still code you'll need to write if you want to save settings as part of your GUI.  Since having "settings" for a GUI based program isn't uncommon, it made sense to build this capability into PySimpleGUI.  Clearly you can still use your own method for saving settings, but if you're looking for a simple and easy way to do it, these calls are likely about as easy as it gets.
+
+There have already been some demo programs written that use JSON files to store settings.  You can expect that this capability will begin to show up in more demos in the future since it's now part of PySimpleGUI.
+
+User settings are stored in a Python dictionary which is saved to / loaded from disk.  Individual settings are thus keys into a dictionary.  You do not need to explicitly read nor write the file.  Changing any entry will cause the file to be saved.  Reading any entry will cause the file to be read if it hasn't already been read.
+
+## Two Interfaces
+
+There are 2 ways to access User Settings
+
+1. User Settings function calls
+2. The `UserSettings` class
+
+They both offer the same basic operations.  The class interface has an added benefit of being able to access the individual settings using the same syntax as Python dictionary.
+
+
+## List of Calls for Function Interface
+
+|Function|Description|
+| ---  | --- |
+|user_settings|Returns settings as a dictionary|
+|user_settings_delete_entry|Deletes a setting|
+|user_settings_delete_filename|Deletes the settings file|
+|user_settings_file_exists|Returns True if settings file specified exists|
+|user_settings_filename|Returns full path and filename of current settings file|
+|user_settings_get_entry|Returns value for a setting. If no setting found, then specified default value is returned|
+|user_settings_load|Loads dictionary from the settings file. This is not normally needed||
+|user_settings_save|Saves settings to current or newly specified file. Not normally needed|
+|user_settings_set_entry|Sets an entry to a particular value
+|user_settings_write_new_dictionary|Writes a specified dictionary to settings file|
+
+
+## Operations
+
+There are 2 categories that the calls can be divided into.
+
+1. File operations
+2. Settings operations
+
+File operations involve working with the JSON file itself.  They include:
+* Setting the path and/or filename
+* Load/save the file (these are somewhat optional as the saving loading/saving is done automatically)
+* Deleting the settings file
+* Checking if settings file exists
+
+Generally speaking, a setting is specified with a key which is generally a string.  Settings operations are for working with the individual settings and include:
+* Get the value of a setting (returns a default value if not found)
+* Set the value of a setting (also saves the settings to disk)
+
+Any setting operation may cause the file to be written. This is because a "get" operation can include returning a default value if the setting isn't found.  This means a new entry is made in your settings dictionary is one didn't exist before.  Since a new entry is made, that means it needs to be also be written to disk.
+
+## Filenames
+
+The settings filename defaults the filename of your Python file making the call with the extension ".json" added.  If your Python program is called `test.py` then your default settings filename will be `test.json`.
+
+In addition to the filename having a default value, the path to the file also has a default value.  The default depends on your operating system.
+
+|Operating System|Default Path|
+| ---  | --- |
+| Windows | \user\user_name\AppData\Local\PySimpleGUI\settings |
+| Linux | ~/.config/PySimpleGUI/settings |
+| Mac | ~/Library/Application Support/PySimpleGUI/settings |
+
+When calling the User Settings APIs, if a parameter is named `filename`, you can specify a full path or just the filename.  This will save you the trouble of having to split up your path and filename in your code.  If you specify only the path, the the filename will be added to that path and named as defined earlier.
+
+Like the rest of PySimpleGUI, the idea is for you to write as little code as possible.  The default values for the filename and path should be fine for you to use.  They will be stored in a location on your system that is meant to store user settings.
+
+
+### Setting Filename
+
+If you want to see what the current filename is for your settings, then you can call `user_settings_filename()` with no parameters and you'll get back an absolute path and filename.
+
+To make the code for specifying the folder and filename as simple as possible, the 2 parts are separated in the call specifying the name of the settings file.  However, it is possible to supply a full and complete folder + filename as well.
+
+The default filename for your settings file is the name of the file that makes the call to the User Settings API's with the `.py` extension changed to a `.json` extension. If your source file is called `demo.py`,  then your settings filename will be `demo.json`.
+
+#### Setting only the filename
+
+If you want to control the name of the file and/or the path to the settings file, then you will use the `user_settings_filename` call.  This function takes 2 parameters.
+
+```python
+user_settings_filename(filename=None, path=None)
+```
+
+If you set only the path, then the filename will default to the value already described.  If you set only the filename, then the path will be the default path is dependent on your operating system.  See the table above for the locations for each OS.
+
+```python
+import PySimpleGUI as sg
+
+sg.user_settings_filename(filename='my_settings.json')
+print(sg.user_settings_filename())
+```
+
+If you are running on Windows, then the result of running this code will be this printed on the console:
+
+```
+C:\Users\your_use_name\AppData\Local\PySimpleGUI\settings\my_settings.json
+```
+
+You are not restricted to naming your settings file to an extension of .json.  That is simply the default extension that's used by PySimpleGUI.  You can use any extension you would like, including no extension.
+
+#### Setting only the path
+
+Maybe you don't care about the settings filename itself, but you do care about where the settings are stored.  Let's say you want the settings to be stored in the same folder as your Python source file.  Specifying `path='.'` will achieve this.
+
+
+#### Setting a fully qualified filename
+
+If you want to specify the full absolute path and filename of the settings file, you can do it by using the filename parameter.  Instead of passing the filename only, pass in a fully qualified path and filename.  If you want to name your settings file `a:\temp\my_settings`, then your call will look like this:
+
+
+```python
+sg.user_settings_filename(filename=r'a:\temp\my_settings')
+```
+
+You are not required to break your file down into 2 parameters.  You could if you wanted to however.  The equivalent to the above call using 2 parameters would be:
+
+```python
+sg.user_settings_filename(filename='my_settings' , path=r'a:\temp')
+```
+
+
+### Getting the current filename
+
+Calling `user_settings_filename` with no parameters will return the full path and filename of your settings file as a single string.
+
+
+### File Loading / Saving
+
+Generally speaking you will not need to load or save your settings file.  It is automatically saved after every change.
+
+Note that reading a setting can also cause the file to be written.  If you read a setting and the setting did not exist, then your call to `user_settings_get_entry` will return the default value you specified.  As a result, the dictionary is updated with this default value and in return the file is written with this value as well.
+
+One of the situations where you may want to explicitly read/load the settings file is if you're expecting it to be modified by another program.
+
+Like so much of PySimpleGUI, as much as possible is automatically done on your behalf.  This includes the requirement of saving and loading your settings file.  Even naming your settings file is optional.
+
+## The `UserSettings` Class Interface
+
+The `UserSettings` class makes working with settings look like a Python dictionary.  The familiar [ ] syntax is used to read, write and delete entries.
+
+### Creating a `UserSettings` Object
+
+The first step is to create your setting object.  The parameters are the same as calling the `user_settings_filename` function.  If you want to use the default values, then leave the parameters unchanged.
+
+```python
+settings = sg.UserSettings()
+```
+
+This is the same as calling `sg.user_settings_filename()`
+
+
+### Reading, Writing, and Deleting an Individual Settings Using [ ] Syntax
+
+The first operation will be to create the User Settings object.
+
+```python
+settings = sg.UserSettings()
+```
+
+To read a setting the dictionary-style [ ] syntax is used.  If the item's name is `'-item-'`, then reading the value is achieved by writing
+
+```python
+item_value = settings['-item-']
+```
+
+Writing the setting is the same syntax except the expression is reversed.
+
+```python
+settings['-item-'] = new_value
+```
+
+To delete an item, again the dictionary style syntax is used.
+
+```python
+del settings['-item-']
+```
+
+You can also call the delete_entry method to delete the entry.
+
+```python
+settings.delete_entry('-item-')
+```
+
+### `UserSettings` Methods
+
+You'll find all of the `UserSettings` methods available to you detailed in the Call Reference documentation.
+
+One operation in particular that is not achievable using the [ ] notation is a "get" operation with a default value.  For dictionaries, this method is `get` and for the `UserSettings` class the method is also called `get`.  They both have an optional second parameter that represents a "default value" should the key not be found in the dictionary.
+
+If you would like a setting with key `'-item-'` to return an empty string `''` instead of `None` if they key isn't found, then you can use this code to achieve that:
+
+```python
+value = settings.get('-item-', '')
+```
+
+It's the same kind of syntax that you're used to using with dictionaries.
+
+
+### Default Value
+
+Normally the default value will be `None` if a key is not found and you get the value of the entry using the bracket format:
+
+```python
+item_value = settings['-item-']
+```
+
+You can change the default value by calling `settings.set_default_value(new_default)`.  This will set the default value to return in the case when no key is found.  Note that an exception is not raised when there is a key error (see next section on error handling).  Instead, the default value is returned with a warning displayed.
+
+
+## Displaying the Settings Dictionary
+
+The class interface makes it easy to dump out the dictionary.  If you print the UserSettings object you'll get a printout of the dictionary.
+
+Note that you'll need to "load" the settings from disk if you haven't performed any operations on the settings.
+
+```python
+settings = sg.UserSettings()
+settings.load()
+print(settings)
+```
+
+If you were to print the dictionary after creating the object, then the `load` is not needed
+
+```python
+settings = sg.UserSettings()
+print(settings['-item-'])
+print(settings)
+```
+
+To print the dictionary using the function call interface:
+
+```python
+print(sg.user_settings())
+```
+
+## Error Handling for User Settings
+
+From a GUI perspective, user settings are not critical to the GUI operations itself.  There is nothing about settings that will cause your window to not function.  As a result, errors that occur in the User Settings are "soft errors".  An error message is displayed along with information about how you called the function, when possible, and then execution continues.
+
+One reason for treating these as soft errors and thus not raising an exception is that raising an exception will crash your GUI.  If you have redirected your output, which many GUIs do, then you will see no error information and your window will simply disappear.  If you double clicked a .py file to launch your GUI, both the GUI and the console window will instantly disappear if the GUI crashes, leaving you no information to help you debug the problem.
+
+The only time errors can occur are during file operations.  Typically these errors happen because you've specified a bad path or you don't have write permission for the path you specified.
+
+Example error message.  If you executed this code:
+
+```python
+def main():
+    sg.user_settings_filename(path='...')
+    sg.user_settings_set_entry('-test-',123)
+```
+
+Then you'll get an error when trying to set the '-test-' entry because `'...'` is not a valid path.
+
+```
+*** Error saving settings to file:***
+ ...\scratch_1065.json [Errno 2] No such file or directory: '...\\scratch_1065.json'
+The PySimpleGUI internal reporting function is save
+The error originated from:
+  File "C:/Users/mike/.PyCharmCE2019.1/config/scratches/scratch_1065.py"
+line 8
+in main
+    sg.user_settings_set_entry('-test-',123)
+```
+
+You should be able to easily figure out these errors as they are file operations and the error messages are clear in detailing what's happened and where the call originated.
+
+### Silenting the Errors
+
+If you're the type that doesn't want to see any error messages printed out on your console, then you can silence the error output.
+
+When using the class interface, there is a parameter `silent_on_error` that you can set to `True`.
+
+For the function interface, call the function `user_settings_silent_on_error()` and set the parameter to `True`
+
+
+## Coding Convention for User Settings Keys
+
+The User Settings prompted a new coding convention that's been added to PySimpleGUI examples.  As you're likely aware, keys in layouts have the format `'-KEY-`'.  For UserSettings, a similar format is used, but instead of the string being in all upper case, the characters are lower case.  In the example below, the user setting for "filename" has a User Setting key of `'-filename-'`.  Coding conventions are a good thing to have in your projects.  You don't have to follow this one of course, but you're urged to create your own for places in your code that it makes sense.  You could say that PEP8 is one giant coding convention for the Python language as a whole.  You don't have to follow it, but most Python programmers do.  We follow it "by convention".
+
+The reason this is done in PySimpleGUI is so that the keys are immediately recognizable.  Perhaps your application has dictionaries that you use.  If you follow the PySimpleGUI coding convention of Element keys have the format `'-KEY-'` and User Settings keys have the format of `'-key-'`, then you'll immediately understand what a specific key is used for.  Your company may have its own coding conventions so follow those if appropriate instead of what you see in the PySimpleGUI examples.
+
+## Example User Settings Usage
+
+One of the primary places settings are likely to be used is for filenames / folder names.  How many times have you run the same program and needed to enter the same filename?  Even if the name of the file is on your clipboard, it's still a pain in the ass to paste it into the input field every time you run the code.  Wouldn't it be so much simpler if your program remembered the last value you entered?  Well, that's exactly why this set of APIs was developed.... again it was from laziness that this capability gained life.
+
+If you want your `Input` elements to default to an entry from your settings, then you simply set the first parameter (`default_text`) to the value of a setting from your settings file.
+
+Let's say your layout had this typical file input row:
+
+```python
+[sg.Input(key='-IN-'), sg.FileBrowse()]
+```
+
+To automatically fill in the `Input` to be the last value entered, use this layout row:
+
+```python
+[sg.Input(sg.user_settings_get_entry('-filename-', ''), key='-IN-'), sg.FileBrowse()]
+```
+
+When your user clicks OK or closes the window in a way that is in a positive way (instead of cancelling), then add this statement to save the value.
+
+```python
+sg.user_settings_set_entry('-filename-', values['-IN-'])
+```
+
+Here's an entire program demonstrating this way of using user settings
+
+![image](https://user-images.githubusercontent.com/46163555/96048583-cde78800-0e44-11eb-87fe-c2465e1b6cf8.png)
+
+```python
+import PySimpleGUI as sg
+
+layout = [[sg.Text('Enter a filename:')],
+          [sg.Input(sg.user_settings_get_entry('-filename-', ''), key='-IN-'), sg.FileBrowse()],
+          [sg.B('Save'), sg.B('Exit Without Saving', key='Exit')]]
+
+window = sg.Window('Filename Example', layout)
+
+while True:
+    event, values = window.read()
+    if event in (sg.WINDOW_CLOSED, 'Exit'):
+        break
+    elif event == 'Save':
+        sg.user_settings_set_entry('-filename-', values['-IN-'])
+
+window.close()
+```
+
+In 2 lines of code you've just made life for your user so much easier.  And, by not specifying a location and name for your file, the settings are stored out of sight / out of mind.  If you wanted to have the settings be stored with your program file so that it's more visible, then add this statement before your layout:
+
+```python
+sg.user_settings_filename(path='.')
+```
+
+## Example Using UserSettings Class with [ ] Syntax
+
+The same example can be written using the `UserSettings` class and the [ ] lookup syntax.
+
+Here's the same program as above.
+
+```python
+import PySimpleGUI as sg
+
+settings = sg.UserSettings()
+
+layout = [[sg.Text('Enter a filename:')],
+          [sg.Input(settings.get('-filename-', ''), key='-IN-'), sg.FileBrowse()],
+          [sg.B('Save'), sg.B('Exit Without Saving', key='Exit')]]
+
+window = sg.Window('Filename Example', layout)
+
+while True:
+    event, values = window.read()
+    if event in (sg.WINDOW_CLOSED, 'Exit'):
+        break
+    elif event == 'Save':
+        settings['-filename-'] = values['-IN-']
+
+window.close()
+```
+
+If you were to place these 2 examples in the same file so that one ran after the other, you will find that the same settings file is used and thus the value saved in the first example will be read by the second one.
+
+There was one additional line of code added:
+
+```python
+settings.set_default_value('')      # Set the default not-found value to ''
+
+```
+
+Strictly speaking, this line isn't needed because the Input Element now takes `None` to be the same as a value of `''`, but to produce identical results I added this line of code.
+
+
+## Demo Programs
+
+There are a number of demo programs that show how to use UserSettings to create a richer experience for your users by remember the last value input into input elements or by adding a Combobox with a history of previously entered values.  These upgrades make for a much easier to use GUI, especially when you find yourself typing in the same values or using the same files/folders.
+
+
+## Brief Caution - User Settings Stick Around
+
+If you're using the default path, remember that previous runs of your file may have old settings that are still in your settings file.  It can get confusing when you've forgotten that you previously wrote a setting.  Not seeing the filename can have drawbacks like this.
+
+Also, because the settings automatically save after every update, it can be easy to accidently overwrite a previously saved setting.  If you want to avoid this, then perhaps it's best that you work with a dictionary within your code and then explicitly save your dictionary when you're ready to commit it to disk.
+
+To save your Python dictionary to a settings file, simply call `user_settings_write_new_dictionary(dict)`, passing in your dictionary as the parameter.
+
+
+-------------------------
+
 
 # Extending PySimpleGUI
 
-PySimpleGUI doesn't and can't provide every single setting available in the underlying GUI framework.  Not all tkinter options are available for a `Text` Element.  Same with PySimpleGUIQt and the other ports.  
+PySimpleGUI doesn't and can't provide every single setting available in the underlying GUI framework.  Not all tkinter options are available for a `Text` Element.  Same with PySimpleGUIQt and the other ports.
 
 There are a few of reasons for this.
 
@@ -4218,13 +4988,13 @@ However, PySimpleGUI programs are ***not*** dead ends!!  Writing PySimpleGUI cod
 
 ## Widget Access
 
-Most of the user extensions / enhancements are at the "Element" level.  You want some Element to do a trick that you cannot do using the existing PySimpleGUI APIs.  It's just not possible.  What to do?  
+Most of the user extensions / enhancements are at the "Element" level.  You want some Element to do a trick that you cannot do using the existing PySimpleGUI APIs.  It's just not possible.  What to do?
 
 What you need is access to the underlying GUI framework's "Widget".  The good news is that you HAVE that access ready and waiting for you, for all of the ports of PySimpleGUI, not just the tkinter one.
 
 ### `Element.Widget` is The GUI Widget
 
-The class variable `Widget` contains the tkinter, Qt, WxPython, or Remi widget.  With that variable you can modify that widget directly.  
+The class variable `Widget` contains the tkinter, Qt, WxPython, or Remi widget.  With that variable you can modify that widget directly.
 
 ***You must first `Read` or `Finalize` the window before accessing the `Widget` class variable***
 
@@ -4253,7 +5023,7 @@ So far there have been 2 uses of this capability.  One already mentioned is addi
 
 A recent Issue posted was that focus was always being set on a button in a tab when you switch tabs in tkinter.  The user didn't want this to happen as it was putting an ugly black line around their nicely made graphical button.
 
-There is no current way in PySimpleGUI to "disable focus" on an Element.  That's essentially what was needed, the ability to tell tkinter that this widget should never get focus.  
+There is no current way in PySimpleGUI to "disable focus" on an Element.  That's essentially what was needed, the ability to tell tkinter that this widget should never get focus.
 
 There is a way to tell tkinter that a widget should not get focus.  The downside is that if you use your tab key to navigate, that element will never get focus.  So, it's not only blocking focus for this automatic problem, but blocking it for all uses.  Of course you can still click on the button.
 
@@ -4302,14 +5072,13 @@ Watch this space in the future for the more standardized variable name for this 
 
 ## Binding tkiner "events"
 
-If you wish to receive events directly from tkinter, but do it in a PySimpleGUI way, then you can do that and get those events returned to you via your standard `Window.read()` call.  
+If you wish to receive events directly from tkinter, but do it in a PySimpleGUI way, then you can do that and get those events returned to you via your standard `Window.read()` call.
 
-Both the Elements and Window objects have a method called `bind`.  You specify 2 parameters to this function.  One is the string that is used to tell tkinter what events to bind.  The other is a "key modifier" for Elements and a "key" for Windows.
+Both the Elements and Window objects have a method called `bind`. You specify 2 parameters to this function. One is the string that is used to tell tkinter what events to bind. The other is a "key modifier" for Elements and a "key" for Windows.
 
 The `key_modifier` in the `Element.bind` call is something that is added to your key. If your key is a string, then this modifier will be appended to your key and the event will be a single string.
 
-If your element's key is not a string, then a tuple will be returned as the event
-(your_key, key_modifier)
+If your element's key is not a string, then a tuple will be returned as the event (your_key, key_modifier)
 
 This will enable you to continue to use your weird, non-string keys. Just be aware that you'll be getting back a tuple instead of your key in these situations.
 
@@ -4317,16 +5086,66 @@ The best example of when this can happen is in a Minesweeper game where each but
 
 It'll be tricky for the user to parse these events, but it's assumed you're an advanced user if you're using this capability and are also using non-string keys.
 
-There are 2 member variables that have also been added as shown in the documentation for the bind methods. This added variable contains the tkinter specific event information. In other words, the 'event' that tkinter normally sends back when a callback happens.
+An Element member variable `user_bind_event` will contain information that tkinter passed back along with the event. It's not required for most operations and none of the demos currently use this variable, but it's there just in case. The contents of the variable are tkinter specific and set by tkinter so you'll be digging into the tkinter docs if you're using an obscure binding of some kind.
 
-Here is sample code that shows how to make these calls.
+tkinter events must be in between angle brackets
 
-Three events are being bound.
+```python
+window['-KEY-'].bind('<TKINTER EVENT>', 'STRING TO APPEND')
+```
+
+Events can also be binded to the window
+```python
+window.bind('<TKINTER EVENT>', 'STRING TO APPEND')
+```
+
+
+List of tkinter events:
+
+| Event                            | Description                                                  |
+| :------------------------------- | ------------------------------------------------------------ |
+| Button-1  / ButtonPress-1 / 1    | Left button is pressed over an element. 1 corresponds to the left button, 2 to the middle button, 3 to the right button. <br>Buttons can go up to 5 |
+| ButtonRelease-1                  | Left button is released over an element.                     |
+| Double-Button-1                  | An element was double clicked. The 'Double' modifier was used. See below for more modifiers. |
+| B1-Motion                        | Left button is held and moved around over an element.        |
+| Motion                           | Mouse pointer is moved over an element                       |
+| Enter                            | Mouse pointer entered the element                            |
+| Leave                            | Mouse pointer left the element                               |
+| Key / KeyPress<br>Keypress-a / a | A key was pressed. [Keysyms](https://www.tcl.tk/man/tcl8.6/TkCmd/keysyms.htm) can be used to bind specific key/s. <br>When using keysyms, 'Key' or 'KeyPress' can be omitted. <br> |
+| KeyReleased                      | A key was released.                                          |
+| FocusIn                      | Keyboard has focused on element.       |
+| FocusOut                      | Keyboard switched focus from element.  |
+| Visibility | Some part of the element is seen on screen |
+
+Modifier keys can be put in front of events.
+
+| Windows | MacOS   |
+| ------- | ------- |
+| Control | Command |
+| Alt     | Option  |
+| Shift            |<==|
+| Double  | <== |
+| Triple | <== |
+| Quadruple | <== |
+
+The following will bind Ctrl+z to the window:
+```python
+window.bind('<Control-z>', 'STRING TO APPEND')
+```
+
+To unbind an event from an element, use the `unbind` method.
+```python
+window['-KEY-'].unbind('TKINTER EVENT')
+```
+
+Here is sample code that shows these bindings in action.
+
+Four main things are occurring.
 
 1. Any button clicks in the window will return an event "Window Click" from window.read()
-2. Right clicking the "Go" buttons will return an event "Go+RIGHT CLICK+" from window.read()
-3. When the Input Element receives focus, an event "-IN-+FOCUS+" will be returned from window.read()
-
+2. Right clicking the "Go" buttons will return an event "Go +RIGHT CLICK+" from window.read()
+3. When the second Input Element receives focus, an event "-IN2- +FOCUS+" will be returned from window.read()
+4. If the "Unbind " button is pressed, the right click binding of the "Go" button will be unbinded.
 
 ```python
 import PySimpleGUI as sg
@@ -4334,27 +5153,29 @@ import PySimpleGUI as sg
 sg.theme('Dark Green 2')
 
 layout = [  [sg.Text('My Window')],
-            [sg.Input(key='-IN-'), sg.Text(size=(15,1), key='-OUT-')],
-            [sg.Button('Go'), sg.Button('Exit')]
+            [sg.Input(key='-IN1-')],
+            [sg.Input(key='-IN2-')],
+            [sg.Button('Go'), sg.Button('Unbind'),sg.Button('Exit')]
               ]
 
 window = sg.Window('Window Title', layout, finalize=True)
 
-window['-IN-'].bind("<FocusIn>", '+FOCUS+')
 window.bind("<Button-1>", 'Window Click')
-window['Go'].bind("<Button-3>", '+RIGHT CLICK+')
+window['Go'].bind("<Button-3>", ' +RIGHT CLICK+')
+window['-IN2-'].bind("<FocusIn>", ' +FOCUS+')
 
 while True:             # Event Loop
     event, values = window.read()
     print(event, values)
     if event in (sg.WIN_CLOSED, 'Exit'):
         break
+    if event == 'Unbind':
+        window['Go'].unbind('<Button-3>')
 
-window.close(); del window
+window.close()
 ```
 
-There is no way to "unbind" and event at this time.  (sorry, didn't think of it before releasing)
----
+[Tkinter bindings documentation](https://tcl.tk/man/tcl8.6/TkCmd/bind.htm#M18)
 
 
 ------------------
