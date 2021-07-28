@@ -84,22 +84,26 @@ CLASS
     }
 """
 
-def get_return_part(code: str, line_break=None) -> str:
+def get_return_part(code: str, line_break=None):
     """ Find ":return:" part in given "doc string"."""
     if not line_break:
         # line_break = ' <br> '
         line_break = ''
 
     if ':return:' not in code:
-        return ''
+        return '', ''
 
 
-    
         
     only_return = code[code.index(':return:')+len(':return:'):].strip().replace('\n', line_break)
     if ':rtype' in only_return:
-        only_return = only_return.split(':rtype')[0]
-    return only_return
+        only_return = only_return.split(':rtype')[0].strip()
+
+    return_TYPE = ''
+    if ':rtype' in code:
+        rcode = code.strip()
+        return_TYPE = rcode[rcode.index(':rtype:')+len(':rtype:'):].strip()
+    return only_return, return_TYPE
 
 
 def special_cases(function_name, function_obj, sig, doc_string, line_break=None):
@@ -145,10 +149,17 @@ def special_cases(function_name, function_obj, sig, doc_string, line_break=None)
             return special_case(ok=True, just_text=f'\n\n#### property: {function_name}\n{get_doc_desc(doca, function_obj)}\n\n',              sig='', table='')
         # TEMPLATE3
         elif only_self and doca and ':param' not in doca and ':return:' in doca:
-            return_part, desc = get_return_part(doca, line_break=line_break), get_doc_desc(doca, function_obj)
-            return special_case(ok=True, just_text='', 
+            return_part, return_part_type = get_return_part(doca, line_break=line_break)
+            # print(return_part, return_part_type)
+            desc = get_doc_desc(doca, function_obj)
+
+            a_table = TABLE_Only_table_RETURN_TEMPLATE.replace('$', return_part) + '\n\n'
+            if return_part_type:
+                a_table = a_table.replace('<type>', return_part_type)
+
+            return special_case(ok=True, just_text='',
                                          sig=f'\n\n#### property: {function_name}\n{desc}\n\n',
-                                         table=TABLE_Only_table_RETURN_TEMPLATE.replace('$', return_part) + '\n\n')
+                                         table=a_table)
 
     ################################################################################################################
     #                                      _        _                                _   _               _         #
@@ -162,27 +173,27 @@ def special_cases(function_name, function_obj, sig, doc_string, line_break=None)
     ################################################################################################################
 
     """
-    # TEMPLATE1
+        # TEMPLATE1
 
-        def Get(self):
-           ''' '''
-    # TEMPLATE2 -return -param
-        def Get(self):
-            '''
-            blah blah blah
-            '''
-    # TEMPLATE3  +return -param
-        def Get(self):
-            ''' 
-            blah blah blah
-            :return: blah-blah
-            '''
-    # TEMPLATE4  -return +param
-        def SetFocus(self, elem):
-            ''' 
-            blah blah blah
-            :param elem: qwerty
-            '''
+            def Get(self):
+               ''' '''
+        # TEMPLATE2 -return -param
+            def Get(self):
+                '''
+                blah blah blah
+                '''
+        # TEMPLATE3  +return -param
+            def Get(self):
+                ''' 
+                blah blah blah
+                :return: blah-blah
+                '''
+        # TEMPLATE4  -return +param
+            def SetFocus(self, elem):
+                ''' 
+                blah blah blah
+                :param elem: qwerty
+                '''
     """
 
     # TEMPLATE1
@@ -193,9 +204,14 @@ def special_cases(function_name, function_obj, sig, doc_string, line_break=None)
         return special_case(ok=True, just_text=f'\n\n{doca}\n\n```python\n{function_name}()\n```\n\n', sig='', table='')
     # TEMPLATE3
     elif only_self and doca and ':param' not in doca and ':return:' in doca:
-        return_part, desc = get_return_part(doca, line_break=line_break), get_doc_desc(doca, function_obj)
+        return_part, return_part_type = get_return_part(doca, line_break=line_break)
+        desc = get_doc_desc(doca, function_obj)
+        
+        a_table = TABLE_Only_table_RETURN_TEMPLATE.replace('$', return_part) + '\n\n'
+        if return_part_type:
+            a_table = a_table.replace('<type>', return_part_type)
         return special_case(ok=True, just_text='',  sig=f'\n\n{desc}\n\n`{function_name}()`\n\n',
-                                     table=TABLE_Only_table_RETURN_TEMPLATE.replace('$', return_part) + '\n\n')
+                                     table=a_table)
     # TEMPLATE4
     elif only_self and doca and ':param' not in doca and ':return:' in doca:
         return special_case(ok=False, just_text='', sig='', table='')
@@ -247,6 +263,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
         if logger: logger.error(f'PROBLEM WITH "{function_obj}" "{function_name}":\nit\'s signature is BS. Ok, I will just return \'\' for \'signature\' and \'param_table\'\nOR BETTER - delete it from the 2_readme.md.\n======')
         return '', ''
 
+    # if 'The text currently displayed on the butto' in 
 
     if not is_propery(function_obj):
         for key in sig:
@@ -254,21 +271,22 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             if 'self' == str(key): continue
             elif key == 'args': rows.append('args=*<1 or N object>')
             elif val == _empty:                 rows.append(key)
-            elif val == None:                   rows.append(f'{key}=None')
-            elif type(val) in (int, float):     rows.append(f'{key}={val}')
-            elif type(val) is str:              rows.append(f'{key}="{val}"')
-            elif type(val) is tuple:            rows.append(f'{key}={val}')
-            elif type(val) is bool:             rows.append(f'{key}={val}')
-            elif type(val) is bytes:            rows.append(f'{key}=...')
+            elif val == None:                   rows.append(f'{key} = None')
+            elif type(val) in (int, float):     rows.append(f'{key} = {val}')
+            elif type(val) is str:              rows.append(f'{key} = "{val}"')
+            elif type(val) is tuple:            rows.append(f'{key} = {val}')
+            elif type(val) is bool:             rows.append(f'{key} = {val}')
+            elif type(val) is bytes:            rows.append(f'{key} = ...')
             else:
                 raise Exception(f'IDK this type -> {key, val}')
 
+
+    # if 'update' in function_name.lower(): breakpoint();
 
     sig_content = f',\n{TAB_char}'.join(rows) if len(rows) > 2 else f', '.join(rows) if rows else ''
     
     sign = "\n\n{0}\n\n```\n{1}({2})\n```".format(get_doc_desc(doc_string, function_obj), function_name, sig_content)
 
-    
     
     if is_method:
         if insert_md_section_for__class_methods:
@@ -289,7 +307,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
     # qpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqpqp
 
     # 1
-    return_guy = get_return_part(doc_string, line_break=line_break)
+    return_guy, return_guy_type = get_return_part(doc_string, line_break=line_break)
     if not return_guy:
         md_return = return_guy = ''
     else:
@@ -331,7 +349,7 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
         #     pass
         #     print(123)
 
-        # |> find PARAM, PARAM_TYPE, PARAM_DESCRIPTIONe
+        # |> find PARAM, PARAM_TYPE, PARAM_DESCRIPTION
         trips = [triplet(   i.group(1), replace_re(i.group(2), r'\s{2,}', ' '), process_type(i.group(3).strip()))
                             for index, i in enumerate(re.finditer(row_n_type_regex, docstring + ' \n'))]
         if not trips and ':return:' not in docstring: # no :param in doc
@@ -354,7 +372,15 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
         row_template = f'| {{: ^{max_type_width}}} | {{: ^{max_name_width}}} | {{}} |'
 
         # rows, and finally table.
-        rows = [row_template.format(i.atype, i.name, i.value) for i in trips]
+        rows = []
+        for some_triplet in trips:
+            if '|' in some_triplet.atype:
+                good_atype = some_triplet.atype.replace('|', 'or')
+            else:
+                good_atype = some_triplet.atype
+            good_atype = good_atype.replace(' OR ', ' or ').replace('\\or', 'or')
+            rows.append(row_template.format(good_atype, some_triplet.name, some_triplet.value))
+
 
         row_n_type_regex = re.compile(r':param ([\d\w\*\s]+):([\d\D]*?):type [\w\d]+:([\d\D].*?)\n', flags=re.M|re.DOTALL)
 
@@ -366,7 +392,11 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             aa =  list(re.finditer(regex_pattern, a_doc))[0]
             text, atype = aa.group(1).strip(), aa.group(2).strip()
             if text.strip():
-                rows.append(f'| {atype} | **RETURN** | {text}')
+                if '|' in atype:
+                    atype_no_pipes = atype.replace('|', 'or')
+                    rows.append(f'| {atype_no_pipes} | **RETURN** | {text}')
+                else:
+                    rows.append(f'| {atype} | **RETURN** | {text}')
         except Exception as e:
             # print(a_original_obj)
             # import pdb; pdb.set_trace();
@@ -407,7 +437,6 @@ def get_sig_table_parts(function_obj, function_name, doc_string,
             # import pdb; pdb.set_trace();
             
             sign = sign[:-4] + f' -> {return_guy}\n```\n'
-
     return sign, params_TABLE
 
 
@@ -436,7 +465,6 @@ def render(injection, logger=None, line_break=None, insert_md_section_for__class
                                          insert_md_section_for__class_methods=insert_md_section_for__class_methods,
                                          doc_string=injection['function_object'].__doc__, logger=logger, line_break=line_break,
                                          replace_pipe_bar_in_TYPE_TEXT_char=replace_pipe_bar_in_TYPE_TEXT_char)
-
 
     if injection['number'] == '':
         return pad_n(sig) + pad_n(table)
