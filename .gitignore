@@ -4,3 +4,10 @@ __pycache__/
 *.7z
 *.mkv
 *.mp4
+/*LoG*
+/*LoG*json
+*LoG*
+*LoG*json
+*pycache*
+*pycache*/
+db/output/*
